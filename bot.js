@@ -228,7 +228,7 @@ function onCommand(target, context, commandName, self) {
   } else if (commandName === '!slots') {
 
     console.log(`* slots`);
-    slotsCommand(target, context, self);
+    slotsCommand(commandName.split(" "), target, context, self);
 
   } else if (commandName === '!discord') {
 
@@ -426,8 +426,88 @@ function ttsCommand(text, target, context, self) {
 }
 
 
-function slotsCommand(target, context, self) {
+function slotsCommand(args, target, context, self) {
 
+  if (args.length == 1) {
+    slotsDefault(target, context, self);
+  } else {
+
+    if (args[1].isNaN() && args[1] != "all") {
+      whisperBack(target, context, "invalid arguments, !slots [all|<amount>]");
+      return;
+    }
+
+    let amount = 0;
+
+    if (args[1] != "all") {
+      amount = getUserBalance(context.username);
+      amount -= amount % CC_COST_SLOTS;
+    } else {
+      amount = parseInt(args[1], 10);
+      amount -= amount % CC_COST_SLOTS;
+    }
+
+    if (amount < CC_COST_SLOTS) {
+      whisperBack(target, context, "Not enough coin. Turning the slots once costs " + CC_COST_SLOTS + CC_SYMBOL);
+      return;
+    }
+
+    let rolls = amount / 5;
+    let win = 0;
+    let superwin = 0;
+
+    let slots_out_chosen = [];
+
+    for (let i = 0; i < rolls; i++) {
+      let slots_out = Array.from(getSlotOutput());
+      if (slots_out[0] == '🍑' && slots_out[1] == '🍑' && slots_out[2] == '🍑') { // check super win
+        slots_out_chosen = slots_out;
+        superwin += CC_RETURN_SLOTS_PEACH;
+      } else if (slots_out[0] == slots_out[1] && slots_out[1] == slots_out[2]) { // check basic win
+        win += CC_RETURN_SLOTS_BASIC;
+        if (superwin == 0) { // set output if no super jackpot
+          slots_out_chosen = slots_out;
+        }
+      }
+      if (superwin == 0 && win == 0) { // if no jackpot set last output
+        slots_out_chosen = slots_out;
+      }
+    }
+
+    updateUserBalance(context.username, getUserBalance(context.username) + win + superwin);
+
+    // default animation
+    let slots_out_fancy_0 = "[" + slots_out[0] + "|🔳|🔳]_📍   -" + (CC_COST_SLOTS * rolls) + "" + CC_SYMBOL;
+    let slots_out_fancy_1 = "[" + slots_out[0] + "|" + slots_out[1] + "|🔳]_📍";
+    let slots_out_fancy_2 = "[" + slots_out[0] + "|" + slots_out[1] + "|" + slots_out[2] + "]_📍";
+
+    scheduleDelayedMessage(target, context, 0, slots_out_fancy_0);
+    scheduleDelayedMessage(target, context, 600, slots_out_fancy_1);
+    scheduleDelayedMessage(target, context, 1200, slots_out_fancy_2);
+
+    let delay = 1200;
+
+    for (let w = win; w > 0; w -= CC_RETURN_SLOTS_BASIC) {
+      setTimeout(function() {
+        client.say(target, "💰💰💰" + context.username + " WON " + CC_RETURN_SLOTS_BASIC + CC_SYMBOL + " 💰💰💰");
+        playSound(SOUND_JACKPOT);
+      }, delay);
+      delay += 1000;
+    }
+
+    for (let w = superwin; w > 0; w -= CC_RETURN_SLOTS_PEACH) {
+      setTimeout(function() {
+        client.say(target, "💰💰💰 SUPER 💰💰💰 WIN 💰💰💰" + context.username + " WON " + CC_RETURN_SLOTS_PEACH + CC_SYMBOL + " 💰💰💰 " + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL);
+        playSound(SOUND_SUPER_JACKPOT);
+      }, delay);
+      delay += 2000;
+    }
+  }
+
+
+}
+
+function slotsDefault(target, context, self) {
   let userbalance = getUserBalance(context.username);
 
   if (userbalance < CC_COST_SLOTS) {
@@ -517,15 +597,21 @@ function transferCoinCommand(args, target, context, self) {
   let targetUser = args[1];
   let amount = parseInt(args[2], 10);
 
+  // check positive
+  if (amount < 0) {
+    whisperBack(target, context, "You are a smart one aren't you? But not as smart as the CaptainsEngineer :)");
+    return;
+  }
+
   // check sufficient funds
   if (getUserBalance(context.username) < amount) {
-    whisperBack(target, context, "you dont have enough coin");
+    whisperBack(target, context, "you dont have enough coin, chat more");
     return;
   }
 
   // check target exsiting
   if (!isUserKnown(targetUser)) {
-    whisperBack(target, context, target + "is not on deck");
+    whisperBack(target, context, target + " is not on deck");
     return;
   }
 
