@@ -1,15 +1,5 @@
 // V 2.2.1  // lates change: external save fix attempt
 
-// TODO:
-// mehr chat korrekturen und Korrekturen ausgelagert
-//soviet anthem
-//stranger things
-//akte X
-//alle 5 Minuten info broadcast "!help I show you the boat"
-//bot slots komprimieren
-//slot gamble amount
-//TTS zahlen limit
-
 const tmi = require('tmi.js');
 const fs = require('fs');
 const { exec } = require('child_process');
@@ -284,6 +274,11 @@ function onCommand(target, context, commandName, self) {
     console.log(`* give coin cmd`);
     giveCoinCommand(commandName.split(" "), target, context, self);
 
+  }  else if (commandName.split(" ")[0] == "!transfer") {
+
+    console.log(`* transfer coin cmd`);
+    transferCoinCommand(commandName.split(" "), target, context, self);
+
   } else if (commandName.split(" ")[0] == "!tts") {
 
     console.log(`* tts: ` + commandName.substring(4, commandName.length));
@@ -509,6 +504,38 @@ function giveCoinCommand(args, target, context, self) {
     updateUserBalance(targetUser, getUserBalance(targetUser) + amount); // add requested amount to user save
     whisperBack(target, context, "Added " + amount + CC_SYMBOL + " to " + targetUser + "'s balance");
   } // else: no athority, do nothing
+}
+
+function transferCoinCommand(args, target, context, self) {
+  
+  // integrity guard
+  if (args.length != 3 || isNaN(args[2])) {
+    whisperBack(target, context, "invalid arguments, !transfer <username> <amount>");
+    return;
+  }
+
+  let targetUser = args[1];
+  let amount = parseInt(args[2], 10);
+
+  // check sufficient funds
+  if (getUserBalance(context.username) < amount) {
+    whisperBack(target, context, "you dont have enough coin");
+    return;
+  }
+
+  // check target exsiting
+  if (!isUserKnown(targetUser)) {
+    whisperBack(target, context, target + "is not on deck");
+    return;
+  }
+
+  updateUserBalance(targetUser, getUserBalance(targetUser) + amount); // add requested amount to user save
+  updateUserBalance(targetUser, getUserBalance(context.username) - amount);
+
+  client.say(target, context.username + " send " + targetUser + " " + amount + CC_SYMBOL);
+
+  whisperBack(target, context, "Added " + amount + CC_SYMBOL + " to " + targetUser + "'s balance");
+
 }
 
 
