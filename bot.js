@@ -1,4 +1,4 @@
-// V 2.3.2  // lates change: !lurk
+// V 2.3.2b  // lates change: !lurk
 
 const tmi = require('tmi.js');
 const fs = require('fs');
@@ -51,8 +51,8 @@ const CC_RETURN_SLOTS_BASIC = 200;
 const CC_RETURN_SLOTS_PEACH = 1000;
 const CC_PER_CHAT = 1;
 const WELCOME_MSG = "Ahoy, Matey! ⛵ Welcome aboard "; // followed by: username!
-const LURK_MSG_0 = "Danke das du an Bord bist ";
-const LURK_MSG_1 = " ⛵. Lehn dich ruhig bei Drinks am Sonnendeck zurück <3"
+const LURK_MSG_0 = "Thank you for boarding the ship ";
+const LURK_MSG_1 = " ⛵! Lay back and enjoy your drink <3"
 const TUTORIAL_COOLDOWN = 300; // how often the tutorial can be requested (in seconds)
 
 const CC_SOUNDS = [
