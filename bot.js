@@ -481,7 +481,9 @@ function slotsCommand(args, target, context, self) {
       }
     }
 
+    console.log(context.username + " owns " + getUserBalance(context.username) + " and spends on slots " + amount);
     updateUserBalance(context.username, getUserBalance(context.username) + win + superwin - amount);
+    console.log(" -> won is " + (win + superwin) + ", account update to " + getUserBalance(context.username));
 
     // default animation
     let slots_out_fancy_0 = "[" + slots_out_chosen[0] + "|🔳|🔳]_📍   -" + (CC_COST_SLOTS * rolls) + "" + CC_SYMBOL;
@@ -836,8 +838,6 @@ function updateUser(user, balance, anthem=undefined) {
   }
 
   // write changes to file
-  console.log("attempting write: ");
-  console.log(JSON.stringify(chatters));
   try {
     fs.writeFileSync('chatters.json', JSON.stringify(chatters), {flag:'w'});
   } catch (e) {
