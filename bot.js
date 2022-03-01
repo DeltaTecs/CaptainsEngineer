@@ -1,4 +1,4 @@
-// V 2.2.1  // lates change: external save fix attempt
+// V 2.3.2  // lates change: !lurk
 
 const tmi = require('tmi.js');
 const fs = require('fs');
@@ -51,6 +51,8 @@ const CC_RETURN_SLOTS_BASIC = 200;
 const CC_RETURN_SLOTS_PEACH = 1000;
 const CC_PER_CHAT = 1;
 const WELCOME_MSG = "Ahoy, Matey! ⛵ Welcome aboard "; // followed by: username!
+const LURK_MSG_0 = "Danke das du an Bord bist ";
+const LURK_MSG_1 = " ⛵. Lehn dich ruhig bei Drinks am Sonnendeck zurück <3"
 const TUTORIAL_COOLDOWN = 300; // how often the tutorial can be requested (in seconds)
 
 const CC_SOUNDS = [
@@ -225,7 +227,7 @@ function onCommand(target, context, commandName, self) {
     client.say(target, `42069 seconds`);
     console.log(`* watchtime`);
 
-  } else if (commandName === '!slots') {
+  } else if (commandName.split(" ")[0] == "!slots") {
 
     console.log(`* slots`);
     slotsCommand(commandName.split(" "), target, context, self);
@@ -248,6 +250,11 @@ function onCommand(target, context, commandName, self) {
 
     console.log(`* gulp`);
     playSound(SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS);
+
+  } else if (commandName === '!lurk') {
+
+    console.log(`* lurk`);
+    client.say(target, LURK_MSG_0 + context.username + LURK_MSG_1);
 
   } else if (commandName === '!silent') {
 
@@ -432,14 +439,14 @@ function slotsCommand(args, target, context, self) {
     slotsDefault(target, context, self);
   } else {
 
-    if (args[1].isNaN() && args[1] != "all") {
+    if (isNaN(args[1]) && args[1] != "all") {
       whisperBack(target, context, "invalid arguments, !slots [all|<amount>]");
       return;
     }
 
     let amount = 0;
 
-    if (args[1] != "all") {
+    if (args[1] == "all") {
       amount = getUserBalance(context.username);
       amount -= amount % CC_COST_SLOTS;
     } else {
@@ -474,12 +481,12 @@ function slotsCommand(args, target, context, self) {
       }
     }
 
-    updateUserBalance(context.username, getUserBalance(context.username) + win + superwin);
+    updateUserBalance(context.username, getUserBalance(context.username) + win + superwin - amount);
 
     // default animation
-    let slots_out_fancy_0 = "[" + slots_out[0] + "|🔳|🔳]_📍   -" + (CC_COST_SLOTS * rolls) + "" + CC_SYMBOL;
-    let slots_out_fancy_1 = "[" + slots_out[0] + "|" + slots_out[1] + "|🔳]_📍";
-    let slots_out_fancy_2 = "[" + slots_out[0] + "|" + slots_out[1] + "|" + slots_out[2] + "]_📍";
+    let slots_out_fancy_0 = "[" + slots_out_chosen[0] + "|🔳|🔳]_📍   -" + (CC_COST_SLOTS * rolls) + "" + CC_SYMBOL;
+    let slots_out_fancy_1 = "[" + slots_out_chosen[0] + "|" + slots_out_chosen[1] + "|🔳]_📍";
+    let slots_out_fancy_2 = "[" + slots_out_chosen[0] + "|" + slots_out_chosen[1] + "|" + slots_out_chosen[2] + "]_📍";
 
     scheduleDelayedMessage(target, context, 0, slots_out_fancy_0);
     scheduleDelayedMessage(target, context, 600, slots_out_fancy_1);
