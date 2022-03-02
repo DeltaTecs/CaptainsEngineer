@@ -1,4 +1,4 @@
-// V 2.3.2b  // lates change: !lurk
+// V 2.3.3  // lates change: slot bill
 
 const tmi = require('tmi.js');
 const fs = require('fs');
@@ -435,7 +435,7 @@ function ttsCommand(text, target, context, self) {
 
 function slotsCommand(args, target, context, self) {
 
-  if (args.length == 1) {
+  if (args.length == 1) { // no arguments, slot for 5 cc
     slotsDefault(target, context, self);
   } else {
 
@@ -445,9 +445,10 @@ function slotsCommand(args, target, context, self) {
     }
 
     let amount = 0;
+    const balance = getUserBalance(context.username);
 
     if (args[1] == "all") {
-      amount = getUserBalance(context.username);
+      amount = balance;
       amount -= amount % CC_COST_SLOTS;
     } else {
       amount = parseInt(args[1], 10);
@@ -456,6 +457,11 @@ function slotsCommand(args, target, context, self) {
 
     if (amount < CC_COST_SLOTS) {
       whisperBack(target, context, "Not enough coin. Turning the slots once costs " + CC_COST_SLOTS + CC_SYMBOL);
+      return;
+    }
+
+    if (amount > balance) {
+      whisperBack(target, context, "You dont have coin. (" + balance + "/" + amount + ") " + CC_SYMBOL + ", chat more");
       return;
     }
 
@@ -481,9 +487,11 @@ function slotsCommand(args, target, context, self) {
       }
     }
 
-    console.log(context.username + " owns " + getUserBalance(context.username) + " and spends on slots " + amount);
-    updateUserBalance(context.username, getUserBalance(context.username) + win + superwin - amount);
-    console.log(" -> won is " + (win + superwin) + ", account update to " + getUserBalance(context.username));
+
+    updateUserBalance(context.username, balance + win + superwin - amount);
+
+    console.log(context.username + " won slots: cc_before=" + balance + ", amount_in=" + amount + ", cc_after=" + getUserBalance(context.username) + ", win=" + win + ", superwin=" + superwin);
+
 
     // default animation
     let slots_out_fancy_0 = "[" + slots_out_chosen[0] + "|🔳|🔳]_📍   -" + (CC_COST_SLOTS * rolls) + "" + CC_SYMBOL;
@@ -510,6 +518,13 @@ function slotsCommand(args, target, context, self) {
         playSound(SOUND_SUPER_JACKPOT);
       }, delay);
       delay += 2000;
+    }
+
+    if (superwin + win > CC_RETURN_SLOTS_BASIC) {
+      // print bill only if atleast two basic wins or a super win
+      setTimeout(function() {
+        client.say(target, "-- total: " + balance + CC_SYMBOL + " >> " + (balance - amount + win + superwin) + CC_SYMBOL + " --");
+      }, delay - 900);
     }
   }
 
