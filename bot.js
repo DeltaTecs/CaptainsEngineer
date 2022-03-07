@@ -55,7 +55,7 @@ const CC_RETURN_SLOTS_PEACH = 1000;
 const CC_PER_CHAT = 1;
 const WELCOME_MSG = "Ahoy, Matey! ⛵ Welcome aboard "; // followed by: username!
 const LURK_MSG_0 = "Thank you for boarding the ship ";
-const LURK_MSG_1 = " ⛵! Lay back and enjoy your drink <3"
+const LURK_MSG_1 = " ⛵ Lay back and enjoy your drink <3"
 const TUTORIAL_COOLDOWN = 300; // how often the tutorial can be requested (in seconds)
 
 const CC_SOUNDS = [
@@ -238,7 +238,7 @@ function onCommand(target, context, commandName, self) {
     console.log(`* slots`);
     slotsCommand(commandName.split(" "), target, context, self);
 
-  } else if (commandName === '!discord') {
+  } else if (commandName === '!discord' || commandName === '!dc') {
 
     console.log(`* discord`);
     client.say(target, DISCORD_INVITE);
