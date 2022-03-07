@@ -1,4 +1,4 @@
-// V 2.4  // lates change: death command
+// V 2.4.3  // lates change: "deathS counter:" + stefan und berenike death rechte
 
 const tmi = require('tmi.js');
 const fs = require('fs');
@@ -12,7 +12,7 @@ const DISCORD_INVITE = "https://discord.gg/X5KGBJGTPu";
 const REDDIT_LINK = "https://www.reddit.com/r/captaincasimir/";
 
 const FILENAME_DEATH_COUNTER = "deathcounter.txt"
-const DEATH_COUNTER_PREFIX = "DEATH COUNTER:";
+const DEATH_COUNTER_PREFIX = "DEATHS:";
 
 const SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS = "ctn_uuh.mp3";
 const SOUND_ENORM = "enorm.mp3";
@@ -372,7 +372,7 @@ function tutorialCommand(target, context, self) {
 
 function deathCommand(args, target, context, self) {
 
-  if (context.username != "captaincasimir" && context.username != "deltatecs" ) {
+  if (context.username != "captaincasimir" && context.username != "deltatecs" && context.username != "xx_berenike_xx" && context.username != "stefan_2202") {
     return;
   }
 
