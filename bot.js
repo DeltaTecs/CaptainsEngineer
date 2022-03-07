@@ -1,4 +1,4 @@
-// V 2.3.3  // lates change: slot bill
+// V 2.4  // lates change: death command
 
 const tmi = require('tmi.js');
 const fs = require('fs');
@@ -10,6 +10,9 @@ const CC_SYMBOL = "₵₵"; // Captain's Coin
 
 const DISCORD_INVITE = "https://discord.gg/X5KGBJGTPu";
 const REDDIT_LINK = "https://www.reddit.com/r/captaincasimir/";
+
+const FILENAME_DEATH_COUNTER = "deathcounter.txt"
+const DEATH_COUNTER_PREFIX = "DEATH COUNTER:";
 
 const SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS = "ctn_uuh.mp3";
 const SOUND_ENORM = "enorm.mp3";
@@ -110,6 +113,9 @@ var last_tutorial_print = getTime();
 
 // no sounds mode
 var silent_mode = false;
+
+// death counter this session
+var deaths = 0;
 
 // Create a client with our options
 const client = new tmi.client(opts);
@@ -281,10 +287,15 @@ function onCommand(target, context, commandName, self) {
     console.log(`* give coin cmd`);
     giveCoinCommand(commandName.split(" "), target, context, self);
 
-  }  else if (commandName.split(" ")[0] == "!transfer") {
+  } else if (commandName.split(" ")[0] == "!transfer") {
 
     console.log(`* transfer coin cmd`);
     transferCoinCommand(commandName.split(" "), target, context, self);
+
+  } else if (commandName.split(" ")[0] == "!death") {
+
+    console.log(`* death cmd`);
+    deathCommand(commandName.split(" "), target, context, self);
 
   } else if (commandName.split(" ")[0] == "!tts") {
 
@@ -357,6 +368,26 @@ function tutorialCommand(target, context, self) {
   client.say(target, tutorial);
   tutorial = ": ----------------- :"
   client.say(target, tutorial);
+}
+
+function deathCommand(args, target, context, self) {
+
+  if (context.username != "captaincasimir" && context.username != "deltatecs" ) {
+    return;
+  }
+
+  let toSet = deaths + 1;
+
+  if (args.length > 1) {
+    if (isNaN(args[1])) {
+      whisperBack(target, context, "invalid arguments, !death [count to add]");
+      return;
+    }
+
+    toSet = parseInt(args[1], 10);
+  }
+
+  setDeathCount(toSet);
 }
 
 function muteCommand(target, context, self) {
@@ -779,6 +810,12 @@ function handleAnthem(name, target) {
 
 }
 
+function setDeathCount(count) {
+
+  deaths = count;
+  rawdata = DEATH_COUNTER_PREFIX + " " + count
+  fs.writeFileSync(FILENAME_DEATH_COUNTER, rawdata, {flag:'w'});
+}
 
 function playSound(sound_path, duration=3000) {
 
