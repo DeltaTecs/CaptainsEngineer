@@ -537,7 +537,7 @@ function slotsCommand(args, target, context, self) {
 
     for (let w = win; w > 0; w -= CC_RETURN_SLOTS_BASIC) {
       setTimeout(function() {
-        client.say(target, "💰💰💰" + context.username + " WON " + CC_RETURN_SLOTS_BASIC + CC_SYMBOL + " 💰💰💰");
+        client.say(target, "captai1955Golden " + context.username + " WON " + CC_RETURN_SLOTS_BASIC + CC_SYMBOL + " 💰");
         playSound(SOUND_JACKPOT);
       }, delay);
       delay += 1000;
@@ -545,7 +545,7 @@ function slotsCommand(args, target, context, self) {
 
     for (let w = superwin; w > 0; w -= CC_RETURN_SLOTS_PEACH) {
       setTimeout(function() {
-        client.say(target, "💰💰💰 SUPER 💰💰💰 WIN 💰💰💰" + context.username + " WON " + CC_RETURN_SLOTS_PEACH + CC_SYMBOL + " 💰💰💰 " + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL);
+        client.say(target, "captai1955Golden 💰💰💰 SUPER 💰💰💰 WIN 💰💰💰 captai1955Golden " + context.username + " WON " + CC_RETURN_SLOTS_PEACH + CC_SYMBOL + " 💰💰💰 " + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL);
         playSound(SOUND_SUPER_JACKPOT);
       }, delay);
       delay += 2000;
@@ -671,11 +671,9 @@ function transferCoinCommand(args, target, context, self) {
   }
 
   updateUserBalance(targetUser, getUserBalance(targetUser) + amount); // add requested amount to user save
-  updateUserBalance(targetUser, getUserBalance(context.username) - amount);
+  updateUserBalance(context.username, getUserBalance(context.username) - amount);
 
   client.say(target, context.username + " send " + targetUser + " " + amount + CC_SYMBOL);
-
-  whisperBack(target, context, "Added " + amount + CC_SYMBOL + " to " + targetUser + "'s balance");
 
 }
 
