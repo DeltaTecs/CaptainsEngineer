@@ -1,4 +1,4 @@
-// V 2.3.4  // lates change: slot max 100
+// V 2.4.4  // lates change: slot max 100
 
 const tmi = require('tmi.js');
 const fs = require('fs');
@@ -10,6 +10,9 @@ const CC_SYMBOL = "₵₵"; // Captain's Coin
 
 const DISCORD_INVITE = "https://discord.gg/X5KGBJGTPu";
 const REDDIT_LINK = "https://www.reddit.com/r/captaincasimir/";
+
+const FILENAME_DEATH_COUNTER = "deathcounter.txt"
+const DEATH_COUNTER_PREFIX = "DEATHS:";
 
 const SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS = "ctn_uuh.mp3";
 const SOUND_ENORM = "enorm.mp3";
@@ -53,7 +56,7 @@ const CC_RETURN_SLOTS_PEACH = 1000;
 const CC_PER_CHAT = 1;
 const WELCOME_MSG = "Ahoy, Matey! ⛵ Welcome aboard "; // followed by: username!
 const LURK_MSG_0 = "Thank you for boarding the ship ";
-const LURK_MSG_1 = " ⛵! Lay back and enjoy your drink <3"
+const LURK_MSG_1 = " ⛵ Lay back and enjoy your drink <3"
 const TUTORIAL_COOLDOWN = 300; // how often the tutorial can be requested (in seconds)
 
 const CC_SOUNDS = [
@@ -111,6 +114,9 @@ var last_tutorial_print = getTime();
 
 // no sounds mode
 var silent_mode = false;
+
+// death counter this session
+var deaths = 0;
 
 // Create a client with our options
 const client = new tmi.client(opts);
@@ -233,7 +239,7 @@ function onCommand(target, context, commandName, self) {
     console.log(`* slots`);
     slotsCommand(commandName.split(" "), target, context, self);
 
-  } else if (commandName === '!discord') {
+  } else if (commandName === '!discord' || commandName === '!dc') {
 
     console.log(`* discord`);
     client.say(target, DISCORD_INVITE);
@@ -282,10 +288,15 @@ function onCommand(target, context, commandName, self) {
     console.log(`* give coin cmd`);
     giveCoinCommand(commandName.split(" "), target, context, self);
 
-  }  else if (commandName.split(" ")[0] == "!transfer") {
+  } else if (commandName.split(" ")[0] == "!transfer") {
 
     console.log(`* transfer coin cmd`);
     transferCoinCommand(commandName.split(" "), target, context, self);
+
+  } else if (commandName.split(" ")[0] == "!death") {
+
+    console.log(`* death cmd`);
+    deathCommand(commandName.split(" "), target, context, self);
 
   } else if (commandName.split(" ")[0] == "!tts") {
 
@@ -358,6 +369,26 @@ function tutorialCommand(target, context, self) {
   client.say(target, tutorial);
   tutorial = ": ----------------- :"
   client.say(target, tutorial);
+}
+
+function deathCommand(args, target, context, self) {
+
+  if (context.username != "captaincasimir" && context.username != "deltatecs" && context.username != "xx_berenike_xx" && context.username != "stefan_2202") {
+    return;
+  }
+
+  let toSet = deaths + 1;
+
+  if (args.length > 1) {
+    if (isNaN(args[1])) {
+      whisperBack(target, context, "invalid arguments, !death [count to add]");
+      return;
+    }
+
+    toSet = parseInt(args[1], 10);
+  }
+
+  setDeathCount(toSet);
 }
 
 function muteCommand(target, context, self) {
@@ -785,6 +816,12 @@ function handleAnthem(name, target) {
 
 }
 
+function setDeathCount(count) {
+
+  deaths = count;
+  rawdata = DEATH_COUNTER_PREFIX + " " + count
+  fs.writeFileSync(FILENAME_DEATH_COUNTER, rawdata, {flag:'w'});
+}
 
 function playSound(sound_path, duration=3000) {
 
