@@ -1,4 +1,4 @@
-// V 2.3.3  // lates change: slot bill
+// V 2.3.4  // lates change: slot max 100
 
 const tmi = require('tmi.js');
 const fs = require('fs');
@@ -46,6 +46,7 @@ const REWARD_ID_SCREAM = "e9456e46-8d24-4e89-bec3-dc0d5132ba6c";
 
 const INITIAL_CC_BALANCE = 50;
 const CC_COST_SLOTS = 5;
+const CC_SLOTS_MAX_INPUT = 100;
 const CC_COST_TTS = 30;
 const CC_RETURN_SLOTS_BASIC = 200;
 const CC_RETURN_SLOTS_PEACH = 1000;
@@ -462,6 +463,11 @@ function slotsCommand(args, target, context, self) {
 
     if (amount > balance) {
       whisperBack(target, context, "You dont have coin. (" + balance + "/" + amount + ") " + CC_SYMBOL + ", chat more");
+      return;
+    }
+
+    if (amount > CC_SLOTS_MAX_INPUT && context.username != "captaincasimir") {
+      whisperBack(target, context, "Slot max is " + CC_SLOTS_MAX_INPUT + CC_SYMBOL);
       return;
     }
 
