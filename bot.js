@@ -433,9 +433,9 @@ function muteCommand(target, context, self) {
   silent_mode = !silent_mode;
   console.log(`* toggeling silent mode to ` + silent_mode);
   if (silent_mode)
-    client.say(target, "Sounds enabled");
-  else
     client.say(target, "Sounds disabled");
+  else
+    client.say(target, "Sounds enabled");
 }
 
 function forcePlayCommand(args, target, context, self) {
