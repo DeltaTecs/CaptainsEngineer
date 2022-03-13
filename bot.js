@@ -1,4 +1,4 @@
-// V 2.4.4  // lates change: slot max 100
+// V 2.4.5  // lates change: slot max 100 und Volumne Multiplier
 
 const tmi = require('tmi.js');
 const fs = require('fs');
@@ -13,6 +13,9 @@ const REDDIT_LINK = "https://www.reddit.com/r/captaincasimir/";
 
 const FILENAME_DEATH_COUNTER = "deathcounter.txt"
 const DEATH_COUNTER_PREFIX = "DEATHS:";
+
+// change sound volumne, except tts
+const GLOBAL_VOLUME_MULTIPLIER = 1.0; // min: 0.0, max: 1.0
 
 const SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS = "ctn_uuh.mp3";
 const SOUND_ENORM = "enorm.mp3";
@@ -830,7 +833,7 @@ function playSound(sound_path, duration=3000) {
     return;
   }
 
-  exec('vlc\\vlc.exe -Irc -Idummy ' + sound_path, (err, stdout, stderr) => {});
+  exec('vlc\\vlc.exe -Irc -Idummy --gain ' + GLOBAL_VOLUME_MULTIPLIER + ' ' + sound_path, (err, stdout, stderr) => {});
   console.log("playing sound " + sound_path);
 }
 
