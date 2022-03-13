@@ -17,7 +17,7 @@ const FILENAME_DEATH_COUNTER = "brausecounter.txt"
 const DEATH_COUNTER_PREFIX = "BRAUSE:";
 
 // change sound volumne, except tts
-const GLOBAL_VOLUME_MULTIPLIER = 1.0; // min: 0.0, max: 1.0
+const GLOBAL_VOLUME_MULTIPLIER = 0.5; // min: 0.0, max: 1.0
 
 const SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS = "ctn_uuh.mp3";
 const SOUND_ENORM = "enorm.mp3";
