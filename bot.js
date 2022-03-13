@@ -1,4 +1,4 @@
-// V 2.4.5  // lates change: slot max 100 und Volumne Multiplier
+// V 2.4.6  // lates change: !brause
 
 const tmi = require('tmi.js');
 const fs = require('fs');
@@ -13,6 +13,8 @@ const REDDIT_LINK = "https://www.reddit.com/r/captaincasimir/";
 
 const FILENAME_DEATH_COUNTER = "deathcounter.txt"
 const DEATH_COUNTER_PREFIX = "DEATHS:";
+const FILENAME_DEATH_COUNTER = "brausecounter.txt"
+const DEATH_COUNTER_PREFIX = "BRAUSE:";
 
 // change sound volumne, except tts
 const GLOBAL_VOLUME_MULTIPLIER = 1.0; // min: 0.0, max: 1.0
@@ -119,6 +121,9 @@ var last_tutorial_print = getTime();
 var silent_mode = false;
 
 // death counter this session
+var deaths = 0;
+
+// brause counter this session
 var deaths = 0;
 
 // Create a client with our options
@@ -301,6 +306,11 @@ function onCommand(target, context, commandName, self) {
     console.log(`* death cmd`);
     deathCommand(commandName.split(" "), target, context, self);
 
+  }  else if (commandName.split(" ")[0] == "!brause") {
+
+    console.log(`* brause cmd`);
+    brauseCommand(commandName.split(" "), target, context, self);
+
   } else if (commandName.split(" ")[0] == "!tts") {
 
     console.log(`* tts: ` + commandName.substring(4, commandName.length));
@@ -392,6 +402,26 @@ function deathCommand(args, target, context, self) {
   }
 
   setDeathCount(toSet);
+}
+
+function brauseCommand(args, target, context, self) {
+
+  if (context.username != "captaincasimir" && context.username != "deltatecs" && context.username != "xx_berenike_xx" && context.username != "stefan_2202") {
+    return;
+  }
+
+  let toSet = deaths + 1;
+
+  if (args.length > 1) {
+    if (isNaN(args[1])) {
+      whisperBack(target, context, "invalid arguments, !brause [count to add]");
+      return;
+    }
+
+    toSet = parseInt(args[1], 10);
+  }
+
+  setBrauseCount(toSet);
 }
 
 function muteCommand(target, context, self) {
@@ -674,7 +704,7 @@ function transferCoinCommand(args, target, context, self) {
   }
 
   // check target exsiting
-  if (!isUserKnown(targetUser)) {
+  if (isUserKnown(targetUser) == false) {
     whisperBack(target, context, target + " is not on deck");
     return;
   }
@@ -824,6 +854,13 @@ function setDeathCount(count) {
   deaths = count;
   rawdata = DEATH_COUNTER_PREFIX + " " + count
   fs.writeFileSync(FILENAME_DEATH_COUNTER, rawdata, {flag:'w'});
+}
+
+function setBrauseCount(count) {
+
+  brause = count;
+  rawdata = BRAUSE_COUNTER_PREFIX + " " + count
+  fs.writeFileSync(FILENAME_BRAUSE_COUNTER, rawdata, {flag:'w'});
 }
 
 function playSound(sound_path, duration=3000) {
