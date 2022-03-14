@@ -44,6 +44,7 @@ const SOUND_SKRILLEX = "skrillex.mp3";
 const SOUND_WILHELM_SCREAM = "wilhelm-scream.mp3";
 const SOUND_AIRHORN = "airhorn.mp3";
 const SOUND_WASTED = "wasted.mp3";
+const SOUND_CHALLENGE = "challenge.mp3";
 
 
 const REWARD_ID_STRECH = "8c31a6f0-b319-4865-9c4a-e9b57b960311";
@@ -53,6 +54,8 @@ const REWARD_ID_SOUND_FAIL = "3efc8ce0-3da1-40a7-83b5-a2725ab2b1f9";
 const REWARD_ID_SOUND_INCEPTION = "fe96b4b0-11f2-449d-92e1-65cde878e110";
 const REWARD_ID_MUSIC_REQUEST = "c9b4dfaa-a3fb-4f97-8195-14de8822a5b8"; 
 const REWARD_ID_SCREAM = "e9456e46-8d24-4e89-bec3-dc0d5132ba6c";
+const REWARD_ID_CHALLENGE_GLOBAL = "-bec3-dc0d5132ba6c";
+const REWARD_ID_CHALLENGE_HUNT = "5d798aed-c0bd-48f2-aaae-2ab3b24dea81";
 
 const INITIAL_CC_BALANCE = 50;
 const CC_COST_SLOTS = 5;
@@ -209,6 +212,35 @@ function onReward(target, context, self) {
 
     playSound(SOUND_SON_OF_A_BITCH, 10500);
 
+  } else if (context["custom-reward-id"] === REWARD_ID_CHALLENGE_GLOBAL) {
+
+    challenges = loadChallenges();
+
+    if (challenges.length == 0) {
+      client.say(target, "No global challenge saved");
+      return;
+    }
+
+    playSound(SOUND_CHALLENGE, 5000);
+
+    challenge = challenges.global[getRandomInt(challenges.global.length)];
+
+    client.say(target, "🔥 CHALLENGE: " + challenge);
+
+  } else if (context["custom-reward-id"] === REWARD_ID_CHALLENGE_HUNT) {
+
+    challenges = loadChallenges();
+
+    if (challenges.length == 0) {
+      client.say(target, "No hunt challenge saved");
+      return;
+    }
+
+    playSound(SOUND_CHALLENGE, 5000);
+
+    challenge = challenges.hunt[getRandomInt(challenges.hunt.length)];
+
+    client.say(target, "🔥 CHALLENGE: " + challenge);
   }
 }
 
