@@ -1,4 +1,4 @@
-// V 2.4.6  // lates change: !brause
+// V 2.4.7  // lates change: 50% sounds
 
 const tmi = require('tmi.js');
 const fs = require('fs');
@@ -13,8 +13,8 @@ const REDDIT_LINK = "https://www.reddit.com/r/captaincasimir/";
 
 const FILENAME_DEATH_COUNTER = "deathcounter.txt"
 const DEATH_COUNTER_PREFIX = "DEATHS:";
-const FILENAME_DEATH_COUNTER = "brausecounter.txt"
-const DEATH_COUNTER_PREFIX = "BRAUSE:";
+const FILENAME_BRAUSE_COUNTER = "brausecounter.txt"
+const BRAUSE_COUNTER_PREFIX = "BRAUSE:";
 
 // change sound volumne, except tts
 const GLOBAL_VOLUME_MULTIPLIER = 0.5; // min: 0.0, max: 1.0
