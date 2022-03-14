@@ -308,7 +308,7 @@ function onCommand(target, context, commandName, self) {
     console.log(`* death cmd`);
     deathCommand(commandName.split(" "), target, context, self);
 
-  }  else if (commandName.split(" ")[0] == "!brause") {
+  } else if (commandName.split(" ")[0] == "!brause") {
 
     console.log(`* brause cmd`);
     brauseCommand(commandName.split(" "), target, context, self);
@@ -341,7 +341,12 @@ function onCommand(target, context, commandName, self) {
     console.log(`* force play`);
     forcePlayCommand(commandName.split(" "), target, context, self);
 
-  }  else {
+  } else if (commandName.split(" ")[0] == "!challenge") {
+
+    console.log(`* challenge `);
+    challengeCommand(commandName.split(" "), commandName, target, context, self);
+
+  } else {
     console.log(`* Unknown command ${commandName}`);
     whisperBack(target, context, `unknown command ${commandName}`);
   }
@@ -658,6 +663,39 @@ function balanceCommand(target, context, self) {
   whisperBack(target, context, "your balance is " + getUserBalance(context.username) + CC_SYMBOL);
 }
 
+function challengeCommand(args, cmd, target, context, self) {
+
+    // check if authorised
+    if (context.username == "captaincasimir" || context.username == "deltatecs") {
+
+      if (args.length < 3 || (args[1] != "hunt" && args[1] != "global")) {
+        whisperBack(target, context, "invalid arguments, !challenge <hunt|global> <challenge text>");
+        return;
+      }
+
+      let text = cmd.replaceAll('!challenge hunt', '').replaceAll('!challenge global', '');
+      let challenges = loadChallenges();
+
+      if (args[1] == 'hunt') {
+        
+        challenges.hunt.push(text);
+
+      } else {
+
+        challenges.global.push(text);
+
+      }
+
+      writeChallenges(challenges);
+
+
+
+
+    }
+
+
+}
+
 
 function checkProvanity(text) {
   let t = text.toLowerCase();
@@ -953,6 +991,25 @@ function loadChatters() {
   }
   let chatters = JSON.parse(rawdata);
   return chatters;
+}
+
+function loadChallenges() {
+  let rawdata = fs.readFileSync('challenges.json');
+  if (rawdata == "") { // if file absent, create it
+    rawdata = "{\"global\": [], \"hunt\": []}";
+    fs.writeFileSync('challenges.json', rawdata, {flag:'w'});
+  }
+  let challenges = JSON.parse(rawdata);
+  return challenges;
+}
+
+function writeChallenges(challenges) {
+    // write changes to file
+    try {
+      fs.writeFileSync('challenges.json', JSON.stringify(challenges), {flag:'w'});
+    } catch (e) {
+      console.log(e);
+    }
 }
 
 function whisperBack(target, context, message) {
