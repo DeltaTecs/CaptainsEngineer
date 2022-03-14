@@ -16,8 +16,10 @@ const DEATH_COUNTER_PREFIX = "DEATHS:";
 const FILENAME_BRAUSE_COUNTER = "brausecounter.txt"
 const BRAUSE_COUNTER_PREFIX = "BRAUSE:";
 
+const GOLDEN_EMOTE = "captai1955Golden"
+
 // change sound volumne, except tts
-const GLOBAL_VOLUME_MULTIPLIER = 0.5; // min: 0.0, max: 1.0
+const GLOBAL_VOLUME_MULTIPLIER = 0.2; // min: 0.0, max: 1.0
 
 const SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS = "ctn_uuh.mp3";
 const SOUND_ENORM = "enorm.mp3";
@@ -271,7 +273,7 @@ function onCommand(target, context, commandName, self) {
     console.log(`* lurk`);
     client.say(target, LURK_MSG_0 + context.username + LURK_MSG_1);
 
-  } else if (commandName === '!silent') {
+  } else if (commandName === '!silent' || commandName === '!silence') {
 
     console.log(`* toggle mute`);
     muteCommand(target, context, self);
