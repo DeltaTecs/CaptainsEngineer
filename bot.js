@@ -711,20 +711,15 @@ function challengeCommand(args, cmd, target, context, self) {
       if (args[1] == 'hunt') {
         
         challenges.hunt.push(text);
-
       } else {
 
         challenges.global.push(text);
-
       }
 
+      client.say(target, "Challenge added!");
+
       writeChallenges(challenges);
-
-
-
-
-    }
-
+   }
 
 }
 
