@@ -1036,7 +1036,7 @@ function playSound(sound_path, duration=20000) {
     }
   }
 
-  exec('vlc\\vlc.exe -Irc -Idummy --gain ' + gain + ' ' + sound_path, timeout=duration, (err, stdout, stderr) => {});
+  exec('vlc\\vlc.exe -Irc -Idummy --gain ' + gain + ' ' + sound_path, (err, stdout, stderr) => {});
   console.log("playing sound " + sound_path);
 }
 
