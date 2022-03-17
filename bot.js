@@ -1,5 +1,6 @@
 // V 2.4.7  // lates change: 50% sounds
 
+
 const tmi = require('tmi.js');
 const fs = require('fs');
 const { exec } = require('child_process');
@@ -632,7 +633,7 @@ function slotsCommand(args, target, context, self) {
     if (superwin + win > CC_RETURN_SLOTS_BASIC) {
       // print bill only if atleast two basic wins or a super win
       setTimeout(function() {
-        client.say(target, "-- total: " + balance + CC_SYMBOL + " >> " + (balance - amount + win + superwin) + CC_SYMBOL + " --");
+        client.say(target, "total: " + balance + CC_SYMBOL + " >> " + (balance - amount + win + superwin) + CC_SYMBOL + "");
       }, delay - 900);
     }
   }
