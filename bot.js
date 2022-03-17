@@ -145,8 +145,12 @@ var users_seen = [];
 
 var chat_target;
 
+var config;
+
 // Connect to Twitch:
 client.connect();
+
+initConfig();
 
 // Called every time a message comes in
 function onMessageHandler (target, context, msg, self) {
@@ -330,6 +334,11 @@ function onCommand(target, context, commandName, self) {
 
     console.log(`* give coin cmd`);
     giveCoinCommand(commandName.split(" "), target, context, self);
+
+  } else if (commandName.split(" ")[0] == "!volume") {
+
+    console.log(`* volume cmd`);
+    volumeCommand(commandName.split(" "), target, context, self);
 
   } else if (commandName.split(" ")[0] == "!transfer") {
 
@@ -534,7 +543,7 @@ function ttsCommand(text, target, context, self) {
 
   updateUserBalance(context.username, getUserBalance(context.username) - CC_COST_TTS);
 
-  say.speak(context.username + " sagt: " + text);
+  say.speak(text);
 }
 
 
@@ -730,6 +739,90 @@ function checkProvanity(text) {
   return t.includes('neger') || t.includes('negger') || t.includes('nigger') || t.includes('niger') || t.includes('nigga') || t.includes('niga') || t.includes('bitch') || t.includes('hure') || t.includes('arsch') || t.includes('wichser') || t.includes('schwanz') || t.includes('penis') || t.includes('bastard') || t.includes('bastart') || t.includes('schwuchtel') || t.includes('faggot') || t.includes('simp');
 }
 
+function volumeCommand(args, target, context, self) {
+  
+  // check if authorised
+  if (context.username == "captaincasimir" || context.username == "deltatecs") {
+
+    if (args.length > 3) {
+      whisperBack(target, context, "invalid arguments, !volume [<global volume>]|[<file> <volume>], volume greater 0");
+      return;
+    }
+
+    // integrity guard
+    if (args.length == 2 && (isNaN(args[1]) || args[1] < 0)) {
+      whisperBack(target, context, "invalid arguments, !volume [<global volume>]|[<file> <volume>], volume greater 0");
+      return;
+    }
+
+    // integrity guard
+    if (args.length == 3 && (isNaN(args[2]) || args[1] < 0)) {
+      whisperBack(target, context, "invalid arguments, !volume [<global volume>]|[<file> <volume>], volume greater 0");
+      return;
+    }
+
+    if (args.length == 1) {
+      whisperBack(target, context, "Master volume is " + config.mastervolume + "%");
+      return;
+    }
+
+    if (args.length == 2) {
+
+      let gain = args[1];
+      config.mastervolume = gain;
+      saveConfig();
+      whisperBack(target, context, "Master volume set to " + gain + "%");
+
+    } else if (args.length == 3) {
+
+      let target_sound = args[1];
+      let gain = args[2];
+
+      if (!target_sound.endsWith(".mp3")) {
+        whisperBack(target, context, "Sounds have .mp3 format");
+        return;
+      }
+
+      // check if target file exists
+      try {
+        if (!fs.existsSync(target_sound)) {
+          whisperBack(target, context, "No such file " + target_sound);
+          let filenames = "";
+          fs.readdir(".", (err, files) => {
+            files.forEach(file => {
+              if (file.endsWith(".mp3")) {
+                filenames += file + ", ";
+              }
+            });
+            whisperBack(target, context, "Available: " + filenames);
+          });
+          return;
+        }
+      } catch(err) {
+        console.log(err)
+      }
+
+      let overwritten = false;
+      for (let s of config.volume) {
+        if (s.file == target_sound) {
+          s.volume = gain;
+          overwritten = true;
+          break;
+        }
+      }
+
+
+      if (!overwritten) {
+        config.volume.push({file : target_sound, volume : gain});
+      }
+
+      saveConfig();
+      whisperBack(target, context, "Set " + target_sound + " volume multiplier to " + gain + "%");
+    }
+
+  } // else: no athority, do nothing
+}
+
 
 function giveCoinCommand(args, target, context, self) {
   
@@ -773,7 +866,7 @@ function transferCoinCommand(args, target, context, self) {
 
   // check target exsiting
   if (isUserKnown(targetUser) == false) {
-    whisperBack(target, context, target + " is not on deck");
+    whisperBack(target, context, targetUser + " is not on deck");
     return;
   }
 
@@ -936,7 +1029,19 @@ function playSound(sound_path, duration=3000) {
     return;
   }
 
-  exec('vlc\\vlc.exe -Irc -Idummy --gain ' + GLOBAL_VOLUME_MULTIPLIER + ' ' + sound_path, (err, stdout, stderr) => {});
+  let gain = config.mastervolume / 100.0;
+
+  // check if gain local modifier
+  for (let s of config.volume) {
+    if (s.file == sound_path) {
+      gain = gain * s.volume / 100.0;
+      break;
+    }
+  }
+
+
+  console.log("gain: " + gain + ", " +  config.mastervolume + ", ");
+  exec('vlc\\vlc.exe -Irc -Idummy --gain ' + gain + ' ' + sound_path, (err, stdout, stderr) => {});
   console.log("playing sound " + sound_path);
 }
 
@@ -1015,8 +1120,7 @@ function loadChatters() {
     rawdata = "{accounts : [{name : \"obama69\", balance : 420}]}";
     fs.writeFileSync('chatters.json', rawdata, {flag:'w'});
   }
-  let chatters = JSON.parse(rawdata);
-  return chatters;
+  return JSON.parse(rawdata);
 }
 
 function loadChallenges() {
@@ -1025,8 +1129,7 @@ function loadChallenges() {
     rawdata = "{\"global\": [], \"hunt\": []}";
     fs.writeFileSync('challenges.json', rawdata, {flag:'w'});
   }
-  let challenges = JSON.parse(rawdata);
-  return challenges;
+  return JSON.parse(rawdata);
 }
 
 function writeChallenges(challenges) {
@@ -1036,6 +1139,48 @@ function writeChallenges(challenges) {
     } catch (e) {
       console.log(e);
     }
+}
+
+function loadConfig() {
+  let rawdata = "";
+  if (!fs.existsSync('config.json')) { // create file if not existing
+    rawdata = "{}";
+    fs.writeFileSync('config.json', rawdata, {flag:'w'});
+  } else {
+    rawdata = fs.readFileSync('config.json');
+  }
+  
+  config = JSON.parse(rawdata);
+}
+
+function saveConfig() {
+    // write changes to file
+    try {
+      fs.writeFileSync('config.json', JSON.stringify(config), {flag:'w'});
+    } catch (e) {
+      console.log(e);
+    }
+}
+
+/**
+ * loads and inits config
+ */
+function initConfig() {
+
+  loadConfig();
+
+  // checks if all values present, if not sets defaults
+  if (config.mastervolume == undefined) {
+    config.mastervolume = 80;
+    console.log("CONFIG: mastervolume not defined. Defaulting.")
+  }
+
+  if (config.volume == undefined) {
+    config.volume = [];
+    console.log("CONFIG: volume not defined. Defaulting.")
+  }
+
+  saveConfig();
 }
 
 function whisperBack(target, context, message) {
