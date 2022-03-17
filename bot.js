@@ -7,6 +7,7 @@ const { exec } = require('child_process');
 const say = require('say');
 
 const slot_symbols = ['🍐', '🍒', '🍍', '🍇', '🍉', '🍑', '🍊']; // propability of getting a triple is 2.04%
+const slut_symbols = ['💦', '🧡', '💅', '🍆', '😩', '👅', '💋']; // propability of getting a triple is 2.04%
 const CC_SYMBOL = "₵₵"; // Captain's Coin
 
 const DISCORD_INVITE = "https://discord.gg/X5KGBJGTPu";
@@ -278,10 +279,10 @@ function onCommand(target, context, commandName, self) {
     client.say(target, `42069 seconds`);
     console.log(`* watchtime`);
 
-  } else if (commandName.split(" ")[0] == "!slots") {
+  } else if (commandName.split(" ")[0] == "!slots" || commandName.split(" ")[0] == "!sluts") {
 
     console.log(`* slots`);
-    slotsCommand(commandName.split(" "), target, context, self);
+    slotsCommand(commandName.split(" "), target, context, self, sluts=(commandName.split(" ")[0] == "!sluts"));
 
   } else if (commandName === '!discord' || commandName === '!dc') {
 
@@ -544,7 +545,7 @@ function ttsCommand(text, target, context, self) {
 }
 
 
-function slotsCommand(args, target, context, self) {
+function slotsCommand(args, target, context, self, sluts=false) {
 
   if (args.length == 1) { // no arguments, slot for 5 cc
     slotsDefault(target, context, self);
@@ -587,9 +588,11 @@ function slotsCommand(args, target, context, self) {
 
     let slots_out_chosen = [];
 
+    const super_symbol = sluts ? '💦' : '🍑';
+
     for (let i = 0; i < rolls; i++) {
-      let slots_out = Array.from(getSlotOutput());
-      if (slots_out[0] == '🍑' && slots_out[1] == '🍑' && slots_out[2] == '🍑') { // check super win
+      let slots_out = Array.from(getSlotOutput(sluts=sluts));
+      if (slots_out[0] == super_symbol && slots_out[1] == super_symbol && slots_out[2] == super_symbol) { // check super win
         slots_out_chosen = slots_out;
         superwin += CC_RETURN_SLOTS_PEACH;
       } else if (slots_out[0] == slots_out[1] && slots_out[1] == slots_out[2]) { // check basic win
@@ -625,6 +628,11 @@ function slotsCommand(args, target, context, self) {
         client.say(target, "captai1955Golden " + context.username + " WON " + CC_RETURN_SLOTS_BASIC + CC_SYMBOL + " 💰");
         playSound(SOUND_JACKPOT);
       }, delay);
+      if (sluts) {
+        setTimeout(function() {
+          playSound(SOUND_OH_YEAH);
+        }, delay + 1900);
+      }
       delay += 1000;
     }
 
@@ -633,6 +641,11 @@ function slotsCommand(args, target, context, self) {
         client.say(target, "captai1955Golden 💰💰💰 SUPER 💰💰💰 WIN 💰💰💰 captai1955Golden " + context.username + " WON " + CC_RETURN_SLOTS_PEACH + CC_SYMBOL + " 💰💰💰 " + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL);
         playSound(SOUND_SUPER_JACKPOT);
       }, delay);
+      if (sluts) {
+        setTimeout(function() {
+          playSound(SOUND_OH_YEAH);
+        }, delay + 2200);
+      }
       delay += 2000;
     }
 
@@ -647,7 +660,7 @@ function slotsCommand(args, target, context, self) {
 
 }
 
-function slotsDefault(target, context, self) {
+function slotsDefault(target, context, self, sluts=false) {
   let userbalance = getUserBalance(context.username);
 
   if (userbalance < CC_COST_SLOTS) {
@@ -656,7 +669,7 @@ function slotsDefault(target, context, self) {
   } else {
     updateUserBalance(context.username, userbalance - CC_COST_SLOTS);
 
-    let slots_out = Array.from(getSlotOutput());
+    let slots_out = Array.from(getSlotOutput(sluts=sluts));
     let slots_out_fancy_0 = "[" + slots_out[0] + "|🔳|🔳]_📍   -" + CC_COST_SLOTS + CC_SYMBOL;
     let slots_out_fancy_1 = "[" + slots_out[0] + "|" + slots_out[1] + "|🔳]_📍";
     let slots_out_fancy_2 = "[" + slots_out[0] + "|" + slots_out[1] + "|" + slots_out[2] + "]_📍";
@@ -666,8 +679,10 @@ function slotsDefault(target, context, self) {
     scheduleDelayedMessage(target, context, 600, slots_out_fancy_1);
     scheduleDelayedMessage(target, context, 1200, slots_out_fancy_2);
 
+    const super_symbol = sluts ? '💦' : '🍑';
+
     // check win
-    if (slots_out[0] == '🍑' && slots_out[1] == '🍑' && slots_out[2] == '🍑') { // check super win
+    if (slots_out[0] == super_symbol && slots_out[1] == super_symbol && slots_out[2] == super_symbol) { // check super win
 
       updateUserBalance(context.username, getUserBalance(context.username) + CC_RETURN_SLOTS_PEACH);
       setTimeout(function() {
@@ -675,6 +690,11 @@ function slotsDefault(target, context, self) {
         client.say(target, "💰💰💰" + context.username + " WON THE SLOTS: +" + CC_RETURN_SLOTS_PEACH + CC_SYMBOL + " 💰💰💰");
         client.say(target, CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL + CC_SYMBOL);
       }, 1200);
+      if (sluts) {
+        setTimeout(function() {
+          playSound(SOUND_OH_YEAH);
+        }, 3100);
+      }
 
     } else if (slots_out[0] == slots_out[1] && slots_out[1] == slots_out[2]) { // check basic win
 
@@ -683,6 +703,11 @@ function slotsDefault(target, context, self) {
         playSound(SOUND_JACKPOT);
         client.say(target, "💰💰💰" + context.username + " WON THE SLOTS: +" + CC_RETURN_SLOTS_BASIC + CC_SYMBOL + " 💰💰💰");
       }, 1200);
+      if (sluts) {
+        setTimeout(function() {
+          playSound(SOUND_OH_YEAH);
+        }, 3100);
+      }
     }
 
     return;
@@ -954,8 +979,12 @@ function purchaseItemCommand(args, target, context, self) {
 }
 
 
-function getSlotOutput() {
-  return slot_symbols[getRandomInt(slot_symbols.length)] + slot_symbols[getRandomInt(slot_symbols.length)] + slot_symbols[getRandomInt(slot_symbols.length)];
+function getSlotOutput(sluts=false) {
+  if (sluts) {
+    return slut_symbols[getRandomInt(slut_symbols.length)] + slut_symbols[getRandomInt(slut_symbols.length)] + slut_symbols[getRandomInt(slut_symbols.length)];
+  } else {
+    return slot_symbols[getRandomInt(slot_symbols.length)] + slot_symbols[getRandomInt(slot_symbols.length)] + slot_symbols[getRandomInt(slot_symbols.length)];
+  }
 }
 
 
