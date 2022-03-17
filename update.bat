@@ -1,4 +1,5 @@
 git add chatters.json  challenges.json
+git add config.json
 git config --global user.name "ccasimir"
 git config --global user.email "ccasimir@casimir.de"
 git commit -m "temp"
