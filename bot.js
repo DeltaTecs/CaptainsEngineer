@@ -1,4 +1,4 @@
-// V 2.4.3  // lates change: "deathS counter:" + stefan und berenike death rechte
+// V 2.4.7  // lates change: 50% sounds
 
 const tmi = require('tmi.js');
 const fs = require('fs');
@@ -13,6 +13,13 @@ const REDDIT_LINK = "https://www.reddit.com/r/captaincasimir/";
 
 const FILENAME_DEATH_COUNTER = "deathcounter.txt"
 const DEATH_COUNTER_PREFIX = "DEATHS:";
+const FILENAME_BRAUSE_COUNTER = "brausecounter.txt"
+const BRAUSE_COUNTER_PREFIX = "BRAUSE:";
+
+const GOLDEN_EMOTE = "captai1955Golden"
+
+// change sound volumne, except tts
+const GLOBAL_VOLUME_MULTIPLIER = 0.2; // min: 0.0, max: 1.0
 
 const SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS = "ctn_uuh.mp3";
 const SOUND_ENORM = "enorm.mp3";
@@ -37,6 +44,7 @@ const SOUND_SKRILLEX = "skrillex.mp3";
 const SOUND_WILHELM_SCREAM = "wilhelm-scream.mp3";
 const SOUND_AIRHORN = "airhorn.mp3";
 const SOUND_WASTED = "wasted.mp3";
+const SOUND_CHALLENGE = "challenge.mp3";
 
 
 const REWARD_ID_STRECH = "8c31a6f0-b319-4865-9c4a-e9b57b960311";
@@ -46,9 +54,12 @@ const REWARD_ID_SOUND_FAIL = "3efc8ce0-3da1-40a7-83b5-a2725ab2b1f9";
 const REWARD_ID_SOUND_INCEPTION = "fe96b4b0-11f2-449d-92e1-65cde878e110";
 const REWARD_ID_MUSIC_REQUEST = "c9b4dfaa-a3fb-4f97-8195-14de8822a5b8"; 
 const REWARD_ID_SCREAM = "e9456e46-8d24-4e89-bec3-dc0d5132ba6c";
+const REWARD_ID_CHALLENGE_GLOBAL = "-bec3-dc0d5132ba6c";
+const REWARD_ID_CHALLENGE_HUNT = "5d798aed-c0bd-48f2-aaae-2ab3b24dea81";
 
 const INITIAL_CC_BALANCE = 50;
 const CC_COST_SLOTS = 5;
+const CC_SLOTS_MAX_INPUT = 100;
 const CC_COST_TTS = 30;
 const CC_RETURN_SLOTS_BASIC = 200;
 const CC_RETURN_SLOTS_PEACH = 1000;
@@ -115,6 +126,9 @@ var last_tutorial_print = getTime();
 var silent_mode = false;
 
 // death counter this session
+var deaths = 0;
+
+// brause counter this session
 var deaths = 0;
 
 // Create a client with our options
@@ -198,6 +212,35 @@ function onReward(target, context, self) {
 
     playSound(SOUND_SON_OF_A_BITCH, 10500);
 
+  } else if (context["custom-reward-id"] === REWARD_ID_CHALLENGE_GLOBAL) {
+
+    challenges = loadChallenges();
+
+    if (challenges.length == 0) {
+      client.say(target, "No global challenge saved");
+      return;
+    }
+
+    playSound(SOUND_CHALLENGE, 5000);
+
+    challenge = challenges.global[getRandomInt(challenges.global.length)];
+
+    client.say(target, "🔥 CHALLENGE: " + challenge);
+
+  } else if (context["custom-reward-id"] === REWARD_ID_CHALLENGE_HUNT) {
+
+    challenges = loadChallenges();
+
+    if (challenges.length == 0) {
+      client.say(target, "No hunt challenge saved");
+      return;
+    }
+
+    playSound(SOUND_CHALLENGE, 5000);
+
+    challenge = challenges.hunt[getRandomInt(challenges.hunt.length)];
+
+    client.say(target, "🔥 CHALLENGE: " + challenge);
   }
 }
 
@@ -262,7 +305,7 @@ function onCommand(target, context, commandName, self) {
     console.log(`* lurk`);
     client.say(target, LURK_MSG_0 + context.username + LURK_MSG_1);
 
-  } else if (commandName === '!silent') {
+  } else if (commandName === '!silent' || commandName === '!silence') {
 
     console.log(`* toggle mute`);
     muteCommand(target, context, self);
@@ -297,6 +340,11 @@ function onCommand(target, context, commandName, self) {
     console.log(`* death cmd`);
     deathCommand(commandName.split(" "), target, context, self);
 
+  } else if (commandName.split(" ")[0] == "!brause") {
+
+    console.log(`* brause cmd`);
+    brauseCommand(commandName.split(" "), target, context, self);
+
   } else if (commandName.split(" ")[0] == "!tts") {
 
     console.log(`* tts: ` + commandName.substring(4, commandName.length));
@@ -325,7 +373,12 @@ function onCommand(target, context, commandName, self) {
     console.log(`* force play`);
     forcePlayCommand(commandName.split(" "), target, context, self);
 
-  }  else {
+  } else if (commandName.split(" ")[0] == "!challenge") {
+
+    console.log(`* challenge `);
+    challengeCommand(commandName.split(" "), commandName, target, context, self);
+
+  } else {
     console.log(`* Unknown command ${commandName}`);
     whisperBack(target, context, `unknown command ${commandName}`);
   }
@@ -390,6 +443,26 @@ function deathCommand(args, target, context, self) {
   setDeathCount(toSet);
 }
 
+function brauseCommand(args, target, context, self) {
+
+  if (context.username != "captaincasimir" && context.username != "deltatecs" && context.username != "xx_berenike_xx" && context.username != "stefan_2202") {
+    return;
+  }
+
+  let toSet = deaths + 1;
+
+  if (args.length > 1) {
+    if (isNaN(args[1])) {
+      whisperBack(target, context, "invalid arguments, !brause [count to add]");
+      return;
+    }
+
+    toSet = parseInt(args[1], 10);
+  }
+
+  setBrauseCount(toSet);
+}
+
 function muteCommand(target, context, self) {
 
   if (context.username != "captaincasimir") {
@@ -399,9 +472,9 @@ function muteCommand(target, context, self) {
   silent_mode = !silent_mode;
   console.log(`* toggeling silent mode to ` + silent_mode);
   if (silent_mode)
-    client.say(target, "Sounds enabled");
-  else
     client.say(target, "Sounds disabled");
+  else
+    client.say(target, "Sounds enabled");
 }
 
 function forcePlayCommand(args, target, context, self) {
@@ -493,6 +566,11 @@ function slotsCommand(args, target, context, self) {
 
     if (amount > balance) {
       whisperBack(target, context, "You dont have coin. (" + balance + "/" + amount + ") " + CC_SYMBOL + ", chat more");
+      return;
+    }
+
+    if (amount > CC_SLOTS_MAX_INPUT && context.username != "captaincasimir") {
+      whisperBack(target, context, "Slot max is " + CC_SLOTS_MAX_INPUT + CC_SYMBOL);
       return;
     }
 
@@ -617,6 +695,34 @@ function balanceCommand(target, context, self) {
   whisperBack(target, context, "your balance is " + getUserBalance(context.username) + CC_SYMBOL);
 }
 
+function challengeCommand(args, cmd, target, context, self) {
+
+    // check if authorised
+    if (context.username == "captaincasimir" || context.username == "deltatecs") {
+
+      if (args.length < 3 || (args[1] != "hunt" && args[1] != "global")) {
+        whisperBack(target, context, "invalid arguments, !challenge <hunt|global> <challenge text>");
+        return;
+      }
+
+      let text = cmd.replaceAll('!challenge hunt', '').replaceAll('!challenge global', '');
+      let challenges = loadChallenges();
+
+      if (args[1] == 'hunt') {
+        
+        challenges.hunt.push(text);
+      } else {
+
+        challenges.global.push(text);
+      }
+
+      client.say(target, "Challenge added!");
+
+      writeChallenges(challenges);
+   }
+
+}
+
 
 function checkProvanity(text) {
   let t = text.toLowerCase();
@@ -665,7 +771,7 @@ function transferCoinCommand(args, target, context, self) {
   }
 
   // check target exsiting
-  if (!isUserKnown(targetUser)) {
+  if (isUserKnown(targetUser) == false) {
     whisperBack(target, context, target + " is not on deck");
     return;
   }
@@ -815,6 +921,13 @@ function setDeathCount(count) {
   fs.writeFileSync(FILENAME_DEATH_COUNTER, rawdata, {flag:'w'});
 }
 
+function setBrauseCount(count) {
+
+  brause = count;
+  rawdata = BRAUSE_COUNTER_PREFIX + " " + count
+  fs.writeFileSync(FILENAME_BRAUSE_COUNTER, rawdata, {flag:'w'});
+}
+
 function playSound(sound_path, duration=3000) {
 
   if (silent_mode) { // no sounds during silent mode
@@ -822,7 +935,7 @@ function playSound(sound_path, duration=3000) {
     return;
   }
 
-  exec('vlc\\vlc.exe -Irc -Idummy ' + sound_path, (err, stdout, stderr) => {});
+  exec('vlc\\vlc.exe -Irc -Idummy --gain ' + GLOBAL_VOLUME_MULTIPLIER + ' ' + sound_path, (err, stdout, stderr) => {});
   console.log("playing sound " + sound_path);
 }
 
@@ -903,6 +1016,25 @@ function loadChatters() {
   }
   let chatters = JSON.parse(rawdata);
   return chatters;
+}
+
+function loadChallenges() {
+  let rawdata = fs.readFileSync('challenges.json');
+  if (rawdata == "") { // if file absent, create it
+    rawdata = "{\"global\": [], \"hunt\": []}";
+    fs.writeFileSync('challenges.json', rawdata, {flag:'w'});
+  }
+  let challenges = JSON.parse(rawdata);
+  return challenges;
+}
+
+function writeChallenges(challenges) {
+    // write changes to file
+    try {
+      fs.writeFileSync('challenges.json', JSON.stringify(challenges), {flag:'w'});
+    } catch (e) {
+      console.log(e);
+    }
 }
 
 function whisperBack(target, context, message) {
