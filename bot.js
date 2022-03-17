@@ -1019,7 +1019,7 @@ function setBrauseCount(count) {
   fs.writeFileSync(FILENAME_BRAUSE_COUNTER, rawdata, {flag:'w'});
 }
 
-function playSound(sound_path, duration=3000) {
+function playSound(sound_path, duration=20000) {
 
   if (silent_mode) { // no sounds during silent mode
     console.log("sound " + sound_path + " suppressed due to silent mode");
@@ -1036,9 +1036,7 @@ function playSound(sound_path, duration=3000) {
     }
   }
 
-
-  console.log("gain: " + gain + ", " +  config.mastervolume + ", ");
-  exec('vlc\\vlc.exe -Irc -Idummy --gain ' + gain + ' ' + sound_path, (err, stdout, stderr) => {});
+  exec('vlc\\vlc.exe -Irc -Idummy --gain ' + gain + ' ' + sound_path, timeout=duration, (err, stdout, stderr) => {});
   console.log("playing sound " + sound_path);
 }
 
