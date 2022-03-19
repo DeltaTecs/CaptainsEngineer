@@ -8,5 +8,4 @@ git reset --hard
 git pull
 git reset HEAD~
 echo Update finished, starting bot...
-Start "CaptainsEngineer" /d "D:\dev\prgm\Nodejs" "node D:\dev\Programmieren\CaptainsEngineer\bot.js"
 pause
