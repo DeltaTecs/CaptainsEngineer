@@ -1141,7 +1141,6 @@ function updateUser(user, balance, anthem=undefined) {
 function loadChatters() {
   createIfUnexistent('chatters.json', JSON.stringify({accounts: [{name : "obama69", balance : 420}]}));
   let rawdata = fs.readFileSync('chatters.json');
-  console.log(rawdata);
   return JSON.parse(rawdata);
 }
 
