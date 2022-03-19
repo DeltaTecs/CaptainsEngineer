@@ -8,5 +8,5 @@ git reset --hard
 git pull
 git reset HEAD~
 echo Update finished, starting bot...
-Start ""  "D:\dev\prgm\Nodejs\node.exe bot.js"
+Start "" "/d D:\dev\prgm\Nodejs" "node.exe bot.js"
 pause
