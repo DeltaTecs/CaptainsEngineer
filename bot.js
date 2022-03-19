@@ -1139,13 +1139,14 @@ function updateUser(user, balance, anthem=undefined) {
 }
 
 function loadChatters() {
-  createIfUnexistent('chatters.json', "{accounts : [{name : \"obama69\", balance : 420}]}");
+  createIfUnexistent('chatters.json', JSON.stringify({accounts: [{name : "obama69", balance : 420}]}));
   let rawdata = fs.readFileSync('chatters.json');
+  console.log(rawdata);
   return JSON.parse(rawdata);
 }
 
 function loadChallenges() {
-  createIfUnexistent('challenges.json', "{\"global\": [], \"hunt\": []}");
+  createIfUnexistent('challenges.json', JSON.stringify({global: [], hunt: []}));
   let rawdata = fs.readFileSync('challenges.json');
   return JSON.parse(rawdata);
 }
