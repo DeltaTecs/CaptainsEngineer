@@ -1139,20 +1139,14 @@ function updateUser(user, balance, anthem=undefined) {
 }
 
 function loadChatters() {
+  createIfUnexistent('chatters.json', "{accounts : [{name : \"obama69\", balance : 420}]}");
   let rawdata = fs.readFileSync('chatters.json');
-  if (rawdata == "") { // if file absent, create it
-    rawdata = "{accounts : [{name : \"obama69\", balance : 420}]}";
-    fs.writeFileSync('chatters.json', rawdata, {flag:'w'});
-  }
   return JSON.parse(rawdata);
 }
 
 function loadChallenges() {
+  createIfUnexistent('challenges.json', "{\"global\": [], \"hunt\": []}");
   let rawdata = fs.readFileSync('challenges.json');
-  if (rawdata == "") { // if file absent, create it
-    rawdata = "{\"global\": [], \"hunt\": []}";
-    fs.writeFileSync('challenges.json', rawdata, {flag:'w'});
-  }
   return JSON.parse(rawdata);
 }
 
@@ -1166,14 +1160,8 @@ function writeChallenges(challenges) {
 }
 
 function loadConfig() {
-  let rawdata = "";
-  if (!fs.existsSync('config.json')) { // create file if not existing
-    rawdata = "{}";
-    fs.writeFileSync('config.json', rawdata, {flag:'w'});
-  } else {
-    rawdata = fs.readFileSync('config.json');
-  }
-  
+  createIfUnexistent('config.json', "{}");
+  let rawdata = fs.readFileSync('config.json');
   config = JSON.parse(rawdata);
 }
 
@@ -1205,6 +1193,13 @@ function initConfig() {
   }
 
   saveConfig();
+}
+
+function createIfUnexistent(file, defaultVal) {
+  if (!fs.existsSync(file)) { // create file if not existing
+    fs.writeFileSync(file, defaultVal, {flag:'w'});
+    console.log("File absend: " + file + ", creating...");
+  }
 }
 
 function whisperBack(target, context, message) {
