@@ -65,7 +65,7 @@ const REWARD_ID_BADUMTS = "a8f76e26-aa73-494c-a75b-49ac5d6b6783";
 
 const INITIAL_CC_BALANCE = 50;
 const CC_COST_SLOTS = 5;
-const CC_COST_SLUTS = 10;
+const CC_COST_SLUTS = 8;
 const CC_SLOTS_MAX_INPUT = 100;
 const CC_COST_TTS = 30;
 const CC_RETURN_SLOTS_BASIC = 200;
@@ -114,13 +114,13 @@ const ENABLE_COMMAND_COOLDOWN_MESSAGE = false; // disabled because whisper dont 
 // Define configuration options
 const opts = {
   identity: {
-    username: "DeltaTecs",
-    password: "oauth:0ubb2esitt1x1bnt1kw6n2ll16hdfo"
-    //password: "oauth:dj9k6ncwzz7u0dwmy5y241ojvxd950"
+    username: "CaptainsEngineer",
+    //password: "oauth:0ubb2esitt1x1bnt1kw6n2ll16hdfo"
+    password: "oauth:dj9k6ncwzz7u0dwmy5y241ojvxd950"
   },
   channels: [
-    //"captaincasimir"
-    "DeltaTecs"
+    "captaincasimir"
+    //"DeltaTecs"
   ]
 };
 
