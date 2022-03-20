@@ -279,10 +279,15 @@ function onCommand(target, context, commandName, self) {
     client.say(target, `42069 seconds`);
     console.log(`* watchtime`);
 
-  } else if (commandName.split(" ")[0] == "!slots" || commandName.split(" ")[0] == "!sluts") {
+  } else if (commandName.split(" ")[0] == "!slots") {
 
     console.log(`* slots`);
-    slotsCommand(commandName.split(" "), target, context, self, sluts=(commandName.split(" ")[0] == "!sluts"));
+    slotsCommand(commandName.split(" "), target, context, self, sluts=false);
+
+  } else if (commandName.split(" ")[0] == "!sluts") {
+
+    console.log(`* slots`);
+    slotsCommand(commandName.split(" "), target, context, self, sluts=true);
 
   } else if (commandName === '!discord' || commandName === '!dc') {
 
@@ -548,7 +553,7 @@ function ttsCommand(text, target, context, self) {
 function slotsCommand(args, target, context, self, sluts=false) {
 
   if (args.length == 1) { // no arguments, slot for 5 cc
-    slotsDefault(target, context, self);
+    slotsDefault(target, context, self, sluts=sluts);
   } else {
 
     if (isNaN(args[1]) && args[1] != "all") {
