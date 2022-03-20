@@ -5,7 +5,6 @@ const tmi = require('tmi.js');
 const fs = require('fs');
 const { exec } = require('child_process');
 const say = require('say');
-const { kill } = require('process');
 
 const slot_symbols = ['🍐', '🍒', '🍍', '🍇', '🍉', '🍑', '🍊']; // propability of getting a triple is 2.04%
 const slut_symbols = ['💦', '🧡', '💅', '🍆', '😩', '👅', '💋']; // propability of getting a triple is 2.04%
@@ -114,13 +113,13 @@ const ENABLE_COMMAND_COOLDOWN_MESSAGE = false; // disabled because whisper dont 
 // Define configuration options
 const opts = {
   identity: {
-    username: "CaptainsEngineer",
-    //password: "oauth:0ubb2esitt1x1bnt1kw6n2ll16hdfo"
-    password: "oauth:dj9k6ncwzz7u0dwmy5y241ojvxd950"
+    username: "DeltaTecs",
+    password: "oauth:0ubb2esitt1x1bnt1kw6n2ll16hdfo"
+    //password: "oauth:dj9k6ncwzz7u0dwmy5y241ojvxd950"
   },
   channels: [
-    "captaincasimir"
-    //"DeltaTecs"
+    //"captaincasimir"
+    "DeltaTecs"
   ]
 };
 
@@ -1128,7 +1127,7 @@ function playSound(sound_path, duration=20000) {
     }
   }
 
-  exec('vlc\\vlc.exe -Irc -Idummy --gain ' + gain + ' ' + sound_path, (err, stdout, stderr) => {});
+  exec('vlc\\vlc.exe -Irc -Idummy --gain ' + gain + ' ' + sound_path + ' vlc://quit', (err, stdout, stderr) => {});
   console.log("playing sound " + sound_path);
 }
 
