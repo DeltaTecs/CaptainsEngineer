@@ -113,13 +113,13 @@ const ENABLE_COMMAND_COOLDOWN_MESSAGE = false; // disabled because whisper dont 
 // Define configuration options
 const opts = {
   identity: {
-    username: "CaptainsEngineer",
-    //password: "oauth:0ubb2esitt1x1bnt1kw6n2ll16hdfo"
-    password: "oauth:dj9k6ncwzz7u0dwmy5y241ojvxd950"
+    username: "DeltaTecs",
+    password: "oauth:0ubb2esitt1x1bnt1kw6n2ll16hdfo"
+    //password: "oauth:dj9k6ncwzz7u0dwmy5y241ojvxd950"
   },
   channels: [
-    "captaincasimir"
-    //"DeltaTecs"
+    //"captaincasimir"
+    "DeltaTecs"
   ]
 };
 
