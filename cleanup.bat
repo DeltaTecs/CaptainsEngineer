@@ -1,4 +1,4 @@
-xcopy temp/* . /q /h /i /c /k /e /r /y /exclude:excludecp.txt
+xcopy temp\* . /q /h /i /c /k /e /r /y /exclude:excludecp.txt
 pause
 DEL /F /S /Q "update.zip"
 pause
