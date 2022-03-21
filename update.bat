@@ -6,6 +6,4 @@ xcopy challenges.json temp /q /r /y
 xcopy config.json temp /q /r /y
 xcopy chatters.json temp /q /r /y
 pause
-xcopy CaptainsEngineer-main\* . /q /y
-pause
 cleanup.bat
