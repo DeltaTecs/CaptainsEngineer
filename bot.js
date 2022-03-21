@@ -1,11 +1,10 @@
-// V 2.4.8  // volume command
+// V 2.5  // golden slots und mehr reward sounds
 
 
 const tmi = require('tmi.js');
 const fs = require('fs');
 const { exec } = require('child_process');
 const say = require('say');
-const { kill } = require('process');
 
 const slot_symbols = ['🍐', '🍒', '🍍', '🍇', '🍉', '🍑', '🍊']; // propability of getting a triple is 2.04%
 const slut_symbols = ['💦', '🧡', '💅', '🍆', '😩', '👅', '💋']; // propability of getting a triple is 2.04%
@@ -1128,7 +1127,7 @@ function playSound(sound_path, duration=20000) {
     }
   }
 
-  exec('vlc\\vlc.exe -Irc -Idummy --gain ' + gain + ' ' + sound_path, (err, stdout, stderr) => {});
+  exec('vlc\\vlc.exe -Irc -Idummy --gain ' + gain + ' ' + sound_path + ' vlc://quit', (err, stdout, stderr) => {});
   console.log("playing sound " + sound_path);
 }
 

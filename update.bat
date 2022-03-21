@@ -1,11 +1,11 @@
-git add chatters.json
-git add challenges.json
-git add config.json
-git config --global user.name "ccasimir"
-git config --global user.email "ccasimir@casimir.de"
-git commit -m "temp"
-git reset --hard
-git pull
-git reset HEAD~
-echo Update finished. you may close this
+powershell -Command "Invoke-WebRequest https://github.com/DeltaTecs/CaptainsEngineer/archive/refs/heads/main.zip -OutFile update.zip"
+powershell -Command "tar -xf update.zip"
+md temp
 pause
+xcopy challenges.json temp /q /r /y
+xcopy config.json temp /q /r /y
+xcopy chatters.json temp /q /r /y
+pause
+xcopy CaptainsEngineer-main\* . /q /y
+pause
+cleanup.bat
