@@ -1,4 +1,6 @@
-xcopy temp\* . /q /h /i /c /k /e /r /y /exclude:excludecp.txt
+xcopy CaptainsEngineer-main\* . /q /y /exclude:excludecp.txt
+pause
+xcopy temp\* . /q /h /i /c /k /e /r /y
 pause
 DEL /F /S /Q "update.zip"
 pause
