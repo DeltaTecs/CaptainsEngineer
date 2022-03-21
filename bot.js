@@ -76,6 +76,7 @@ const LURK_MSG_0 = "Thank you for boarding the ship ";
 const LURK_MSG_1 = " ⛵ Lay back and enjoy your drink <3"
 const TUTORIAL_COOLDOWN = 300; // how often the tutorial can be requested (in seconds)
 const PROP_GOLDEN = 71; // one in 71 fruits is a golden captain -> prop of getting a tripple is 0.0003%
+const GOLD_STATUS_DURATION = 1000 * 60 * 60 * 24 * 30; // one month in millis
 
 const CC_SOUNDS = [
   {name: "gulb", price: 10, sound: SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS},
@@ -113,13 +114,13 @@ const ENABLE_COMMAND_COOLDOWN_MESSAGE = false; // disabled because whisper dont 
 // Define configuration options
 const opts = {
   identity: {
-    username: "DeltaTecs",
-    password: "oauth:0ubb2esitt1x1bnt1kw6n2ll16hdfo"
-    //password: "oauth:dj9k6ncwzz7u0dwmy5y241ojvxd950"
+    username: "CaptainsEngineer",
+    //password: "oauth:0ubb2esitt1x1bnt1kw6n2ll16hdfo"
+    password: "oauth:dj9k6ncwzz7u0dwmy5y241ojvxd950"
   },
   channels: [
-    //"captaincasimir"
-    "DeltaTecs"
+    "captaincasimir"
+    //"DeltaTecs"
   ]
 };
 
@@ -708,7 +709,7 @@ function slotsCommand(args, target, context, self, sluts=false) {
     if (total_win > CC_RETURN_SLOTS_BASIC) {
       // print bill only if atleast two basic wins or a super win
       setTimeout(function() {
-        client.say(target, "-- " + balance + CC_SYMBOL + " >> " + (balance - amount + total_win) + CC_SYMBOL + "");
+        client.say(target, "-- " + balance + CC_SYMBOL + " >> " + (balance - amount + total_win) + CC_SYMBOL + "", user=context.username);
       }, delay - 900);
     }
 }
@@ -761,11 +762,19 @@ function getSlotOutput(username, sluts=false) {
   return {symbols: symbols, rank: win_rank, return: win_return, message: win_message, sound: win_sound};
 }
 
+function wrap(message, user=undefined) {
+  if (user == undefined)
+    return message;
+  else if (getUserGoldStatus(user) != undefined && getUserGoldStatus(user) + GOLD_STATUS_DURATION < (new Date().getTime())) {
+    return "👑" + message;
+  }
+}
+
 function goldenEvent(target, username) {
 
   const rain_messages = 10;
   const chars_per_rain = 13;
-  const rain_symbols = '💎👑';
+  const rain_symbols = "💎👑";
   const rain_delay = 1000;
 
   let delay = 2000;
@@ -1165,6 +1174,15 @@ function getUserAnthem(user) {
   for (acc of chatters.accounts) {
     if (acc.name == user) {
       return acc.anthem;
+    }
+  }
+  return undefined; // user not found
+}
+
+function getUserGoldStatus(user) {
+  for (acc of chatters.accounts) {
+    if (acc.name == user) {
+      return acc.gold;
     }
   }
   return undefined; // user not found
