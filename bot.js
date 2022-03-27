@@ -286,7 +286,7 @@ function onCommand(target, context, commandName, self) {
   }
 
   // reset user cooldown
-  command_cooldowns[context.username] = getTime()[0];
+  command_cooldowns[context.username] = getTime();
 
   // If the command is known, let's execute it
   if (commandName === '!dice') {
