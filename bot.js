@@ -8,6 +8,7 @@ const say = require('say');
 
 const slot_symbols = ['🍐', '🍒', '🍍', '🍇', '🍉', '🍑', '🍊']; // propability of getting a triple is 2.04%
 const slut_symbols = ['💦', '🧡', '💅', '🍆', '😩', '👅', '💋']; // propability of getting a triple is 2.04%
+const slot_symbols_gold = ['💎', '👑', '💅', '🍆', '😩', '👅', '💋']; // propability of getting a triple is 2.04%
 const CC_SYMBOL = "₵₵"; // Captain's Coin
 
 const DISCORD_INVITE = "https://discord.gg/X5KGBJGTPu";
@@ -606,6 +607,7 @@ function slotsCommand(args, target, context, self, sluts=false) {
     let rolls = amount / 5;
     let wins = [];
     let slots_out_chosen = [];
+    let usr_gold_status = isGoldStatusActive(context.username);
 
 
     for (let i = 0; i < rolls; i++) { // roll
@@ -714,23 +716,19 @@ function slotsCommand(args, target, context, self, sluts=false) {
     }
 }
 
-function getSlotSymbols(sluts=false) {
-  if (sluts) {
-    return slut_symbols[getRandomInt(slut_symbols.length)] + slut_symbols[getRandomInt(slut_symbols.length)] + slut_symbols[getRandomInt(slut_symbols.length)];
-  } else {
-    return slot_symbols[getRandomInt(slot_symbols.length)] + slot_symbols[getRandomInt(slot_symbols.length)] + slot_symbols[getRandomInt(slot_symbols.length)];
-  }
-}
-
-function getSlotOutput(username, sluts=false) {
+function getSlotOutput(username, sluts=false, goldstatus=false) {
 
   symbols = [];
 
   for (let i = 0; i < 3; i++) {
     if (getRandomInt(PROP_GOLDEN) == 0) { // force golden
       symbols.push(" " + GOLDEN_EMOTE + " ");
-    } else {
-      symbols.push(sluts ? slut_symbols[getRandomInt(slut_symbols.length)] : slot_symbols[getRandomInt(slot_symbols.length)]);
+    } else if (sluts) { // !sluts / !slotsx
+      symbols.push(slut_symbols[getRandomInt(slut_symbols.length)]);
+    } else if (goldstatus) { // !slots but after golden win
+      symbols.push(slot_symbols_gold[getRandomInt(slot_symbols_gold.length)]);
+    } else { // !slots default
+      symbols.push(slot_symbols[getRandomInt(slot_symbols.length)]);
     }
   }
 
@@ -746,7 +744,7 @@ function getSlotOutput(username, sluts=false) {
       win_return = CC_RETURN_SLOTS_GOLDEN;
       win_message = username + " FOUND THE SECRET GOLDEN CAPTAIN'S TREASURE!!! " + GOLDEN_EMOTE + " 💰💰💰 " + GOLDEN_EMOTE + " 💰💰💰 " + "  +" + CC_RETURN_SLOTS_GOLDEN + CC_SYMBOL;
       win_sound = SOUND_GOLDEN_JACKPOT;
-    } else if (symbols[0] == '🍑' || symbols[0] == '💦') { // super win
+    } else if (symbols[0] == '🍑' || symbols[0] == '💦' || symbols[0] == '💎') { // super win
       win_rank = 2;
       win_return = CC_RETURN_SLOTS_PEACH;
       win_message = GOLDEN_EMOTE + " 💰💰💰 SUPER WIN 💰💰💰 " + GOLDEN_EMOTE + " " + username + " WON " + CC_RETURN_SLOTS_PEACH + CC_SYMBOL;
@@ -760,14 +758,6 @@ function getSlotOutput(username, sluts=false) {
   }
 
   return {symbols: symbols, rank: win_rank, return: win_return, message: win_message, sound: win_sound};
-}
-
-function wrap(message, user=undefined) {
-  if (user == undefined)
-    return message;
-  else if (getUserGoldStatus(user) != undefined && getUserGoldStatus(user) + GOLD_STATUS_DURATION < (new Date().getTime())) {
-    return "👑" + message;
-  }
 }
 
 function goldenEvent(target, username) {
@@ -1177,6 +1167,12 @@ function getUserAnthem(user) {
     }
   }
   return undefined; // user not found
+}
+
+function isGoldStatusActive(user) {
+  if (getUserGoldStatus(user) == undefined)
+    return false;
+  return getUserGoldStatus(user) + GOLD_STATUS_DURATION < (new Date().getTime());
 }
 
 function getUserGoldStatus(user) {
