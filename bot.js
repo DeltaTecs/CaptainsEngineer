@@ -364,6 +364,11 @@ function onCommand(target, context, commandName, self) {
     console.log(`* volume cmd`);
     volumeCommand(commandName.split(" "), target, context, self);
 
+  } else if (commandName.split(" ")[0] == "!config" || commandName.split(" ")[0] == "!set") {
+
+    console.log(`* config cmd`);
+    configCommand(commandName.split(" "), target, context, self);
+
   } else if (commandName.split(" ")[0] == "!transfer") {
 
     console.log(`* transfer coin cmd`);
@@ -845,7 +850,43 @@ function challengeCommand(args, cmd, target, context, self) {
 
 function checkProvanity(text) {
   let t = text.toLowerCase();
-  return t.includes('neger') || t.includes('negger') || t.includes('nigger') || t.includes('niger') || t.includes('nigga') || t.includes('niga') || t.includes('bitch') || t.includes('hure') || t.includes('arsch') || t.includes('wichser') || t.includes('schwanz') || t.includes('penis') || t.includes('bastard') || t.includes('bastart') || t.includes('schwuchtel') || t.includes('faggot') || t.includes('simp');
+  return t.replaceAll(' ', '').includes('neger') || t.includes('negger') || t.includes('nigger') || t.includes('niger') || t.includes('nigga') || t.includes('niga') || t.includes('bitch') || t.includes('hure') || t.includes('arsch') || t.includes('wichser') || t.includes('schwanz') || t.includes('penis') || t.includes('bastard') || t.includes('bastart') || t.includes('schwuchtel') || t.includes('faggot') || t.includes('simp');
+}
+
+function configCommand(args, target, context, self) {
+  
+  // check if authorised
+  if (context.username == "captaincasimir" || context.username == "deltatecs") {
+
+    if (args.length < 3) {
+      whisperBack(target, context, "invalid arguments, !config <variable> <value>");
+      return;
+    }
+
+    if (args[1] == "tts_limit") {
+
+      if (isNaN(args[2])) {
+        whisperBack(target, context, args[1] + " value must be a number (characters)");
+        return;
+      }
+      config.tts_limit = parseInt(args[2], 10);
+      saveConfig();
+
+    } else if (args[1] == "tts_cooldown") {
+    
+      if (isNaN(args[2])) {
+        whisperBack(target, context, args[1] + " value must be a number (seconds)");
+        return;
+      }
+      config.tts_cooldown = parseInt(args[2], 10);
+      saveConfig();
+
+    } else {
+      whisperBack(target, context, "unknown varible, choose from: tts_limit, tts_cooldown");
+      return;
+    }
+
+  }
 }
 
 function volumeCommand(args, target, context, self) {
