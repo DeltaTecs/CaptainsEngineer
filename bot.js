@@ -577,20 +577,21 @@ function slotsCommand(args, target, context, self, sluts=false) {
 
     let amount = 0;
     const balance = getUserBalance(context.username);
+    const roll_cost = sluts ? CC_COST_SLUTS : CC_COST_SLOTS;
 
     if (args.length == 1) {
-      amount = (sluts ? CC_COST_SLUTS : CC_COST_SLOTS);
+      amount = roll_cost;
     } else if (args[1] == "all") {
       amount = balance;
-      amount -= amount % (sluts ? CC_COST_SLUTS : CC_COST_SLOTS);
+      amount -= amount % roll_cost;
     } else {
       amount = parseInt(args[1], 10);
-      amount -= amount % (sluts ? CC_COST_SLUTS : CC_COST_SLOTS);
+      amount -= amount % roll_cost;
     }
 
 
-    if (amount < (sluts ? CC_COST_SLUTS : CC_COST_SLOTS)) {
-      whisperBack(target, context, "Not enough coin. Turning the slots once costs " + (sluts ? CC_COST_SLUTS : CC_COST_SLOTS) + CC_SYMBOL);
+    if (amount < roll_cost) {
+      whisperBack(target, context, "Not enough coin. Turning the slots once costs " + roll_cost + CC_SYMBOL);
       return;
     }
 
@@ -604,7 +605,7 @@ function slotsCommand(args, target, context, self, sluts=false) {
       return;
     }
 
-    let rolls = amount / 5;
+    let rolls = amount / roll_cost;
     let wins = [];
     let slots_out_chosen = [];
     let usr_gold_status = isGoldStatusActive(context.username);
@@ -648,7 +649,7 @@ function slotsCommand(args, target, context, self, sluts=false) {
       console.log(context.username + " won slots: cc_before=" + balance + ", amount_in=" + amount + ", cc_after=" + getUserBalance(context.username) + ", win=" + total_win);
 
     // default animation
-    let slots_out_fancy_0 = "[" + slots_out_chosen[0] + "|🔳|🔳]_📍   -" + ((sluts ? CC_COST_SLUTS : CC_COST_SLOTS) * rolls) + "" + CC_SYMBOL;
+    let slots_out_fancy_0 = "[" + slots_out_chosen[0] + "|🔳|🔳]_📍   -" + amount + "" + CC_SYMBOL;
     let slots_out_fancy_1 = "[" + slots_out_chosen[0] + "|" + slots_out_chosen[1] + "|🔳]_📍";
     let slots_out_fancy_2 = "[" + slots_out_chosen[0] + "|" + slots_out_chosen[1] + "|" + slots_out_chosen[2] + "]_📍";
 
