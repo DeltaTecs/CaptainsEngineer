@@ -5,6 +5,7 @@ const tmi = require('tmi.js');
 const fs = require('fs');
 const { exec } = require('child_process');
 const say = require('say');
+const { time } = require( 'console' );
 
 const slot_symbols = ['🍐', '🍒', '🍍', '🍇', '🍉', '🍑', '🍊']; // propability of getting a triple is 2.04%
 const slut_symbols = ['💦', '🧡', '💅', '🍆', '😩', '👅', '💋']; // propability of getting a triple is 2.04%
@@ -112,6 +113,8 @@ const GLOBAL_COMMAND_COOLDOWN = 3; // seconds
 const ENABLE_COMMAND_COOLDOWN = true;
 const ENABLE_COMMAND_COOLDOWN_MESSAGE = false; // disabled because whisper dont work
 
+initConfig();
+
 // Define configuration options
 const opts = {
   identity: {
@@ -128,8 +131,10 @@ const opts = {
 // initialize cooldown map
 var command_cooldowns = [];
 
+var last_tts = getTime() - config.tts_cooldown;
+
 // last tutorial display
-var last_tutorial_print = getTime();
+var last_tutorial_print = getTime() - TUTORIAL_COOLDOWN;
 
 // no sounds mode
 var silent_mode = false;
@@ -138,7 +143,7 @@ var silent_mode = false;
 var deaths = 0;
 
 // brause counter this session
-var deaths = 0;
+var brause = 0;
 
 // Create a client with our options
 const client = new tmi.client(opts);
@@ -157,8 +162,6 @@ var config;
 
 // Connect to Twitch:
 client.connect();
-
-initConfig();
 
 // Called every time a message comes in
 function onMessageHandler (target, context, msg, self) {
@@ -480,7 +483,7 @@ function brauseCommand(args, target, context, self) {
     return;
   }
 
-  let toSet = deaths + 1;
+  let toSet = brause + 1;
 
   if (args.length > 1) {
     if (isNaN(args[1])) {
@@ -549,6 +552,18 @@ function tmCommand(target, context, self) {
 function ttsCommand(text, target, context, self) {
 
   if (silent_mode) {
+    return;
+  }
+
+  const time_to_wait = config.tts_cooldown - (getTime() - last_tts);
+
+  if (time_to_wait > 0) {
+    whisperBack(target, context, "TTS was used recently, please wait " + time_to_wait + "s ");
+    return;
+  }
+
+  if (text.length > config.tts_limit) {
+    whisperBack(target, context, "TTS character limit exceeded. The maximum is " + config.tts_limit + ", your message has " + text.length);
     return;
   }
 
@@ -1268,6 +1283,16 @@ function initConfig() {
   if (config.volume == undefined) {
     config.volume = [];
     console.log("CONFIG: volume not defined. Defaulting.")
+  }
+
+  if (config.tts_limit == undefined) {
+    config.tts_limit = 60;
+    console.log("CONFIG: tts_limit not defined. Defaulting.")
+  }
+
+  if (config.tts_limit == undefined) {
+    config.tts_cooldown = 60;
+    console.log("CONFIG: tts_cooldown not defined. Defaulting.")
   }
 
   saveConfig();
