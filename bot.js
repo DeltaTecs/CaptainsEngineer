@@ -131,6 +131,9 @@ const opts = {
 // initialize cooldown map
 var command_cooldowns = [];
 
+// initialize lurk time map
+var lurks = [];
+
 var last_tts = getTime() - config.tts_cooldown;
 
 // last tutorial display
@@ -332,7 +335,7 @@ function onCommand(target, context, commandName, self) {
   } else if (commandName === '!lurk') {
 
     console.log(`* lurk`);
-    client.say(target, LURK_MSG_0 + context.username + LURK_MSG_1);
+    lurkCommand(target, context, self);
 
   } else if (commandName === '!silent' || commandName === '!silence') {
 
@@ -502,6 +505,23 @@ function brauseCommand(args, target, context, self) {
   setBrauseCount(toSet);
 }
 
+function lurkCommand(target, context, self) {
+
+  let reward_string = "";
+
+  if (lurks[context.username] == undefined || getTime() - lurks[context.username] > config.lurk_reward_cooldown) {
+    // eligble for lurk reward
+    console.log(context.username + " eligable for lurk reward");
+    updateUserBalance(context.username, getUserBalance(context.username) + config.lurk_reward_amount);
+    reward_string = " (+" + config.lurk_reward_amount + CC_SYMBOL + ")"
+  } else {
+    console.log(context.username + " not eligable for lurk reward");
+  }
+
+  client.say(target, LURK_MSG_0 + context.username + LURK_MSG_1 + reward_string);
+
+}
+
 function muteCommand(target, context, self) {
 
   if (context.username != "captaincasimir") {
@@ -632,7 +652,7 @@ function slotsCommand(args, target, context, self, sluts=false) {
 
 
     for (let i = 0; i < rolls; i++) { // roll
-      let slots_out = getSlotOutput(context.username, sluts=sluts);
+      let slots_out = getSlotOutput(context.username, sluts=sluts, goldStatus=usr_gold_status);
       if (slots_out.rank > 0)
         wins.push(slots_out);
       slots_out_chosen = slots_out.symbols;
@@ -881,8 +901,26 @@ function configCommand(args, target, context, self) {
       config.tts_cooldown = parseInt(args[2], 10);
       saveConfig();
 
+    } else if (args[1] == "lurk_reward_cooldown") {
+    
+      if (isNaN(args[2])) {
+        whisperBack(target, context, args[1] + " value must be a number (seconds)");
+        return;
+      }
+      config.lurk_reward_cooldown = parseInt(args[2], 10);
+      saveConfig();
+
+    } else if (args[1] == "lurk_reward_amount") {
+    
+      if (isNaN(args[2])) {
+        whisperBack(target, context, args[1] + " value must be a number (seconds)");
+        return;
+      }
+      config.lurk_reward_amount = parseInt(args[2], 10);
+      saveConfig();
+
     } else {
-      whisperBack(target, context, "unknown varible, choose from: tts_limit, tts_cooldown");
+      whisperBack(target, context, "unknown varible, choose from: tts_limit, tts_cooldown, lurk_reward_cooldown, lurk_reward_amount");
       return;
     }
 
@@ -1334,6 +1372,16 @@ function initConfig() {
   if (config.tts_limit == undefined) {
     config.tts_cooldown = 60;
     console.log("CONFIG: tts_cooldown not defined. Defaulting.")
+  }
+
+  if (config.lurk_reward_amount == undefined) {
+    config.lurk_reward_amount = 30;
+    console.log("CONFIG: lurk_reward_amount not defined. Defaulting.")
+  }
+  
+  if (config.lurk_reward_cooldown == undefined) {
+    config.lurk_reward_cooldown = 60 * 60 * 1;
+    console.log("CONFIG: lurk_reward_cooldown not defined. Defaulting.")
   }
 
   saveConfig();
