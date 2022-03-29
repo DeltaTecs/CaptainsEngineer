@@ -76,7 +76,7 @@ const WELCOME_MSG = "Ahoy, Matey! ⛵ Welcome aboard "; // followed by: username
 const LURK_MSG_0 = "Thank you for boarding the ship ";
 const LURK_MSG_1 = " ⛵ Lay back and enjoy your drink <3"
 const TUTORIAL_COOLDOWN = 300; // how often the tutorial can be requested (in seconds)
-const PROP_GOLDEN = 6; // one in 71 fruits is a golden captain -> prop of getting a tripple is 0.0003%
+const PROP_GOLDEN = 71; // one in 71 fruits is a golden captain -> prop of getting a tripple is 0.0003%
 const GOLD_STATUS_DURATION = 1000 * 60 * 60 * 24 * 30; // one month in millis
 
 const CC_SOUNDS = [
@@ -117,14 +117,14 @@ initConfig();
 // Define configuration options
 const opts = {
   identity: {
-    username: "DeltaTecs",
-    //username: "CaptainsEngineer",
-    password: "oauth:0ubb2esitt1x1bnt1kw6n2ll16hdfo"
-    //password: "oauth:dj9k6ncwzz7u0dwmy5y241ojvxd950"
+    //username: "DeltaTecs",
+    username: "CaptainsEngineer",
+    //password: "oauth:0ubb2esitt1x1bnt1kw6n2ll16hdfo"
+    password: "oauth:dj9k6ncwzz7u0dwmy5y241ojvxd950"
   },
   channels: [
-    //"captaincasimir"
-    "DeltaTecs"
+    "captaincasimir"
+    //"DeltaTecs"
   ]
 };
 
