@@ -5,11 +5,10 @@ const tmi = require('tmi.js');
 const fs = require('fs');
 const { exec } = require('child_process');
 const say = require('say');
-const { time } = require( 'console' );
 
-const slot_symbols = ['🍐', '🍒', '🍍', '🍇', '🍉', '🍑', '🍊']; // propability of getting a triple is 2.04%
-const slut_symbols = ['💦', '🧡', '💅', '🍆', '😩', '👅', '💋']; // propability of getting a triple is 2.04%
-const slot_symbols_gold = ['💎', '👑', '💅', '🍆', '😩', '👅', '💋']; // propability of getting a triple is 2.04%
+const slot_symbols = ['🍑', '🍒', '🍍', '🍇', '🍉', '🍐', '🍊', '🥥']; // propability of getting a triple is 2.04%
+const slut_symbols = ['💦', '🧡', '💅', '🍆', '😩', '👅', '💋', '🔞']; //🔞 propability of getting a triple is 2.04%
+const slot_symbols_gold = ['💎', '👑', '⛲', '🦞', '🏰', '💂', '🤴', '🏆']; //🏺🏆 // propability of getting a triple is 2.04%
 const CC_SYMBOL = "₵₵"; // Captain's Coin
 
 const DISCORD_INVITE = "https://discord.gg/X5KGBJGTPu";
@@ -77,7 +76,7 @@ const WELCOME_MSG = "Ahoy, Matey! ⛵ Welcome aboard "; // followed by: username
 const LURK_MSG_0 = "Thank you for boarding the ship ";
 const LURK_MSG_1 = " ⛵ Lay back and enjoy your drink <3"
 const TUTORIAL_COOLDOWN = 300; // how often the tutorial can be requested (in seconds)
-const PROP_GOLDEN = 71; // one in 71 fruits is a golden captain -> prop of getting a tripple is 0.0003%
+const PROP_GOLDEN = 6; // one in 71 fruits is a golden captain -> prop of getting a tripple is 0.0003%
 const GOLD_STATUS_DURATION = 1000 * 60 * 60 * 24 * 30; // one month in millis
 
 const CC_SOUNDS = [
@@ -118,15 +117,18 @@ initConfig();
 // Define configuration options
 const opts = {
   identity: {
-    username: "CaptainsEngineer",
-    //password: "oauth:0ubb2esitt1x1bnt1kw6n2ll16hdfo"
-    password: "oauth:dj9k6ncwzz7u0dwmy5y241ojvxd950"
+    username: "DeltaTecs",
+    //username: "CaptainsEngineer",
+    password: "oauth:0ubb2esitt1x1bnt1kw6n2ll16hdfo"
+    //password: "oauth:dj9k6ncwzz7u0dwmy5y241ojvxd950"
   },
   channels: [
-    "captaincasimir"
-    //"DeltaTecs"
+    //"captaincasimir"
+    "DeltaTecs"
   ]
 };
+
+console.log("target channel: " + opts.channels[0] + ", acc: " + opts.identity.username);
 
 // initialize cooldown map
 var command_cooldowns = [];
@@ -605,6 +607,7 @@ function ttsCommand(text, target, context, self) {
   updateUserBalance(context.username, getUserBalance(context.username) - CC_COST_TTS);
 
   say.speak(text);
+  last_tts = getTime();
 }
 
 
@@ -649,7 +652,6 @@ function slotsCommand(args, target, context, self, sluts=false) {
     let wins = [];
     let slots_out_chosen = [];
     let usr_gold_status = isGoldStatusActive(context.username);
-
 
     for (let i = 0; i < rolls; i++) { // roll
       let slots_out = getSlotOutput(context.username, sluts=sluts, goldStatus=usr_gold_status);
@@ -746,6 +748,7 @@ function slotsCommand(args, target, context, self, sluts=false) {
       setTimeout(function() {
         goldenEvent(target, context.username);
       }, delay - 2000);
+      updateUser(context.username, getUserBalance(context.username), gold=(new Date().getTime()))
     }
 
 
@@ -878,15 +881,20 @@ function configCommand(args, target, context, self) {
   // check if authorised
   if (context.username == "captaincasimir" || context.username == "deltatecs") {
 
-    if (args.length < 3) {
-      whisperBack(target, context, "invalid arguments, !config <variable> <value>");
+    if (args.length < 2) {
+      whisperBack(target, context, "invalid arguments, !config <variable> [value]");
       return;
     }
 
     if (args[1] == "tts_limit") {
 
+      if (args.length == 2) {
+        whisperBack(target, context, args[1] + " is " + config.tts_limit);
+        return;
+      }
+
       if (isNaN(args[2])) {
-        whisperBack(target, context, args[1] + " value must be a number (characters)");
+        whisperBack(target, context, args[1] + " must be a number (characters)");
         return;
       }
       config.tts_limit = parseInt(args[2], 10);
@@ -894,17 +902,27 @@ function configCommand(args, target, context, self) {
 
     } else if (args[1] == "tts_cooldown") {
     
+      if (args.length == 2) {
+        whisperBack(target, context, args[1] + " is " + config.tts_cooldown);
+        return;
+      }
+
       if (isNaN(args[2])) {
-        whisperBack(target, context, args[1] + " value must be a number (seconds)");
+        whisperBack(target, context, args[1] + " must be a number (seconds)");
         return;
       }
       config.tts_cooldown = parseInt(args[2], 10);
       saveConfig();
 
     } else if (args[1] == "lurk_reward_cooldown") {
-    
+      
+      if (args.length == 2) {
+        whisperBack(target, context, args[1] + " is " + config.lurk_reward_cooldown);
+        return;
+      }
+
       if (isNaN(args[2])) {
-        whisperBack(target, context, args[1] + " value must be a number (seconds)");
+        whisperBack(target, context, args[1] + " must be a number (seconds)");
         return;
       }
       config.lurk_reward_cooldown = parseInt(args[2], 10);
@@ -912,8 +930,13 @@ function configCommand(args, target, context, self) {
 
     } else if (args[1] == "lurk_reward_amount") {
     
+      if (args.length == 2) {
+        whisperBack(target, context, args[1] + " is " + config.lurk_reward_amount);
+        return;
+      }
+
       if (isNaN(args[2])) {
-        whisperBack(target, context, args[1] + " value must be a number (seconds)");
+        whisperBack(target, context, args[1] + " must be a number (seconds)");
         return;
       }
       config.lurk_reward_amount = parseInt(args[2], 10);
@@ -923,7 +946,7 @@ function configCommand(args, target, context, self) {
       whisperBack(target, context, "unknown varible, choose from: tts_limit, tts_cooldown, lurk_reward_cooldown, lurk_reward_amount");
       return;
     }
-
+    whisperBack(target, context, "Set " + args[1] + " to " + args[2]);
   }
 }
 
@@ -1096,7 +1119,7 @@ function purchaseItemCommand(args, target, context, self) {
 
   if (itemname == "anthem-reset") {
     whisperBack(target, context, context.username + " will no longer have a sound played as welcome.");
-    updateUser(context.username, getUserBalance(context.username), anthem=undefined);
+    updateUser(context.username, getUserBalance(context.username), anthem=null);
     return;
   }
 
@@ -1267,7 +1290,7 @@ function getUserAnthem(user) {
 function isGoldStatusActive(user) {
   if (getUserGoldStatus(user) == undefined)
     return false;
-  return getUserGoldStatus(user) + GOLD_STATUS_DURATION < (new Date().getTime());
+  return getUserGoldStatus(user) > (new Date().getTime()) - GOLD_STATUS_DURATION;
 }
 
 function getUserGoldStatus(user) {
@@ -1291,8 +1314,10 @@ function updateUser(user, balance, anthem=undefined, gold=undefined) {
   for (acc of chatters.accounts) {
     if (acc.name == user) {
       acc.balance = balance_parsed;
-      acc.anthem = anthem;
-      acc.gold = gold;
+      if (anthem != undefined)
+        acc.anthem = anthem == null ? undefined : anthem;
+      if (gold != undefined)
+        acc.gold = gold == null ? undefined : gold;
       updated = true;
       break;
     }
@@ -1369,7 +1394,7 @@ function initConfig() {
     console.log("CONFIG: tts_limit not defined. Defaulting.")
   }
 
-  if (config.tts_limit == undefined) {
+  if (config.tts_cooldown == undefined) {
     config.tts_cooldown = 60;
     console.log("CONFIG: tts_cooldown not defined. Defaulting.")
   }
