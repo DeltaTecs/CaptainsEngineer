@@ -516,6 +516,7 @@ function lurkCommand(target, context, self) {
     console.log(context.username + " eligable for lurk reward");
     updateUserBalance(context.username, getUserBalance(context.username) + config.lurk_reward_amount);
     reward_string = " (+" + config.lurk_reward_amount + CC_SYMBOL + ")"
+    lurks[context.username] = getTime();
   } else {
     console.log(context.username + " not eligable for lurk reward");
   }
