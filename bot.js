@@ -79,6 +79,14 @@ const TUTORIAL_COOLDOWN = 300; // how often the tutorial can be requested (in se
 const PROP_GOLDEN = 71; // one in 71 fruits is a golden captain -> prop of getting a tripple is 0.0003%
 const GOLD_STATUS_DURATION = 1000 * 60 * 60 * 24 * 30; // one month in millis
 
+const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seconds"},
+  {name: "tts_limit", type: 'n', default: 60, unit: "symbols"},
+  {name: "mastervolume", type: 'n', default: 80, unit: "%"},
+  {name: "volume", type: 'o', default: "[]"},
+  {name: "lurk_reward_amount", type: 'n', default: 30, unit: "coins"},
+  {name: "lurk_reward_cooldown", type: 'n', default: 60 * 60 * 1, unit: "seconds"},
+]
+
 const CC_SOUNDS = [
   {name: "gulb", price: 10, sound: SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS},
   {name: "nani", price: 20, sound: SOUND_NANI},
@@ -117,14 +125,14 @@ initConfig();
 // Define configuration options
 const opts = {
   identity: {
-    //username: "DeltaTecs",
-    username: "CaptainsEngineer",
-    //password: "oauth:0ubb2esitt1x1bnt1kw6n2ll16hdfo"
-    password: "oauth:dj9k6ncwzz7u0dwmy5y241ojvxd950"
+    username: "DeltaTecs",
+    //username: "CaptainsEngineer",
+    password: "oauth:0ubb2esitt1x1bnt1kw6n2ll16hdfo"
+    //password: "oauth:dj9k6ncwzz7u0dwmy5y241ojvxd950"
   },
   channels: [
-    "captaincasimir"
-    //"DeltaTecs"
+    //"captaincasimir"
+    "DeltaTecs"
   ]
 };
 
@@ -825,7 +833,7 @@ function goldenEvent(target, username) {
     delay += rain_delay;
   }
 
-  scheduleDelayedMessage(target, delay, "Congratulations " + username + "!! You achieved the impossible! You will greeted with a special anthem from now on!");
+  scheduleDelayedMessage(target, delay, "Congratulations " + username + "!! You achieved the impossible! You have gold status for 30 days and will greeted with a special anthem from now on!");
   scheduleDelayedMessage(target, delay + 1000, GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE);
 
   updateUser(username, getUserBalance(username), anthem=SOUND_FANFARE, gold=(new Date().getTime()));
@@ -887,67 +895,38 @@ function configCommand(args, target, context, self) {
       return;
     }
 
-    if (args[1] == "tts_limit") {
+    for (let setting of CONFIGURABLE) {
+      if (args[1] == setting.name) {
 
-      if (args.length == 2) {
-        whisperBack(target, context, args[1] + " is " + config.tts_limit);
+        if (args.length == 2) {
+          whisperBack(target, context, args[1] + " is " + eval("config." + setting.name));
+          return;
+        }
+
+        if (setting.type == 'o') { // volume for example is an array of volume entries
+          whisperBack(target, context, args[1] + " is set/used by a different command");
+          return;
+        }
+
+        if (setting.type == 'n' && isNaN(args[2])) {
+          whisperBack(target, context, args[1] + " has to be a number (" + setting.unit + ")");
+          return;
+        }
+
+
+        eval("config." + setting.name + " = args[2];");
+        console.log("set " + setting.name + " to " + args[2]);
+        whisperBack(target, context, "set " + setting.name + " to " + args[2]);
+        saveConfig();
         return;
       }
-
-      if (isNaN(args[2])) {
-        whisperBack(target, context, args[1] + " must be a number (characters)");
-        return;
-      }
-      config.tts_limit = parseInt(args[2], 10);
-      saveConfig();
-
-    } else if (args[1] == "tts_cooldown") {
-    
-      if (args.length == 2) {
-        whisperBack(target, context, args[1] + " is " + config.tts_cooldown);
-        return;
-      }
-
-      if (isNaN(args[2])) {
-        whisperBack(target, context, args[1] + " must be a number (seconds)");
-        return;
-      }
-      config.tts_cooldown = parseInt(args[2], 10);
-      saveConfig();
-
-    } else if (args[1] == "lurk_reward_cooldown") {
-      
-      if (args.length == 2) {
-        whisperBack(target, context, args[1] + " is " + config.lurk_reward_cooldown);
-        return;
-      }
-
-      if (isNaN(args[2])) {
-        whisperBack(target, context, args[1] + " must be a number (seconds)");
-        return;
-      }
-      config.lurk_reward_cooldown = parseInt(args[2], 10);
-      saveConfig();
-
-    } else if (args[1] == "lurk_reward_amount") {
-    
-      if (args.length == 2) {
-        whisperBack(target, context, args[1] + " is " + config.lurk_reward_amount);
-        return;
-      }
-
-      if (isNaN(args[2])) {
-        whisperBack(target, context, args[1] + " must be a number (seconds)");
-        return;
-      }
-      config.lurk_reward_amount = parseInt(args[2], 10);
-      saveConfig();
-
-    } else {
-      whisperBack(target, context, "unknown varible, choose from: tts_limit, tts_cooldown, lurk_reward_cooldown, lurk_reward_amount");
-      return;
     }
-    whisperBack(target, context, "Set " + args[1] + " to " + args[2]);
+
+    let all_settings = "";
+    for (let setting of CONFIGURABLE) {
+      all_setting += setting.name + ", ";
+    }
+    whisperBack(target, context, args[1] + " not found. Available: " + all_settings);
   }
 }
 
@@ -1380,34 +1359,11 @@ function initConfig() {
   loadConfig();
 
   // checks if all values present, if not sets defaults
-  if (config.mastervolume == undefined) {
-    config.mastervolume = 80;
-    console.log("CONFIG: mastervolume not defined. Defaulting.")
-  }
-
-  if (config.volume == undefined) {
-    config.volume = [];
-    console.log("CONFIG: volume not defined. Defaulting.")
-  }
-
-  if (config.tts_limit == undefined) {
-    config.tts_limit = 60;
-    console.log("CONFIG: tts_limit not defined. Defaulting.")
-  }
-
-  if (config.tts_cooldown == undefined) {
-    config.tts_cooldown = 60;
-    console.log("CONFIG: tts_cooldown not defined. Defaulting.")
-  }
-
-  if (config.lurk_reward_amount == undefined) {
-    config.lurk_reward_amount = 30;
-    console.log("CONFIG: lurk_reward_amount not defined. Defaulting.")
-  }
-  
-  if (config.lurk_reward_cooldown == undefined) {
-    config.lurk_reward_cooldown = 60 * 60 * 1;
-    console.log("CONFIG: lurk_reward_cooldown not defined. Defaulting.")
+  for (let setting of CONFIGURABLE) {
+    if (eval("config." + setting.name) == undefined) {
+      console.log("config: " + setting.name + " not defined, defaulting...");
+      eval("config." + setting.name + " = " + setting.default + ";");
+    }
   }
 
   saveConfig();
