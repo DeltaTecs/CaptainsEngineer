@@ -4,4 +4,5 @@ md temp
 xcopy challenges.json temp /q /r /y
 xcopy config.json temp /q /r /y
 xcopy chatters.json temp /q /r /y
+xcopy credentials.json temp /q /r /y
 cleanup.bat

@@ -6,21 +6,11 @@ const fs = require('fs');
 const { exec } = require('child_process');
 const say = require('say');
 
-const slot_symbols = ['🍑', '🍒', '🍍', '🍇', '🍉', '🍐', '🍊', '🥥']; // propability of getting a triple is 1.56%
-const slut_symbols = ['💦', '🧡', '💅', '🍆', '😩', '👅', '💋', '🔞']; // propability of getting a triple is 1.56%
-const slot_symbols_gold = ['💎', '👑', '⛲', '🦞', '🏰', '💂', '🤴', '🏆']; // propability of getting a triple is 1.56%
-// average return per roll is 230*7/(8^3) + 1000*(1/8^3) = 5,0976  ->  win +20 per 1000
-const CC_SYMBOL = "₵₵"; // Captain's Coin
-
 const DISCORD_INVITE = "https://discord.gg/X5KGBJGTPu";
 const REDDIT_LINK = "https://www.reddit.com/r/captaincasimir/";
 
 const FILENAME_DEATH_COUNTER = "deathcounter.txt"
-const DEATH_COUNTER_PREFIX = "DEATHS:";
 const FILENAME_BRAUSE_COUNTER = "brausecounter.txt"
-const BRAUSE_COUNTER_PREFIX = "BRAUSE:";
-
-const GOLDEN_EMOTE = "captai1955Golden"
 
 const SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS = "ctn_uuh.mp3";
 const SOUND_ENORM = "enorm.mp3";
@@ -64,28 +54,30 @@ const REWARD_ID_AIRHORN = "42eb57c3-2b1f-4700-a35a-2713bd9ed519";
 const REWARD_ID_BADUMTS = "a8f76e26-aa73-494c-a75b-49ac5d6b6783";
 
 
-const INITIAL_CC_BALANCE = 50;
-const CC_COST_SLOTS = 5;
-const CC_COST_SLUTS = 8;
-const CC_SLOTS_MAX_INPUT = 100;
-const CC_COST_TTS = 60;
-const CC_RETURN_SLOTS_BASIC = 200;
-const CC_RETURN_SLOTS_PEACH = 1000;
-const CC_RETURN_SLOTS_GOLDEN = 10000;
-const CC_PER_CHAT = 1;
-const WELCOME_MSG = "Ahoy, Matey! ⛵ Welcome aboard "; // followed by: username
-const LURK_MSG_0 = "Thank you for boarding the ship ";
-const LURK_MSG_1 = " ⛵ Lay back and enjoy your drink <3"
-const TUTORIAL_COOLDOWN = 300; // how often the tutorial can be requested (in seconds)
-const PROP_GOLDEN = 71; // one in 71 fruits is a golden captain -> prop of getting a tripple is 0.0003%
-const GOLD_STATUS_DURATION = 1000 * 60 * 60 * 24 * 30; // one month in millis
-
 const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seconds"},
   {name: "tts_limit", type: 'n', default: 60, unit: "symbols"},
+  {name: "tutorial_cooldown", type: 'n', default: 300, unit: "seconds"},
   {name: "mastervolume", type: 'n', default: 80, unit: "%"},
   {name: "volume", type: 'o', default: "[]"},
   {name: "lurk_reward_amount", type: 'n', default: 30, unit: "coins"},
   {name: "lurk_reward_cooldown", type: 'n', default: 60 * 60 * 1, unit: "seconds"},
+  {name: "cc_initial", type: 'n', default: 50, unit: "coins"},
+  {name: "cc_cost_slots", type: 'n', default: 5, unit: "coins"},
+  {name: "cc_cost_slotsx", type: 'n', default: 8, unit: "coins"},
+  {name: "cc_slots_max_in", type: 'n', default: 100, unit: "coins"},
+  {name: "cc_cost_tts", type: 'n', default: 60, unit: "coins"},
+  {name: "cc_return_slots_basic", type: 'n', default: 230, unit: "coins"},
+  {name: "cc_return_slots_peach", type: 'n', default: 1000, unit: "coins"},
+  {name: "cc_return_slots_golden", type: 'n', default: 10000, unit: "coins"},
+  {name: "cc_per_chat", type: 'n', default: 1, unit: "coins"},
+  {name: "msg_welcome", type: 's', default: encodeURIComponent("Ahoy, Matey! ⛵ Welcome aboard ")} , // followed by: username
+  {name: "msg_lurk_0", type: 's', default: encodeURIComponent("Thank you for boarding the ship ")},
+  {name: "msg_lurk_1", type: 's', default: encodeURIComponent("⛵ Lay back and enjoy your drink <3")},
+  {name: "death_cnt_prefix", type: 's', default: encodeURIComponent("DEATHS: ")},
+  {name: "bause_cnt_prefix", type: 's', default: encodeURIComponent("BRAUSE: ")},
+  {name: "golden_emote", type: 's', default: encodeURIComponent("captai1955Golden")},
+  {name: "rand_golden", type: 'n', default: 71, unit: "(1 in x)"}, // one in 71 fruits is a golden captain -> prop of getting a tripple is 0.0003%
+  {name: "gold_status_duration", type: 'n', default: 1000 * 60 * 60 * 24 * 30, unit: "milliseconds"} // gold status gives golden slots
 ]
 
 const CC_SOUNDS = [
@@ -115,6 +107,12 @@ const CC_ANTHEMS = [
   {name: "anthem-skrillex", price: 1000, sound: SOUND_SKRILLEX}
 ]
 
+const slot_symbols = ['🍑', '🍒', '🍍', '🍇', '🍉', '🍐', '🍊', '🥥']; // propability of getting a triple is 1.56%
+const slut_symbols = ['💦', '🧡', '💅', '🍆', '😩', '👅', '💋', '🔞']; // propability of getting a triple is 1.56%
+const slot_symbols_gold = ['💎', '👑', '⛲', '🦞', '🏰', '💂', '🤴', '🏆']; // propability of getting a triple is 1.56%
+// average return per roll is 230*7/(8^3) + 1000*(1/8^3) = 5,0976  ->  win +20 per 1000
+const CC_SYMBOL = "₵₵"; // Captain's Coin
+
 const SYMBOL_TM = "™";
 
 const GLOBAL_COMMAND_COOLDOWN = 3; // seconds
@@ -126,10 +124,10 @@ initConfig();
 // Define configuration options
 const opts = {
   identity: {
-    username: "DeltaTecs",
-    //username: "CaptainsEngineer",
-    password: "oauth:0ubb2esitt1x1bnt1kw6n2ll16hdfo"
-    //password: "oauth:dj9k6ncwzz7u0dwmy5y241ojvxd950"
+    //username: "DeltaTecs",
+    username: "CaptainsEngineer",
+    //password: "oauth:0ubb2esitt1x1bnt1kw6n2ll16hdfo"
+    password: "oauth:dj9k6ncwzz7u0dwmy5y241ojvxd950"
   },
   channels: [
     //"captaincasimir"
@@ -148,7 +146,7 @@ var lurks = [];
 var last_tts = getTime() - config.tts_cooldown;
 
 // last tutorial display
-var last_tutorial_print = getTime() - TUTORIAL_COOLDOWN;
+var last_tutorial_print = getTime() - config.tutorial_coldown;
 
 // no sounds mode
 var silent_mode = false;
@@ -409,7 +407,7 @@ function onCommand(target, context, commandName, self) {
 
     if (commandName.split(" ").length == 1) {
       // too few arguments
-      whisperBack(target, context, "invalid usage, !purchase <list | itemname>");
+      whisperBackAndDelete(target, context, "invalid usage, !purchase <list | itemname>");
       return;
 
     } else if (commandName.split(" ")[1] == "list") {
@@ -440,8 +438,8 @@ function onCommand(target, context, commandName, self) {
 function tutorialCommand(target, context, self) {
 
   // check for cooldown so it can't be spammed
-  if (getTime() - last_tutorial_print < TUTORIAL_COOLDOWN) {
-    client.say(target, " 🧭Tutorial on cooldown, please wait " + (TUTORIAL_COOLDOWN - (getTime() - last_tutorial_print)) + " seconds");
+  if (getTime() - last_tutorial_print < config.tutorial_coldown) {
+    client.say(target, " 🧭Tutorial on cooldown, please wait " + (config.tutorial_coldown - (getTime() - last_tutorial_print)) + " seconds");
     return;
   } else
     last_tutorial_print = getTime();
@@ -452,7 +450,7 @@ function tutorialCommand(target, context, self) {
   client.say(target, tutorial);
   tutorial = "💰 Captain's Coin (" + CC_SYMBOL + "):";
   client.say(target, tutorial);
-  tutorial = "- earn " + CC_PER_CHAT + " " + CC_SYMBOL + " per chat message";
+  tutorial = "- earn " + config.cc_per_chat + " " + CC_SYMBOL + " per chat message";
   client.say(target, tutorial);
   tutorial = "- spend " + CC_SYMBOL + " on sounds 🔊";
   client.say(target, tutorial);
@@ -530,7 +528,7 @@ function lurkCommand(target, context, self) {
     console.log(context.username + " not eligable for lurk reward");
   }
 
-  client.say(target, LURK_MSG_0 + context.username + LURK_MSG_1 + reward_string);
+  client.say(target, decodeURIComponent(config.msg_lurk_0) + context.username + decodeURIComponent(config.msg_lurk_1) + reward_string);
 
 }
 
@@ -609,12 +607,12 @@ function ttsCommand(text, target, context, self) {
     return;
   }
 
-  if (getUserBalance(context.username) < CC_COST_TTS) {
-    whisperBack(target, context, "You are broke. Text-To-Speech costs " + CC_COST_TTS + CC_SYMBOL + "! Chat more.");
+  if (getUserBalance(context.username) < config.cc_cost_tts) {
+    whisperBack(target, context, "You are broke. Text-To-Speech costs " + config.cc_cost_tts + CC_SYMBOL + "! Chat more.");
     return;
   }
 
-  updateUserBalance(context.username, getUserBalance(context.username) - CC_COST_TTS);
+  updateUserBalance(context.username, getUserBalance(context.username) - config.cc_cost_tts);
 
   say.speak(text);
   last_tts = getTime();
@@ -630,7 +628,7 @@ function slotsCommand(args, target, context, self, sluts=false) {
 
     let amount = 0;
     const balance = getUserBalance(context.username);
-    const roll_cost = sluts ? CC_COST_SLUTS : CC_COST_SLOTS;
+    const roll_cost = sluts ? config.cc_cost_slotsx : config.cc_cost_slots;
 
     if (args.length == 1) {
       amount = roll_cost;
@@ -653,11 +651,12 @@ function slotsCommand(args, target, context, self, sluts=false) {
       return;
     }
 
-    if (amount > CC_SLOTS_MAX_INPUT && context.username != "captaincasimir") {
-      whisperBack(target, context, "Slot max is " + CC_SLOTS_MAX_INPUT + CC_SYMBOL);
+    if (amount > config.cc_slots_max_in && context.username != "captaincasimir") {
+      whisperBack(target, context, "Slot max is " + config.cc_slots_max_in + CC_SYMBOL);
       return;
     }
 
+    const golden_emote = decodeURIComponent(config.golden_emote);
     let rolls = amount / roll_cost;
     let wins = [];
     let slots_out_chosen = [];
@@ -687,7 +686,7 @@ function slotsCommand(args, target, context, self, sluts=false) {
     if (total_win == 0) {
       // try to pick slots out with golden emote if possible
       for (let win of wins) {
-        let count = (win.symbols[0] == " " + GOLDEN_EMOTE + " " ? 1 : 0) + (win.symbols[1] == " " + GOLDEN_EMOTE + " " ? 1 : 0) + (win.symbols[2] == " " + GOLDEN_EMOTE + " " ? 1 : 0);
+        let count = (win.symbols[0] == " " + golden_emote + " " ? 1 : 0) + (win.symbols[1] == " " + golden_emote + " " ? 1 : 0) + (win.symbols[2] == " " + golden_emote + " " ? 1 : 0);
         if (count > golden_count) {
           golden_count = count;
           slots_out_chosen = win.symbols;
@@ -762,7 +761,7 @@ function slotsCommand(args, target, context, self, sluts=false) {
     }
 
 
-    if (total_win > CC_RETURN_SLOTS_BASIC) {
+    if (total_win > config.cc_return_slots_basic) {
       // print bill only if atleast two basic wins or a super win
       setTimeout(function() {
         client.say(target, "-- " + balance + CC_SYMBOL + " >> " + (balance - amount + total_win) + CC_SYMBOL + "", user=context.username);
@@ -774,9 +773,11 @@ function getSlotOutput(username, sluts=false, goldstatus=false) {
 
   symbols = [];
 
+  const golden_emote = decodeURIComponent(config.golden_emote);
+
   for (let i = 0; i < 3; i++) {
-    if (getRandomInt(PROP_GOLDEN) == 0) { // force golden
-      symbols.push(" " + GOLDEN_EMOTE + " ");
+    if (getRandomInt(config.rand_golden) == 0) { // force golden
+      symbols.push(" " + golden_emote + " ");
     } else if (sluts) { // !sluts / !slotsx
       symbols.push(slut_symbols[getRandomInt(slut_symbols.length)]);
     } else if (goldstatus) { // !slots but after golden win
@@ -793,20 +794,20 @@ function getSlotOutput(username, sluts=false, goldstatus=false) {
 
   if (symbols[0] == symbols[1] && symbols[1] == symbols[2]) { // some win present
 
-    if (symbols[0] == " " + GOLDEN_EMOTE + " ") { // golden win
+    if (symbols[0] == " " + golden_emote + " ") { // golden win
       win_rank = 3;
-      win_return = CC_RETURN_SLOTS_GOLDEN;
-      win_message = username + " FOUND THE SECRET GOLDEN CAPTAIN'S TREASURE!!! " + GOLDEN_EMOTE + " 💰💰💰 " + GOLDEN_EMOTE + " 💰💰💰 " + "  +" + CC_RETURN_SLOTS_GOLDEN + CC_SYMBOL;
+      win_return = config.cc_return_slots_golden;
+      win_message = username + " FOUND THE SECRET GOLDEN CAPTAIN'S TREASURE!!! " + golden_emote + " 💰💰💰 " + golden_emote + " 💰💰💰 " + "  +" + config.cc_return_slots_golden + CC_SYMBOL;
       win_sound = SOUND_GOLDEN_JACKPOT;
     } else if (symbols[0] == '🍑' || symbols[0] == '💦' || symbols[0] == '💎') { // super win
       win_rank = 2;
-      win_return = CC_RETURN_SLOTS_PEACH;
-      win_message = GOLDEN_EMOTE + " 💰💰💰 SUPER WIN 💰💰💰 " + GOLDEN_EMOTE + " " + username + " WON " + CC_RETURN_SLOTS_PEACH + CC_SYMBOL;
+      win_return = config.cc_return_slots_peach;
+      win_message = golden_emote + " 💰💰💰 SUPER WIN 💰💰💰 " + golden_emote + " " + username + " WON " + config.cc_return_slots_peach + CC_SYMBOL;
       win_sound = SOUND_SUPER_JACKPOT;
     } else { // basic win
       win_rank = 1;
-      win_return = CC_RETURN_SLOTS_BASIC;
-      win_message = GOLDEN_EMOTE + " " + username + " WON " + CC_RETURN_SLOTS_BASIC + CC_SYMBOL + " 💰";
+      win_return = config.cc_return_slots_basic;
+      win_message = golden_emote + " " + username + " WON " + config.cc_return_slots_basic + CC_SYMBOL + " 💰";
       win_sound = SOUND_JACKPOT;
     }
   }
@@ -834,8 +835,10 @@ function goldenEvent(target, username) {
     delay += rain_delay;
   }
 
+  const ge = decodeURIComponent(config.golden_emote);
+
   scheduleDelayedMessage(target, delay, "Congratulations " + username + "!! You achieved the impossible! You have gold status for 30 days and will greeted with a special anthem from now on!");
-  scheduleDelayedMessage(target, delay + 1000, GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE + " " + GOLDEN_EMOTE);
+  scheduleDelayedMessage(target, delay + 1000, ge + " " + ge + " " + ge + " " + ge + " " + ge + " " + ge + " " + ge + " " + ge + " " + ge + " " + ge + " " + ge + " " + ge + " " + ge + " " + ge + " " + ge + " " + ge);
 
   updateUser(username, getUserBalance(username), anthem=SOUND_FANFARE, gold=(new Date().getTime()));
 }
@@ -905,17 +908,17 @@ function configCommand(args, target, context, self) {
         }
 
         if (setting.type == 'o') { // volume for example is an array of volume entries
-          whisperBack(target, context, args[1] + " is set/used by a different command");
+          whisperBackAndDelete(target, context, args[1] + " is set/used by a different command");
           return;
         }
 
         if (setting.type == 'n' && isNaN(args[2])) {
-          whisperBack(target, context, args[1] + " has to be a number (" + setting.unit + ")");
+          whisperBackAndDelete(target, context, args[1] + " has to be a number (" + setting.unit + ")");
           return;
         }
 
-
-        eval("config." + setting.name + " = args[2];");
+        let val = setting.type == 's' ? encodeURIComponent(args[2]) : args[2];
+        eval("config." + setting.name + " = val;");
         console.log("set " + setting.name + " to " + args[2]);
         whisperBack(target, context, "set " + setting.name + " to " + args[2]);
         saveConfig();
@@ -1089,7 +1092,7 @@ function purchaseListCommand(target, context, self) {
   list += "anthem-reset (free)";
 
   whisperBack(target, context, list);
-  whisperBack(target, context, "for Text-To-Speech (" + CC_COST_TTS + CC_SYMBOL + "): !tts <text>");
+  whisperBack(target, context, "for Text-To-Speech (" + config.cc_cost_tts + CC_SYMBOL + "): !tts <text>");
 }
 
 function purchaseItemCommand(args, target, context, self) {
@@ -1176,8 +1179,8 @@ function handleFirstChatter(name, target) {
     }
 
 
-    updateUser(name, INITIAL_CC_BALANCE);
-    client.say(target, WELCOME_MSG + name + "!");
+    updateUser(name, config.cc_initial);
+    client.say(target, decodeURIComponent(config.msg_welcome) + name + "!");
   }
 }
 
@@ -1197,14 +1200,14 @@ function handleAnthem(name, target) {
 function setDeathCount(count) {
 
   deaths = count;
-  rawdata = DEATH_COUNTER_PREFIX + " " + count
+  rawdata = decodeURIComponent(config.death_cnt_prefix) + " " + count
   fs.writeFileSync(FILENAME_DEATH_COUNTER, rawdata, {flag:'w'});
 }
 
 function setBrauseCount(count) {
 
   brause = count;
-  rawdata = BRAUSE_COUNTER_PREFIX + " " + count
+  rawdata = decodeURIComponent(config.brause_cnt_prefix) + " " + count
   fs.writeFileSync(FILENAME_BRAUSE_COUNTER, rawdata, {flag:'w'});
 }
 
@@ -1246,7 +1249,7 @@ function isUserKnown(user) {
 
 
 function handleIncrementBalance(user) {
-  updateUserBalance(user, getUserBalance(user) + CC_PER_CHAT);
+  updateUserBalance(user, getUserBalance(user) + config.cc_per_chat);
 }
 
 
@@ -1271,7 +1274,7 @@ function getUserAnthem(user) {
 function isGoldStatusActive(user) {
   if (getUserGoldStatus(user) == undefined)
     return false;
-  return getUserGoldStatus(user) > (new Date().getTime()) - GOLD_STATUS_DURATION;
+  return getUserGoldStatus(user) > (new Date().getTime()) - config.gold_status_duration;
 }
 
 function getUserGoldStatus(user) {
@@ -1363,7 +1366,7 @@ function initConfig() {
   for (let setting of CONFIGURABLE) {
     if (eval("config." + setting.name) == undefined) {
       console.log("config: " + setting.name + " not defined, defaulting...");
-      eval("config." + setting.name + " = " + setting.default + ";");
+      eval("config." + setting.name + " = '" + setting.default + "';");
     }
   }
 
@@ -1378,9 +1381,13 @@ function createIfUnexistent(file, defaultVal) {
 }
 
 function whisperBack(target, context, message) {
+  client.whisper(context.username, message);
+}
+
+function whisperBackAndDelete(target, context, message) {
   client.say(target, message);
-  //client.say(target, "/w " + context.username + " " + message);
-  //console.log("/w " + context.username + " " + message);
+  //whisperBack(target, context, message);
+  client.deletemessage(target, context.messageUUID);
 }
 
 // returns time in seconds since process start
