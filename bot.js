@@ -6,9 +6,10 @@ const fs = require('fs');
 const { exec } = require('child_process');
 const say = require('say');
 
-const slot_symbols = ['🍑', '🍒', '🍍', '🍇', '🍉', '🍐', '🍊', '🥥']; // propability of getting a triple is 2.04%
-const slut_symbols = ['💦', '🧡', '💅', '🍆', '😩', '👅', '💋', '🔞']; //🔞 propability of getting a triple is 2.04%
-const slot_symbols_gold = ['💎', '👑', '⛲', '🦞', '🏰', '💂', '🤴', '🏆']; //🏺🏆 // propability of getting a triple is 2.04%
+const slot_symbols = ['🍑', '🍒', '🍍', '🍇', '🍉', '🍐', '🍊', '🥥']; // propability of getting a triple is 1.56%
+const slut_symbols = ['💦', '🧡', '💅', '🍆', '😩', '👅', '💋', '🔞']; // propability of getting a triple is 1.56%
+const slot_symbols_gold = ['💎', '👑', '⛲', '🦞', '🏰', '💂', '🤴', '🏆']; // propability of getting a triple is 1.56%
+// average return per roll is 230*7/(8^3) + 1000*(1/8^3) = 5,0976  ->  win +20 per 1000
 const CC_SYMBOL = "₵₵"; // Captain's Coin
 
 const DISCORD_INVITE = "https://discord.gg/X5KGBJGTPu";
