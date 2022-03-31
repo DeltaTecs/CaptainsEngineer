@@ -134,8 +134,8 @@ const opts = {
   identity: {
     //username: "DeltaTecs",
     username: "CaptainsEngineer",
-    //password: "oauth:dj9k6ncwzz7u0dwmy5y241ojvxd950"
-    password: "oauth:0ubb2esitt1x1bnt1kw6n2ll16hdfo"
+    //password: "oauth:0ubb2esitt1x1bnt1kw6n2ll16hdfo"
+    password: "oauth:y4m3kppvn3ekwhmp9zrjlelstnx2n1"
   },
   channels: [
     "captaincasimir"
