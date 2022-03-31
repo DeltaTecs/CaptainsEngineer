@@ -89,30 +89,30 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
 ]
 
 const CC_SOUNDS = [
-  {name: "gulb", price: 10, sound: SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS},
-  {name: "nani", price: 20, sound: SOUND_NANI},
-  {name: "magic", price: 20, sound: SOUND_MAGIC},
-  {name: "scream", price: 20, sound: SOUND_WILHELM_SCREAM},
-  {name: "wasted", price: 30, sound: SOUND_WASTED},
-  {name: "airhorn", price: 40, sound: SOUND_AIRHORN},
-  {name: "fail", price: 40, sound: SOUND_FAIL},
-  {name: "inception", price: 60, sound: SOUND_INCEPTION},
-  {name: "to-be-continued", price: 60, sound: SOUND_JOJO_TO_BE_CONTINUED},
-  {name: "earrape", price: 1000, sound: SOUND_THOMAS}
+  {name: "gulb", price: 1, sound: SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS},
+  {name: "nani", price: 2, sound: SOUND_NANI},
+  {name: "magic", price: 2, sound: SOUND_MAGIC},
+  {name: "scream", price: 2, sound: SOUND_WILHELM_SCREAM},
+  {name: "wasted", price: 3, sound: SOUND_WASTED},
+  {name: "airhorn", price: 4, sound: SOUND_AIRHORN},
+  {name: "fail", price: 4, sound: SOUND_FAIL},
+  {name: "inception", price: 6, sound: SOUND_INCEPTION},
+  {name: "to-be-continued", price: 6, sound: SOUND_JOJO_TO_BE_CONTINUED},
+  {name: "earrape", price: 100, sound: SOUND_THOMAS}
 ]
 
 const CC_ANTHEMS = [
-  {name: "anthem-gulb", price: 100, sound: SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS},
-  {name: "anthem-magic", price: 200, sound: SOUND_MAGIC},
-  {name: "anthem-scream", price: 200, sound: SOUND_WILHELM_SCREAM},
-  {name: "anthem-airhorn", price: 300, sound: SOUND_AIRHORN},
-  {name: "anthem-inception", price: 400, sound: SOUND_INCEPTION},
-  {name: "anthem-jojo-tbc", price: 600, sound: SOUND_JOJO_TO_BE_CONTINUED},
-  {name: "anthem-hes-a-pirate", price: 800, sound: SOUND_HES_A_PIRATE},
-  {name: "anthem-brawl", price: 800, sound: SOUND_BRAWL},
-  {name: "anthem-jojo-ost", price: 800, sound: SOUND_JOJO_GOLDEN_WING},
-  {name: "anthem-jojo-stroheim", price: 800, sound: SOUND_JOJO_STROHEIM},
-  {name: "anthem-skrillex", price: 1000, sound: SOUND_SKRILLEX}
+  {name: "anthem-gulb", price: 1, sound: SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS},
+  {name: "anthem-magic", price: 2, sound: SOUND_MAGIC},
+  {name: "anthem-scream", price: 2, sound: SOUND_WILHELM_SCREAM},
+  {name: "anthem-airhorn", price: 3, sound: SOUND_AIRHORN},
+  {name: "anthem-inception", price: 4, sound: SOUND_INCEPTION},
+  {name: "anthem-jojo-tbc", price: 6, sound: SOUND_JOJO_TO_BE_CONTINUED},
+  {name: "anthem-hes-a-pirate", price: 8, sound: SOUND_HES_A_PIRATE},
+  {name: "anthem-brawl", price: 8, sound: SOUND_BRAWL},
+  {name: "anthem-jojo-ost", price: 8, sound: SOUND_JOJO_GOLDEN_WING},
+  {name: "anthem-jojo-stroheim", price: 8, sound: SOUND_JOJO_STROHEIM},
+  {name: "anthem-skrillex", price: 10, sound: SOUND_SKRILLEX}
 ]
 
 const slot_symbols = ['🍑', '🍒', '🍍', '🍇', '🍉', '🍐', '🍊', '🥥']; // propability of getting a triple is 1.56%
@@ -130,18 +130,20 @@ const ENABLE_COMMAND_COOLDOWN_MESSAGE = false; // disabled because whisper dont 
 initConfig();
 
 // Define configuration options
-const opts = {
+var opts = {
   identity: {
     //username: "DeltaTecs",
     username: "CaptainsEngineer",
     //password: "oauth:0ubb2esitt1x1bnt1kw6n2ll16hdfo"
-    password: "oauth:y4m3kppvn3ekwhmp9zrjlelstnx2n1"
+    //password: "oauth:y4m3kppvn3ekwhmp9zrjlelstnx2n1"
   },
   channels: [
     "captaincasimir"
     //"DeltaTecs"
   ]
 };
+
+loadCredentials();
 
 console.log("target channel: " + opts.channels[0] + ", acc: " + opts.identity.username);
 
@@ -1086,7 +1088,7 @@ function purchaseListCommand(target, context, self) {
   let list = "sounds: ";
 
   for (let sound of CC_SOUNDS) {
-    list += sound.name + " (" + sound.price + CC_SYMBOL + "), ";
+    list += sound.name + " (" + (sound.price * sccfac()) + CC_SYMBOL + "), ";
   }
 
   list = list.substring(0, list.length - 2);
@@ -1094,7 +1096,7 @@ function purchaseListCommand(target, context, self) {
   list += "; anthems: ";
 
   for (let sound of CC_ANTHEMS) {
-    list += sound.name + " (" + sound.price + CC_SYMBOL + "), ";
+    list += sound.name + " (" + (sound.price * accfac()) + CC_SYMBOL + "), ";
   }
 
   list += "anthem-reset (free)";
@@ -1122,13 +1124,15 @@ function purchaseItemCommand(args, target, context, self) {
       // check funding
       let userbalance = getUserBalance(context.username);
 
-      if (userbalance < sound.price) {
-        whisperBack(target, context, "You have not enough Captain's Coin (" + userbalance + "/" + sound.price + CC_SYMBOL + "), earn coin by chatting.");
+      const price = sound.price * sccfac();
+
+      if (userbalance < price) {
+        whisperBack(target, context, "You have not enough Captain's Coin (" + userbalance + "/" + price + CC_SYMBOL + "), earn coin by chatting.");
         return;
       } else {
         // purchase successfull
-        client.say(target, context.username + " bought " + sound.name + ". -" + sound.price + CC_SYMBOL);
-        updateUserBalance(context.username, userbalance - sound.price);
+        client.say(target, context.username + " bought " + sound.name + ". -" + price + CC_SYMBOL);
+        updateUserBalance(context.username, userbalance - price);
         playSound(sound.sound);
         return;
       }
@@ -1143,13 +1147,15 @@ function purchaseItemCommand(args, target, context, self) {
       // check funding
       let userbalance = getUserBalance(context.username);
 
-      if (userbalance < sound.price) {
-        whisperBack(target, context, "You have not enough Captain's Coin (" + userbalance + "/" + sound.price + CC_SYMBOL + "), earn coin by chatting.");
+      const price = sound.price * accfac();
+
+      if (userbalance < price) {
+        whisperBack(target, context, "You have not enough Captain's Coin (" + userbalance + "/" + price + CC_SYMBOL + "), earn coin by chatting.");
         return;
       } else {
         // purchase successfull
-        client.say(target, context.username + " will now be greeted with " + sound.name + ". -" + sound.price + CC_SYMBOL);
-        updateUser(context.username, userbalance - sound.price, anthem=sound.sound);
+        client.say(target, context.username + " will now be greeted with " + sound.name + ". -" + price + CC_SYMBOL);
+        updateUser(context.username, userbalance - price, anthem=sound.sound);
         return;
       }
     }
@@ -1365,6 +1371,12 @@ function loadConfig() {
   createIfUnexistent('config.json', "{}");
   let rawdata = fs.readFileSync('config.json');
   config = JSON.parse(rawdata);
+}
+
+function loadCredentials() {
+  createIfUnexistent('credentials.json', JSON.stringify({identity: {username: "CaptainsEngineer", password: "oauth:y4m3kppvn3ekwhmp9zrjlelstnx2n1"}, channels: ["captaincasimir"]}));
+  let rawdata = fs.readFileSync('credentials.json');
+  opts = JSON.parse(rawdata);
 }
 
 function saveConfig() {
