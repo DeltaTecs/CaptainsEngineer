@@ -9,6 +9,14 @@ const say = require('say');
 const DISCORD_INVITE = "https://discord.gg/X5KGBJGTPu";
 const REDDIT_LINK = "https://www.reddit.com/r/captaincasimir/";
 
+// full access, unlimited slots
+const PRIV_STREAMER = "captaincasimir";
+// administrative access
+const PRIV_SUPPORT = "deltatecs";
+// allowed to update counters
+const PRIV_MOD_0 = "xx_berenike_xx";
+const PRIV_MOD_1 = "stefan_2202";
+
 const FILENAME_DEATH_COUNTER = "deathcounter.txt"
 const FILENAME_BRAUSE_COUNTER = "brausecounter.txt"
 
@@ -75,7 +83,9 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "bause_cnt_prefix", type: 's', default: encodeURIComponent("BRAUSE: ")},
   {name: "golden_emote", type: 's', default: encodeURIComponent("captai1955Golden")},
   {name: "rand_golden", type: 'n', default: 71, unit: "(1 in x)"}, // one in 71 fruits is a golden captain -> prop of getting a tripple is 0.0003%
-  {name: "gold_status_duration", type: 'n', default: 1000 * 60 * 60 * 24 * 30, unit: "milliseconds"} // gold status gives golden slots
+  {name: "gold_status_duration", type: 'n', default: 1000 * 60 * 60 * 24 * 30, unit: "milliseconds"}, // gold status gives golden slots
+  {name: "cc_sound_cost_multiplier", type: 'n', default: 10, unit: "factor"},
+  {name: "cc_anthem_cost_multiplier", type: 'n', default: 100, unit: "factor"}
 ]
 
 const CC_SOUNDS = [
@@ -283,7 +293,7 @@ function onCommand(target, context, commandName, self) {
 
 
   // check if user on cooldown
-  if (command_cooldowns[context.username] != undefined && context.username != "deltatecs" && context.username != "captaincasimir" && ENABLE_COMMAND_COOLDOWN) {
+  if (command_cooldowns[context.username] != undefined && context.username != PRIV_SUPPORT && context.username != PRIV_STREAMER && ENABLE_COMMAND_COOLDOWN) {
     if (getTime() - command_cooldowns[context.username] <= GLOBAL_COMMAND_COOLDOWN) { // user on cooldown and not excepted from cooldown
       console.log("user " + context.username + " on cooldown");
       if (!ENABLE_COMMAND_COOLDOWN_MESSAGE)
@@ -474,7 +484,7 @@ function tutorialCommand(target, context, self) {
 
 function deathCommand(args, target, context, self) {
 
-  if (context.username != "captaincasimir" && context.username != "deltatecs" && context.username != "xx_berenike_xx" && context.username != "stefan_2202") {
+  if (context.username != PRIV_STREAMER && context.username != PRIV_SUPPORT && context.username != PRIV_MOD_0 && context.username != PRIV_MOD_1) {
     return;
   }
 
@@ -494,7 +504,7 @@ function deathCommand(args, target, context, self) {
 
 function brauseCommand(args, target, context, self) {
 
-  if (context.username != "captaincasimir" && context.username != "deltatecs" && context.username != "xx_berenike_xx" && context.username != "stefan_2202") {
+  if (context.username != PRIV_STREAMER && context.username != PRIV_SUPPORT && context.username != PRIV_MOD_0 && context.username != PRIV_MOD_1) {
     return;
   }
 
@@ -532,7 +542,7 @@ function lurkCommand(target, context, self) {
 
 function muteCommand(target, context, self) {
 
-  if (context.username != "captaincasimir") {
+  if (context.username != PRIV_STREAMER) {
     return;
   }
 
@@ -547,7 +557,7 @@ function muteCommand(target, context, self) {
 function forcePlayCommand(args, target, context, self) {
 
   // check if authorised
-  if (context.username == "captaincasimir" || context.username == "deltatecs") {
+  if (context.username == PRIV_STREAMER || context.username == PRIV_SUPPORT) {
     // integrity guard
     if (args.length != 2 ) {
       whisperBack(target, context, "invalid arguments, !forceplay <titel>, see list: !purchase list");
@@ -649,7 +659,7 @@ function slotsCommand(args, target, context, self, sluts=false) {
       return;
     }
 
-    if (amount > config.cc_slots_max_in && context.username != "captaincasimir") {
+    if (amount > config.cc_slots_max_in && context.username != PRIV_STREAMER) {
       whisperBack(target, context, "Slot max is " + config.cc_slots_max_in + CC_SYMBOL);
       return;
     }
@@ -856,7 +866,7 @@ function balanceCommand(target, context, self) {
 function challengeCommand(args, cmd, target, context, self) {
 
     // check if authorised
-    if (context.username == "captaincasimir" || context.username == "deltatecs") {
+    if (context.username == PRIV_STREAMER || context.username == PRIV_SUPPORT) {
 
       if (args.length < 3 || (args[1] != "hunt" && args[1] != "global")) {
         whisperBack(target, context, "invalid arguments, !challenge <hunt|global> <challenge text>");
@@ -890,7 +900,7 @@ function checkProvanity(text) {
 function configCommand(args, target, context, self) {
   
   // check if authorised
-  if (context.username == "captaincasimir" || context.username == "deltatecs") {
+  if (context.username == PRIV_STREAMER || context.username == PRIV_SUPPORT) {
 
     if (args.length < 2) {
       whisperBack(target, context, "invalid arguments, !config <variable> [value]");
@@ -935,7 +945,7 @@ function configCommand(args, target, context, self) {
 function volumeCommand(args, target, context, self) {
   
   // check if authorised
-  if (context.username == "captaincasimir" || context.username == "deltatecs") {
+  if (context.username == PRIV_STREAMER || context.username == PRIV_SUPPORT) {
 
     if (args.length > 3) {
       whisperBack(target, context, "invalid arguments, !volume [<global volume>]|[<file> <volume>], volume greater 0");
@@ -1020,7 +1030,7 @@ function volumeCommand(args, target, context, self) {
 function giveCoinCommand(args, target, context, self) {
   
   // check if authorised
-  if (context.username == "captaincasimir" || context.username == "deltatecs") {
+  if (context.username == PRIV_STREAMER || context.username == PRIV_SUPPORT) {
     // integrity guard
     if (args.length != 3 || isNaN(args[2])) {
       whisperBack(target, context, "invalid arguments, !givecc <username> <amount>");
@@ -1230,6 +1240,19 @@ function playSound(sound_path, duration=20000) {
   console.log("playing sound " + sound_path);
 }
 
+/**
+ * CC cost factor to purchase sounds
+ */
+function sccfac() {
+  return config.cc_sound_cost_multiplier;
+}
+
+/**
+ * CC cost factor to purchase anthems
+ */
+ function accfac() {
+  return config.cc_anthem_cost_multiplier;
+}
 
 function getRandomInt(max) {
   var val = Math.floor(Math.random() * max);
