@@ -40,7 +40,6 @@ const SOUND_CHALLENGE = "challenge.mp3";
 const SOUND_FANFARE = "fanfare.mp3";
 const SOUND_GOLDEN_JACKPOT = "golden-jackpot.mp3";
 
-
 const REWARD_ID_STRECH = "8c31a6f0-b319-4865-9c4a-e9b57b960311";
 const REWARD_ID_BRAUSE = "a37d499f-1550-488b-896a-2b43e2ec9c2f";
 const REWARD_ID_SOUND_THOMAS = "afcbdea0-0eee-4a35-8d18-a1e71e62703f";
@@ -52,7 +51,6 @@ const REWARD_ID_CHALLENGE_GLOBAL = "-bec3-dc0d5132ba6c";
 const REWARD_ID_CHALLENGE_HUNT = "5d798aed-c0bd-48f2-aaae-2ab3b24dea81";
 const REWARD_ID_AIRHORN = "42eb57c3-2b1f-4700-a35a-2713bd9ed519";
 const REWARD_ID_BADUMTS = "a8f76e26-aa73-494c-a75b-49ac5d6b6783";
-
 
 const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seconds"},
   {name: "tts_limit", type: 'n', default: 60, unit: "symbols"},
@@ -124,10 +122,10 @@ initConfig();
 // Define configuration options
 const opts = {
   identity: {
-    //username: "DeltaTecs",
-    username: "CaptainsEngineer",
-    //password: "oauth:0ubb2esitt1x1bnt1kw6n2ll16hdfo"
-    password: "oauth:dj9k6ncwzz7u0dwmy5y241ojvxd950"
+    username: "DeltaTecs",
+    //username: "CaptainsEngineer",
+    password: "oauth:0ubb2esitt1x1bnt1kw6n2ll16hdfo"
+    //password: "oauth:dj9k6ncwzz7u0dwmy5y241ojvxd950"
   },
   channels: [
     //"captaincasimir"
@@ -928,7 +926,7 @@ function configCommand(args, target, context, self) {
 
     let all_settings = "";
     for (let setting of CONFIGURABLE) {
-      all_setting += setting.name + ", ";
+      all_settings += setting.name + ", ";
     }
     whisperBack(target, context, args[1] + " not found. Available: " + all_settings);
   }
@@ -1366,7 +1364,10 @@ function initConfig() {
   for (let setting of CONFIGURABLE) {
     if (eval("config." + setting.name) == undefined) {
       console.log("config: " + setting.name + " not defined, defaulting...");
-      eval("config." + setting.name + " = '" + setting.default + "';");
+      if (setting.type == 's')
+        eval("config." + setting.name + " = '" + setting.default + "';");
+      else
+        eval("config." + setting.name + " = " + setting.default + ";");
     }
   }
 
@@ -1381,7 +1382,8 @@ function createIfUnexistent(file, defaultVal) {
 }
 
 function whisperBack(target, context, message) {
-  client.whisper(context.username, message);
+  client.say(target, message);
+  //client.whisper(context.username, message);
 }
 
 function whisperBackAndDelete(target, context, message) {
