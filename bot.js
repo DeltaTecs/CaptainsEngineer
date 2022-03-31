@@ -85,7 +85,8 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "rand_golden", type: 'n', default: 71, unit: "(1 in x)"}, // one in 71 fruits is a golden captain -> prop of getting a tripple is 0.0003%
   {name: "gold_status_duration", type: 'n', default: 1000 * 60 * 60 * 24 * 30, unit: "milliseconds"}, // gold status gives golden slots
   {name: "cc_sound_cost_multiplier", type: 'n', default: 10, unit: "factor"},
-  {name: "cc_anthem_cost_multiplier", type: 'n', default: 100, unit: "factor"}
+  {name: "cc_anthem_cost_multiplier", type: 'n', default: 100, unit: "factor"},
+  {name: "compact_jackports", type: 'n', default: 1, unit: "0=off, 1=on"}
 ]
 
 const CC_SOUNDS = [
@@ -118,7 +119,7 @@ const CC_ANTHEMS = [
 const slot_symbols = ['🍑', '🍒', '🍍', '🍇', '🍉', '🍐', '🍊', '🥥']; // propability of getting a triple is 1.56%
 const slut_symbols = ['💦', '🧡', '💅', '🍆', '😩', '👅', '💋', '🔞']; // propability of getting a triple is 1.56%
 const slot_symbols_gold = ['💎', '👑', '⛲', '🦞', '🏰', '💂', '🤴', '🏆']; // propability of getting a triple is 1.56%
-// average return per roll is 230*7/(8^3) + 1000*(1/8^3) = 5,0976  ->  win +20 per 1000
+// average return per roll is 230*7/(8^3) + 1000*(1/8^3) = 5,0976  ->  win +2 per 100
 const CC_SYMBOL = "₵₵"; // Captain's Coin
 
 const SYMBOL_TM = "™";
@@ -130,18 +131,7 @@ const ENABLE_COMMAND_COOLDOWN_MESSAGE = false; // disabled because whisper dont 
 initConfig();
 
 // Define configuration options
-var opts = {
-  identity: {
-    //username: "DeltaTecs",
-    username: "CaptainsEngineer",
-    //password: "oauth:0ubb2esitt1x1bnt1kw6n2ll16hdfo"
-    //password: "oauth:y4m3kppvn3ekwhmp9zrjlelstnx2n1"
-  },
-  channels: [
-    "captaincasimir"
-    //"DeltaTecs"
-  ]
-};
+var opts;
 
 loadCredentials();
 
