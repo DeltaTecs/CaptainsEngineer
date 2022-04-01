@@ -86,7 +86,8 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "gold_status_duration", type: 'n', default: 1000 * 60 * 60 * 24 * 30, unit: "milliseconds"}, // gold status gives golden slots
   {name: "cc_sound_cost_multiplier", type: 'n', default: 10, unit: "factor"},
   {name: "cc_anthem_cost_multiplier", type: 'n', default: 100, unit: "factor"},
-  {name: "compact_jackports", type: 'n', default: 1, unit: "0=off, 1=on"}
+  {name: "compact_jackpots", type: 'n', default: 1, unit: "0=off, 1=on"},
+  {name: "slot_rolls_delay", type: 'n', default: 600, unit: "milliseconds"}
 ]
 
 const CC_SOUNDS = [
@@ -118,8 +119,8 @@ const CC_ANTHEMS = [
 
 const slot_symbols = ['🍑', '🍒', '🍍', '🍇', '🍉', '🍐', '🍊', '🥥']; // propability of getting a triple is 1.56%
 const slut_symbols = ['💦', '🧡', '💅', '🍆', '😩', '👅', '💋', '🔞']; // propability of getting a triple is 1.56%
-const slot_symbols_gold = ['💎', '👑', '⛲', '🦞', '🏰', '💂', '🤴', '🏆']; // propability of getting a triple is 1.56%
-// average return per roll is 230*7/(8^3) + 1000*(1/8^3) = 5,0976  ->  win +2 per 100
+const slot_symbols_gold = ['💎', '👑', '⛲', '🦞', '🏰', '💂', '🏆']; // propability of getting a triple is 2.04%
+// average return per roll is (68/71)*250*7/(8^3) + (68/71)*1000*(1/8^3) = 5,144  ->  win +29 per 1000
 const CC_SYMBOL = "₵₵"; // Captain's Coin
 
 const SYMBOL_TM = "™";
@@ -407,7 +408,7 @@ function onCommand(target, context, commandName, self) {
 
     if (commandName.split(" ").length == 1) {
       // too few arguments
-      whisperBackAndDelete(target, context, "invalid usage, !purchase <list | itemname>");
+      whisperBack(target, context, "invalid usage, !purchase <list | itemname>");
       return;
 
     } else if (commandName.split(" ")[1] == "list") {
@@ -629,6 +630,10 @@ function slotsCommand(args, target, context, self, sluts=false) {
     let amount = 0;
     const balance = getUserBalance(context.username);
     const roll_cost = sluts ? config.cc_cost_slotsx : config.cc_cost_slots;
+    const compact_jackpots = config.compact_jackpots != 0;
+    const slot_rolls_delay = config.slot_rolls_delay;
+    const golden_emote = decodeURIComponent(config.golden_emote);
+
 
     if (args.length == 1) {
       amount = roll_cost;
@@ -656,7 +661,6 @@ function slotsCommand(args, target, context, self, sluts=false) {
       return;
     }
 
-    const golden_emote = decodeURIComponent(config.golden_emote);
     let rolls = amount / roll_cost;
     let wins = [];
     let slots_out_chosen = [];
@@ -666,22 +670,23 @@ function slotsCommand(args, target, context, self, sluts=false) {
       let slots_out = getSlotOutput(context.username, sluts=sluts, goldStatus=usr_gold_status);
       if (slots_out.rank > 0)
         wins.push(slots_out);
-      slots_out_chosen = slots_out.symbols;
+      slots_out_chosen = slots_out.symbols; // set to last output
     }
 
     // sort
-    let win_max_rank = 0;
+    let win_max = wins.length > 0 ? wins[0] : undefined;
     let total_win = 0;
 
     for (let win of wins) {
 
-      if (win.rank > win_max_rank) {
-        win_max_rank = win.rank;
+      if (win.rank >= win_max.rank) {
+        win_max = win;
         slots_out_chosen = win.symbols;
       }
       total_win += win.return;
     }
 
+    
     let golden_count = 0;
     if (total_win == 0) {
       // try to pick slots out with golden emote if possible
@@ -694,6 +699,7 @@ function slotsCommand(args, target, context, self, sluts=false) {
       }
     }
 
+
     updateUserBalance(context.username, balance + total_win - amount);
 
     if (total_win > 0)
@@ -705,67 +711,86 @@ function slotsCommand(args, target, context, self, sluts=false) {
     let slots_out_fancy_2 = "[" + slots_out_chosen[0] + "|" + slots_out_chosen[1] + "|" + slots_out_chosen[2] + "]_📍";
 
     scheduleDelayedMessage(target, 0, slots_out_fancy_0);
-    scheduleDelayedMessage(target, 600, slots_out_fancy_1);
-    scheduleDelayedMessage(target, 1200, slots_out_fancy_2);
+    scheduleDelayedMessage(target, slot_rolls_delay, slots_out_fancy_1);
+    scheduleDelayedMessage(target, 2 * slot_rolls_delay, slots_out_fancy_2);
 
-    let delay = 1200;
+    let delay = 2 * slot_rolls_delay;
 
-    for (let win of wins) {
-      if (win.rank != 1)
-        continue;
+    if (compact_jackpots && total_win > 0) {
+
+      // display only highest roll
       setTimeout(function() {
-        client.say(target, win.message);
-        playSound(win.sound);
+        client.say(target, win_max.message + total_win + CC_SYMBOL);
+        playSound(win_max.sound);
       }, delay);
       if (sluts) {
         setTimeout(function() {
           playSound(SOUND_OH_YEAH);
         }, delay + 1900);
       }
-      delay += 1000;
-    }
 
-    for (let win of wins) {
-      if (win.rank != 2)
-        continue;
-      setTimeout(function() {
-        client.say(target, win.message);
-        playSound(win.sound);
-      }, delay);
-      if (sluts) {
+      if (win_max.rank == 3) { // golden win present
         setTimeout(function() {
-          playSound(SOUND_OH_YEAH);
-        }, delay + 2200);
+          goldenEvent(target, context.username);
+        }, delay);
       }
-      delay += 2000;
+
+    } else {
+
+      // all wins after each other
+      for (let win of wins) {
+        if (win.rank != 1)
+          continue;
+        setTimeout(function() {
+          client.say(target, win.message + config.cc_return_slots_basic + CC_SYMBOL);
+          playSound(win.sound);
+        }, delay);
+        if (sluts) {
+          setTimeout(function() {
+            playSound(SOUND_OH_YEAH);
+          }, delay + 1900);
+        }
+        delay += 1000;
+      }
+  
+      for (let win of wins) {
+        if (win.rank != 2)
+          continue;
+        setTimeout(function() {
+          client.say(target, win.message + config.cc_return_slots_peach + CC_SYMBOL);
+          playSound(win.sound);
+        }, delay);
+        if (sluts) {
+          setTimeout(function() {
+            playSound(SOUND_OH_YEAH);
+          }, delay + 2200);
+        }
+        delay += 2000;
+      }
+    
+      for (let win of wins) {
+        if (win.rank != 3)
+          continue;
+        setTimeout(function() {
+          client.say(target, win.message + config.cc_return_slots_golden + CC_SYMBOL);
+          playSound(win.sound);
+        }, delay);
+        delay += 2000;
+      }
+  
+      if (total_win > 0 && win_max.rank == 3) { // golden win present
+        setTimeout(function() {
+          goldenEvent(target, context.username);
+        }, delay - 2000);
+      }
+  
     }
-
-    let golden_win = false;
-
-    for (let win of wins) {
-      if (win.rank != 3)
-        continue;
-      golden_win = true;
-      setTimeout(function() {
-        client.say(target, win.message);
-        playSound(win.sound);
-      }, delay);
-      delay += 2000;
-    }
-
-    if (golden_win) {
-      setTimeout(function() {
-        goldenEvent(target, context.username);
-      }, delay - 2000);
-      updateUser(context.username, getUserBalance(context.username), gold=(new Date().getTime()))
-    }
-
 
     if (total_win > config.cc_return_slots_basic) {
       // print bill only if atleast two basic wins or a super win
       setTimeout(function() {
-        client.say(target, "-- " + balance + CC_SYMBOL + " >> " + (balance - amount + total_win) + CC_SYMBOL + "", user=context.username);
-      }, delay - 900);
+        client.say(target, balance + CC_SYMBOL + " >> " + (balance - amount + total_win) + CC_SYMBOL + "", user=context.username);
+      }, delay + 10);
     }
 }
 
@@ -797,17 +822,17 @@ function getSlotOutput(username, sluts=false, goldstatus=false) {
     if (symbols[0] == " " + golden_emote + " ") { // golden win
       win_rank = 3;
       win_return = config.cc_return_slots_golden;
-      win_message = username + " FOUND THE SECRET GOLDEN CAPTAIN'S TREASURE!!! " + golden_emote + " 💰💰💰 " + golden_emote + " 💰💰💰 " + "  +" + config.cc_return_slots_golden + CC_SYMBOL;
+      win_message = username + " FOUND THE SECRET GOLDEN CAPTAIN'S TREASURE!!! " + golden_emote + " 💰💰💰 " + golden_emote + " 💰💰💰 " + "  +";
       win_sound = SOUND_GOLDEN_JACKPOT;
     } else if (symbols[0] == '🍑' || symbols[0] == '💦' || symbols[0] == '💎') { // super win
       win_rank = 2;
       win_return = config.cc_return_slots_peach;
-      win_message = golden_emote + " 💰💰💰 SUPER WIN 💰💰💰 " + golden_emote + " " + username + " WON " + config.cc_return_slots_peach + CC_SYMBOL;
+      win_message = golden_emote + " 💰💰💰 SUPER WIN 💰💰💰 " + golden_emote + " " + username + " WON +";
       win_sound = SOUND_SUPER_JACKPOT;
     } else { // basic win
       win_rank = 1;
       win_return = config.cc_return_slots_basic;
-      win_message = golden_emote + " " + username + " WON " + config.cc_return_slots_basic + CC_SYMBOL + " 💰";
+      win_message = golden_emote + " " + username + " WON 💰💰 +";
       win_sound = SOUND_JACKPOT;
     }
   }
@@ -908,16 +933,18 @@ function configCommand(args, target, context, self) {
         }
 
         if (setting.type == 'o') { // volume for example is an array of volume entries
-          whisperBackAndDelete(target, context, args[1] + " is set/used by a different command");
+          whisperBack(target, context, args[1] + " is set/used by a different command");
           return;
         }
 
         if (setting.type == 'n' && isNaN(args[2])) {
-          whisperBackAndDelete(target, context, args[1] + " has to be a number (" + setting.unit + ")");
+          whisperBack(target, context, args[1] + " has to be a number (" + setting.unit + ")");
           return;
         }
 
         let val = setting.type == 's' ? encodeURIComponent(args[2]) : args[2];
+        if (setting.type == 'n')
+          val = parseInt(val, 10);
         eval("config." + setting.name + " = val;");
         console.log("set " + setting.name + " to " + args[2]);
         whisperBack(target, context, "set " + setting.name + " to " + args[2]);
