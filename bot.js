@@ -117,6 +117,17 @@ const CC_ANTHEMS = [
   {name: "anthem-skrillex", price: 10, sound: SOUND_SKRILLEX}
 ]
 
+var config;
+initConfig();
+
+const BROADCASTS = [
+  {randspace: 10, event: undefined, message: "🎰 Gambling may lead to addiction, no participation under 18, chance to win 1:67"},
+  {randspace: 10, event: undefined, message: "Did you know you get " + config.cc_per_chat}
+]
+
+// bot token
+//oauth:vzlot0hklicwjsfm52tcih14fuonz1
+
 const slot_symbols = ['🍑', '🍒', '🍍', '🍇', '🍉', '🍐', '🍊', '🥥']; // propability of getting a triple is 1.56%
 const slut_symbols = ['💦', '🧡', '💅', '🍆', '😩', '👅', '💋', '🔞']; // propability of getting a triple is 1.56%
 const slot_symbols_gold = ['💎', '👑', '⛲', '🦞', '🏰', '💂', '🏆']; // propability of getting a triple is 2.04%
@@ -128,8 +139,6 @@ const SYMBOL_TM = "™";
 const GLOBAL_COMMAND_COOLDOWN = 3; // seconds
 const ENABLE_COMMAND_COOLDOWN = true;
 const ENABLE_COMMAND_COOLDOWN_MESSAGE = false; // disabled because whisper dont work
-
-initConfig();
 
 // Define configuration options
 var opts;
@@ -171,7 +180,6 @@ var users_seen = [];
 
 var chat_target;
 
-var config;
 
 // Connect to Twitch:
 client.connect();
@@ -1056,7 +1064,7 @@ function giveCoinCommand(args, target, context, self) {
       return;
     }
 
-    let targetUser = args[1];
+    let targetUser = args[1].toLowerCase();
     let amount = parseInt(args[2], 10);
     updateUserBalance(targetUser, getUserBalance(targetUser) + amount); // add requested amount to user save
     whisperBack(target, context, "Added " + amount + CC_SYMBOL + " to " + targetUser + "'s balance");
@@ -1071,7 +1079,7 @@ function transferCoinCommand(args, target, context, self) {
     return;
   }
 
-  let targetUser = args[1];
+  let targetUser = args[1].toLowerCase();
   let amount = parseInt(args[2], 10);
 
   // check positive
