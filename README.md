@@ -2,7 +2,7 @@ The CaptainsEngineer is a Twitch Chat Bot designed to assist and enrich the live
 
 
 # Setup
-The bot required NodeJS and is designed to work solely on Windows.
+The bot requires NodeJS and is designed to work solely on Windows.
 
 ## Prerequisites
 - NodeJS (tested on v16.13.1)
