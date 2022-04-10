@@ -72,23 +72,55 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "cc_cost_slotsx", type: 'n', default: 8, unit: "coins"},
   {name: "cc_slots_max_in", type: 'n', default: 100, unit: "coins"},
   {name: "cc_cost_tts", type: 'n', default: 60, unit: "coins"},
-  {name: "cc_return_slots_basic", type: 'n', default: 230, unit: "coins"},
+  {name: "cc_return_slots_basic", type: 'n', default: 250, unit: "coins"},
   {name: "cc_return_slots_peach", type: 'n', default: 1000, unit: "coins"},
   {name: "cc_return_slots_golden", type: 'n', default: 10000, unit: "coins"},
   {name: "cc_per_chat", type: 'n', default: 1, unit: "coins"},
+  {name: "cc_sound_cost_multiplier", type: 'n', default: 10, unit: "factor"},
+  {name: "cc_anthem_cost_multiplier", type: 'n', default: 100, unit: "factor"},
   {name: "msg_welcome", type: 's', default: encodeURIComponent("Ahoy, Matey! ⛵ Welcome aboard ")} , // followed by: username
   {name: "msg_lurk_0", type: 's', default: encodeURIComponent("Thank you for boarding the ship ")},
   {name: "msg_lurk_1", type: 's', default: encodeURIComponent("⛵ Lay back and enjoy your drink <3")},
   {name: "death_cnt_prefix", type: 's', default: encodeURIComponent("DEATHS: ")},
   {name: "bause_cnt_prefix", type: 's', default: encodeURIComponent("BRAUSE: ")},
-  {name: "golden_emote", type: 's', default: encodeURIComponent("captai1955Golden")},
   {name: "rand_golden", type: 'n', default: 71, unit: "(1 in x)"}, // one in 71 fruits is a golden captain -> prop of getting a tripple is 0.0003%
+  {name: "golden_emote", type: 's', default: encodeURIComponent("captai1955Golden")},
   {name: "gold_status_duration", type: 'n', default: 1000 * 60 * 60 * 24 * 30, unit: "milliseconds"}, // gold status gives golden slots
-  {name: "cc_sound_cost_multiplier", type: 'n', default: 10, unit: "factor"},
-  {name: "cc_anthem_cost_multiplier", type: 'n', default: 100, unit: "factor"},
   {name: "compact_jackpots", type: 'n', default: 1, unit: "0=off, 1=on"},
-  {name: "slot_rolls_delay", type: 'n', default: 600, unit: "milliseconds"}
+  {name: "slot_rolls_delay", type: 'n', default: 600, unit: "milliseconds"},
+  {name: "max_lvl_reward", type: 'n', default: 100, unit: "levels"},
+  {name: "xp_base", type: 'n', default: 1000, unit: "xp"},
+  {name: "xp_added_per_lvl", type: 'n', default: 1000, unit: "xp"},
+  {name: "xp_per_char", type: 'n', default: 0.25, unit: "xp"},
+  {name: "xp_per_captain_emote", type: 'n', default: 4, unit: "xp"},
+  {name: "xp_per_slot_cmd", type: 'n', default: 5, unit: "xp"},
+  {name: "xp_per_slot_win", type: 'n', default: 40, unit: "xp"}
+  {name: "xp_per_reward", type: 'n', default: 50, unit: "xp"},
+  {name: "xp_per_lurk", type: 'n', default: 200, unit: "xp"},
+  {name: "min_lvl_purchase", type: 'n', default: 2, unit: "level"},
+  {name: "min_lvl_slotsx", type: 'n', default: 20, unit: "level"},
+  {name: "min_lvl_anthems", type: 'n', default: 50, unit: "level"},
+  {name: "max_lvl_anthems", type: 'n', default: 90, unit: "level"},
+  {name: "min_lvl_golden_chance_1", type: 'n', default: 91, unit: "level"},
+  {name: "min_lvl_golden_chance_2", type: 'n', default: 100, unit: "level"},
+  {name: "min_lvl_tts", type: 'n', default: 10, unit: "level"},
+  {name: "max_lvl_tts_scaling", type: 'n', default: 50, unit: "level"},
+  {name: "slot_rolls_per_lvl", type: 'n', default: 2, unit: "rolls"},
+  {name: "max_lvl_slot_scaling", type: 'n', default: 90, unit: "lvl"},
+  {name: "slot_rolls_added_last_lvls", type: 'n', default: 200, unit: "rolls"}
 ]
+
+/*
+ * Notes on the level system: Goal is an xp earn of 1000xp as an active user per stream (daily).
+  Level 100 shall be achieved after 300 days of watching -> after 300 000 xp.
+  expected default XP per stream:
+  Expect 1 lurk -> 200xp
+  Expect 3 rewards -> 150xp
+  Expect 5 slot wins -> 100xp
+  Expect 20 slot commands -> 100xp
+  Expect 50 captain emotes -> 200xp
+  Expect 1000 chars as chat messages in 30 mins, avg 2,5hrs streams (5000 chars) -> 250xp
+ */
 
 const CC_SOUNDS = [
   {name: "gulb", price: 1, sound: SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS},
@@ -117,6 +149,17 @@ const CC_ANTHEMS = [
   {name: "anthem-skrillex", price: 10, sound: SOUND_SKRILLEX}
 ]
 
+var config;
+initConfig();
+
+const BROADCASTS = [
+  {randspace: 10, event: undefined, message: "🎰 Gambling may cause addiction, no participation under 18, chance to win 1:67"},
+  {randspace: 10, event: undefined, message: "Did you know you earn " + config.cc_per_chat + CC_SYMBOL + " by chatting?"},
+]
+
+// bot token
+//oauth:vzlot0hklicwjsfm52tcih14fuonz1
+
 const slot_symbols = ['🍑', '🍒', '🍍', '🍇', '🍉', '🍐', '🍊', '🥥']; // propability of getting a triple is 1.56%
 const slut_symbols = ['💦', '🧡', '💅', '🍆', '😩', '👅', '💋', '🔞']; // propability of getting a triple is 1.56%
 const slot_symbols_gold = ['💎', '👑', '⛲', '🦞', '🏰', '💂', '🏆']; // propability of getting a triple is 2.04%
@@ -128,8 +171,6 @@ const SYMBOL_TM = "™";
 const GLOBAL_COMMAND_COOLDOWN = 3; // seconds
 const ENABLE_COMMAND_COOLDOWN = true;
 const ENABLE_COMMAND_COOLDOWN_MESSAGE = false; // disabled because whisper dont work
-
-initConfig();
 
 // Define configuration options
 var opts;
@@ -171,7 +212,6 @@ var users_seen = [];
 
 var chat_target;
 
-var config;
 
 // Connect to Twitch:
 client.connect();
@@ -198,10 +238,11 @@ function onMessageHandler (target, context, msg, self) {
     return;
   }
 
-  // Remove whitespace from chat message
+// Remove whitespace from chat message
   const commandName = msg.trim();
-  if (commandName[0] != '!') {
-    handleIncrementBalance(context.username); // increment only for non commands and rewards
+  handleChatRewards(context.username, commandName);
+  
+  if (commandName[0] != '!') { // no command
     return;
   }
 
@@ -212,6 +253,8 @@ function onMessageHandler (target, context, msg, self) {
 function onReward(target, context, self) {
 
   console.log("id: " + context["custom-reward-id"]);
+
+  incrementUserBalanceAndXP(context.username, xp_add=config.xp_per_reward, cause="reward");
   
   if (context["custom-reward-id"] === REWARD_ID_BRAUSE) {
   
@@ -522,7 +565,7 @@ function lurkCommand(target, context, self) {
   if (lurks[context.username] == undefined || getTime() - lurks[context.username] > config.lurk_reward_cooldown) {
     // eligble for lurk reward
     console.log(context.username + " eligable for lurk reward");
-    updateUserBalance(context.username, getUserBalance(context.username) + config.lurk_reward_amount);
+    incrementUserBalanceAndXP(context.username, balance_add=config.lurk_reward_amount, xp_add=config.xp_per_lurk, cause="lurk");
     reward_string = " (+" + config.lurk_reward_amount + CC_SYMBOL + ")"
     lurks[context.username] = getTime();
   } else {
@@ -699,8 +742,7 @@ function slotsCommand(args, target, context, self, sluts=false) {
       }
     }
 
-
-    updateUserBalance(context.username, balance + total_win - amount);
+    incrementUserBalanceAndXP(context.username, total_win - amount, wins.length * config.xp_per_slot_win, cause="slot wins");
 
     if (total_win > 0)
       console.log(context.username + " won slots: cc_before=" + balance + ", amount_in=" + amount + ", cc_after=" + getUserBalance(context.username) + ", win=" + total_win);
@@ -1056,7 +1098,7 @@ function giveCoinCommand(args, target, context, self) {
       return;
     }
 
-    let targetUser = args[1];
+    let targetUser = args[1].toLowerCase();
     let amount = parseInt(args[2], 10);
     updateUserBalance(targetUser, getUserBalance(targetUser) + amount); // add requested amount to user save
     whisperBack(target, context, "Added " + amount + CC_SYMBOL + " to " + targetUser + "'s balance");
@@ -1071,7 +1113,7 @@ function transferCoinCommand(args, target, context, self) {
     return;
   }
 
-  let targetUser = args[1];
+  let targetUser = args[1].toLowerCase();
   let amount = parseInt(args[2], 10);
 
   // check positive
@@ -1194,6 +1236,31 @@ function onConnectedHandler (addr, port) {
   console.log(`* Connected to ${addr}:${port}`);
 }
 
+function handleChatRewards(name, message) {
+
+  let xp_added = 0;
+  let cc_added = 0;
+
+  if (message.startsWith("!slot")) {
+    xp_added = config.xp_per_slot_cmd;
+    incrementUserBalanceAndXP(cc_added, xp_added, "slot command");
+    return;
+  } else if (message.startsWith("!tts ")) { 
+    xp_added = message.length * xp_per_char; // add char xp even for tts
+    incrementUserBalanceAndXP(cc_added, xp_added, "tts command");
+  } else if (message.startsWith('!')) {
+    return; // no rewards for other commands. Rewards for lurk and slot win are handled seperatly
+  }
+
+  // assume non-command message
+
+  // count captain emotes
+  var emote_count = (message.match(/ captai/g) || []).length;
+  xp_added = emote_count * config.xp_per_captain_emote + message.length * xp_per_char;
+  cc_added = config.cc_per_chat;
+
+  incrementUserBalanceAndXP(cc_added, xp_added, "chat message");
+}
 
 function handleFirstChatter(name, target) {
 
@@ -1263,6 +1330,27 @@ function playSound(sound_path, duration=20000) {
   console.log("playing sound " + sound_path);
 }
 
+function getLevel(xp) {
+  const base = config.xp_base;
+  const add = config.xp_added_per_lvl;
+
+  let lvl = 1;
+  let step = base;
+
+  while (true) {
+
+    xp -= step;
+
+    if (xp < 0)
+      break;
+
+    lvl += 1;
+    step += add;
+  }
+
+  return lvl;
+}
+
 /**
  * CC cost factor to purchase sounds
  */
@@ -1294,6 +1382,26 @@ function isUserKnown(user) {
 
 function handleIncrementBalance(user) {
   updateUserBalance(user, getUserBalance(user) + config.cc_per_chat);
+}
+
+function incrementUserBalanceAndXP(user, balance_add=0, xp_add=0, cause=undefined) {
+
+  let user_balance = 0;
+  let user_xp = 0;
+
+  for (acc of chatters.accounts) {
+    if (acc.name == user) {
+      user_balance = acc.balance;
+      user_xp = acc.xp;  
+      break;
+    }
+  }
+
+  if (cause != undefined) { // debug print
+    console.log(user + " earns " + balance_add + "cc and " + xp_add + "xp (-> " + (user_xp + xp_add) + ") due to " + cause);
+  }
+
+  updateUser(user, user_balance + balance_add, anthem=undefined, gold=undefined, xp=user_xp + xp_add);
 }
 
 
@@ -1334,7 +1442,7 @@ function updateUserBalance(user, balance) {
   updateUser(user, balance, getUserAnthem(user));
 }
 
-function updateUser(user, balance, anthem=undefined, gold=undefined) {
+function updateUser(user, balance, anthem=undefined, gold=undefined, xp=undefined) {
 
   let balance_parsed = parseInt(balance, 10);
   
@@ -1346,18 +1454,20 @@ function updateUser(user, balance, anthem=undefined, gold=undefined) {
         acc.anthem = anthem == null ? undefined : anthem;
       if (gold != undefined)
         acc.gold = gold == null ? undefined : gold;
+      if (xp != undefined)
+        acc.xp = xp == null ? undefined : xp;
       updated = true;
       break;
     }
   }
 
   if (!updated) { // no update so far, assume new user
-    chatters.accounts.push({name : user, balance : balance_parsed, anthem: anthem, gold: gold});
+    chatters.accounts.push({name : user, balance : balance_parsed, anthem: anthem, gold: gold, xp: xp});
   }
 
   // write changes to file
   try {
-    fs.writeFileSync('chatters.json', JSON.stringify(chatters), {flag:'w'});
+    fs.writeFile('chatters.json', JSON.stringify(chatters), {flag:'w'});
   } catch (e) {
     console.log(e);
   }
