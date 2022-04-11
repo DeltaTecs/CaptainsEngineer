@@ -6,6 +6,10 @@ const fs = require('fs');
 const { exec } = require('child_process');
 const say = require('say');
 
+const CC_SYMBOL = "₵₵"; // Captain's Coin
+
+const LVL_EMBLEMS = ["♟", "♟♟", "♟♟♟", "🔱", "🔱🔱", "🔱🔱🔱", "💥", "💥💥", "💥💥💥", "☠️", "☠️☠️", "☠️☠️☠️", "💙", "💙💙", "💙💙💙", "🖤", "🖤🖤", "🖤🖤🖤", "💠", "💠💠", "💠💠💠", "🔰", "🔰🔰", "🔰🔰🔰", "💎", "💎💎", "💎💎💎", "🃏", "🃏🃏", "🃏🃏🃏", "⭐", "⭐⭐", "⭐⭐⭐", "🌌🌌🌌"];
+
 const DISCORD_INVITE = "https://discord.gg/X5KGBJGTPu";
 const REDDIT_LINK = "https://www.reddit.com/r/captaincasimir/";
 
@@ -89,12 +93,13 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "compact_jackpots", type: 'n', default: 1, unit: "0=off, 1=on"},
   {name: "slot_rolls_delay", type: 'n', default: 600, unit: "milliseconds"},
   {name: "max_lvl_reward", type: 'n', default: 100, unit: "levels"},
-  {name: "xp_base", type: 'n', default: 1000, unit: "xp"},
-  {name: "xp_added_per_lvl", type: 'n', default: 1000, unit: "xp"},
-  {name: "xp_per_char", type: 'n', default: 0.25, unit: "xp"},
+  {name: "xp_factor_subsciber", type: 'n', default: 1.5, unit: "x-times"},
+  {name: "xp_base", type: 'n', default: 500, unit: "xp"},
+  {name: "xp_added_per_lvl", type: 'n', default: 50, unit: "xp"},
+  {name: "xp_per_char", type: 'n', default: 0.3, unit: "xp"},
   {name: "xp_per_captain_emote", type: 'n', default: 4, unit: "xp"},
   {name: "xp_per_slot_cmd", type: 'n', default: 5, unit: "xp"},
-  {name: "xp_per_slot_win", type: 'n', default: 40, unit: "xp"}
+  {name: "xp_per_slot_win", type: 'n', default: 0, unit: "xp"},
   {name: "xp_per_reward", type: 'n', default: 50, unit: "xp"},
   {name: "xp_per_lurk", type: 'n', default: 200, unit: "xp"},
   {name: "min_lvl_purchase", type: 'n', default: 2, unit: "level"},
@@ -107,7 +112,8 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "max_lvl_tts_scaling", type: 'n', default: 50, unit: "level"},
   {name: "slot_rolls_per_lvl", type: 'n', default: 2, unit: "rolls"},
   {name: "max_lvl_slot_scaling", type: 'n', default: 90, unit: "lvl"},
-  {name: "slot_rolls_added_last_lvls", type: 'n', default: 200, unit: "rolls"}
+  {name: "slot_rolls_added_last_lvls", type: 'n', default: 200, unit: "rolls"},
+  {name: "lvl_per_emblem", type: 'n', default: 5, unit: "lvl"},
 ]
 
 /*
@@ -164,7 +170,6 @@ const slot_symbols = ['🍑', '🍒', '🍍', '🍇', '🍉', '🍐', '🍊', '�
 const slut_symbols = ['💦', '🧡', '💅', '🍆', '😩', '👅', '💋', '🔞']; // propability of getting a triple is 1.56%
 const slot_symbols_gold = ['💎', '👑', '⛲', '🦞', '🏰', '💂', '🏆']; // propability of getting a triple is 2.04%
 // average return per roll is (68/71)*250*7/(8^3) + (68/71)*1000*(1/8^3) = 5,144  ->  win +29 per 1000
-const CC_SYMBOL = "₵₵"; // Captain's Coin
 
 const SYMBOL_TM = "™";
 
@@ -184,6 +189,11 @@ var command_cooldowns = [];
 
 // initialize lurk time map
 var lurks = [];
+
+var sub_status = [];
+var vips = [];
+
+let levels = [];
 
 var last_tts = getTime() - config.tts_cooldown;
 
@@ -212,6 +222,7 @@ var users_seen = [];
 
 var chat_target;
 
+initUserLevels();
 
 // Connect to Twitch:
 client.connect();
@@ -220,6 +231,8 @@ client.connect();
 function onMessageHandler (target, context, msg, self) {
   if (self || context.username.toLowerCase() == 'captainsengineer') { return; } // Ignore messages from the bot
   chat_target = target;
+
+  sub_status[context.username.toLowerCase()] = context.subscriber;
 
   if (context["custom-reward-id"] != undefined) {
     onReward(target, context, self);
@@ -344,6 +357,9 @@ function onCommand(target, context, commandName, self) {
   // reset user cooldown
   command_cooldowns[context.username] = getTime();
 
+  args = commandName.split(" ");
+  commandName = args[0].toLowerCase();
+
   // If the command is known, let's execute it
   if (commandName === '!dice') {
 
@@ -356,15 +372,15 @@ function onCommand(target, context, commandName, self) {
     client.say(target, `42069 seconds`);
     console.log(`* watchtime`);
 
-  } else if (commandName.split(" ")[0] == "!slots") {
+  } else if (commandName == "!slots") {
 
     console.log(`* slots`);
-    slotsCommand(commandName.split(" "), target, context, self, sluts=false);
+    slotsCommand(args, target, context, self, sluts=false);
 
-  } else if (commandName.split(" ")[0] == "!slotsx") {
+  } else if (commandName == "!slotsx") {
 
     console.log(`* slots`);
-    slotsCommand(commandName.split(" "), target, context, self, sluts=true);
+    slotsCommand(args, target, context, self, sluts=true);
 
   } else if (commandName === '!discord' || commandName === '!dc') {
 
@@ -410,68 +426,78 @@ function onCommand(target, context, commandName, self) {
     console.log(`* balance cmd`);
     balanceCommand(target, context, self);
 
-  } else if (commandName.split(" ")[0] == "!givecc") {
+  } else if (commandName == "!givecc") {
 
     console.log(`* give coin cmd`);
-    giveCoinCommand(commandName.split(" "), target, context, self);
+    giveCoinCommand(args, target, context, self);
 
-  } else if (commandName.split(" ")[0] == "!volume") {
+  } else if (commandName == "!givexp") {
+
+    console.log(`* give xp cmd`);
+    giveXpCommand(args, target, context, self);
+
+  } else if (commandName == "!volume") {
 
     console.log(`* volume cmd`);
-    volumeCommand(commandName.split(" "), target, context, self);
+    volumeCommand(args, target, context, self);
 
-  } else if (commandName.split(" ")[0] == "!config" || commandName.split(" ")[0] == "!set") {
+  } else if (commandName == "!config" || commandName == "!set") {
 
     console.log(`* config cmd`);
-    configCommand(commandName.split(" "), target, context, self);
+    configCommand(args, target, context, self);
 
-  } else if (commandName.split(" ")[0] == "!transfer") {
+  } else if (commandName == "!transfer") {
 
     console.log(`* transfer coin cmd`);
-    transferCoinCommand(commandName.split(" "), target, context, self);
+    transferCoinCommand(args, target, context, self);
 
-  } else if (commandName.split(" ")[0] == "!death") {
+  } else if (commandName == "!death") {
 
     console.log(`* death cmd`);
-    deathCommand(commandName.split(" "), target, context, self);
+    deathCommand(args, target, context, self);
 
-  } else if (commandName.split(" ")[0] == "!brause") {
+  } else if (commandName == "!brause") {
 
     console.log(`* brause cmd`);
-    brauseCommand(commandName.split(" "), target, context, self);
+    brauseCommand(args, target, context, self);
 
-  } else if (commandName.split(" ")[0] == "!tts") {
+  } else if (commandName == "!tts") {
 
     console.log(`* tts: ` + commandName.substring(4, commandName.length));
     ttsCommand(commandName.substring(4, commandName.length), target, context, self);
 
-  }  else if (commandName.split(" ")[0] == "!purchase") {
+  }  else if (commandName == "!purchase") {
 
     console.log(`* purchase cmd`);
 
-    if (commandName.split(" ").length == 1) {
+    if (args.length == 1) {
       // too few arguments
       whisperBack(target, context, "invalid usage, !purchase <list | itemname>");
       return;
 
-    } else if (commandName.split(" ")[1] == "list") {
+    } else if (args[1] == "list") {
       // show item list
       purchaseListCommand(target, context, self);
 
     } else {
       // assume item purchase
-      purchaseItemCommand(commandName.split(" "), target, context, self);
+      purchaseItemCommand(args, target, context, self);
     }
 
-  } else if (commandName.split(" ")[0] == "!forceplay") {
+  } else if (commandName == "!forceplay") {
 
     console.log(`* force play`);
-    forcePlayCommand(commandName.split(" "), target, context, self);
+    forcePlayCommand(args, target, context, self);
 
-  } else if (commandName.split(" ")[0] == "!challenge") {
+  } else if (commandName == "!challenge") {
 
     console.log(`* challenge `);
-    challengeCommand(commandName.split(" "), commandName, target, context, self);
+    challengeCommand(args, commandName, target, context, self);
+
+  } else if (commandName === '!xp' || commandName === '!level' || commandName === '!lvl') {
+
+    console.log(`* level cmd`);
+    levelCommand(target, context, self);
 
   } else {
     console.log(`* Unknown command ${commandName}`);
@@ -950,10 +976,41 @@ function challengeCommand(args, cmd, target, context, self) {
 
 }
 
-
 function checkProvanity(text) {
   let t = text.toLowerCase();
   return t.replaceAll(' ', '').includes('neger') || t.includes('negger') || t.includes('nigger') || t.includes('niger') || t.includes('nigga') || t.includes('niga') || t.includes('bitch') || t.includes('hure') || t.includes('arsch') || t.includes('wichser') || t.includes('schwanz') || t.includes('penis') || t.includes('bastard') || t.includes('bastart') || t.includes('schwuchtel') || t.includes('faggot') || t.includes('simp');
+}
+
+
+function levelCommand(target, context, self) {
+  let lvl = levels[context.username.toLowerCase()];
+  let xp = getUserXp(context.username);
+  let xp_calculated = getLevel(xp);
+  let xp_left = xp_calculated.xpleft;
+  let xp_next_level = xp_calculated.nextlvlxp;
+
+  let progress = Math.floor((1 - ((0.0 + xp_left) / xp_next_level)) * 100);
+
+  let emblem = LVL_EMBLEMS[Math.min(Math.floor(lvl / config.lvl_per_emblem), LVL_EMBLEMS.length - 1)];
+  let message = "lvl " + lvl + " [" + emblem + "], " + progress + "% -> " + (lvl + 1);
+  whisperBack(target, context, message);
+}
+
+function giveXpCommand(args, target, context, self) {
+  
+  // check if authorised
+  if (context.username == PRIV_STREAMER || context.username == PRIV_SUPPORT) {
+    // integrity guard
+    if (args.length != 3 || isNaN(args[2])) {
+      whisperBack(target, context, "invalid arguments, !givexp <username> <amount>");
+      return;
+    }
+
+    let targetUser = args[1].toLowerCase();
+    let amount = parseInt(args[2], 10);
+    incrementUserBalanceAndXP(targetUser, balance_add = 0, xp_add = amount, cause = "per command");
+    whisperBack(target, context, "Gave " + amount + "xp to " + targetUser);
+  } // else: no athority, do nothing
 }
 
 function configCommand(args, target, context, self) {
@@ -1234,6 +1291,35 @@ function rollDice () {
 // Called every time the bot connects to Twitch chat
 function onConnectedHandler (addr, port) {
   console.log(`* Connected to ${addr}:${port}`);
+  updateVips();
+}
+
+function updateVips() {
+  client.vips(opts.channels[0]).then((n) => vips = n).catch(e => console.log(e));
+  setTimeout(updateVips, 20000); // refresh every 30 sec
+}
+
+function isSubscriber(name) {
+  return sub_status[name];
+}
+
+
+function isVIP(name) {
+  for (s of vips) {
+    if (s.toLowerCase() == name.toLowerCase()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Initializes levels map with user levels based on xp in chatters.json
+ */
+function initUserLevels() {
+  for (let acc of chatters.accounts) {
+    levels[acc.name] = getLevel(acc.xp).lvl;
+  }
 }
 
 function handleChatRewards(name, message) {
@@ -1243,11 +1329,11 @@ function handleChatRewards(name, message) {
 
   if (message.startsWith("!slot")) {
     xp_added = config.xp_per_slot_cmd;
-    incrementUserBalanceAndXP(cc_added, xp_added, "slot command");
+    incrementUserBalanceAndXP(name, cc_added, xp_added, "slot command");
     return;
   } else if (message.startsWith("!tts ")) { 
-    xp_added = message.length * xp_per_char; // add char xp even for tts
-    incrementUserBalanceAndXP(cc_added, xp_added, "tts command");
+    xp_added = message.length * config.xp_per_char; // add char xp even for tts
+    incrementUserBalanceAndXP(name, cc_added, xp_added, "tts command");
   } else if (message.startsWith('!')) {
     return; // no rewards for other commands. Rewards for lurk and slot win are handled seperatly
   }
@@ -1256,10 +1342,25 @@ function handleChatRewards(name, message) {
 
   // count captain emotes
   var emote_count = (message.match(/ captai/g) || []).length;
-  xp_added = emote_count * config.xp_per_captain_emote + message.length * xp_per_char;
+  xp_added = emote_count * config.xp_per_captain_emote + message.length * config.xp_per_char;
   cc_added = config.cc_per_chat;
 
-  incrementUserBalanceAndXP(cc_added, xp_added, "chat message");
+  incrementUserBalanceAndXP(name, cc_added, xp_added, "chat message");
+}
+
+function handleXpUpdate(name, xp_updated) {
+
+  const lvl_updated = getLevel(xp_updated).lvl;
+  const lvl_before = levels[name];
+
+  if (lvl_before != lvl_updated) {
+    console.log("Level up for " + name + " " + lvl_before + " > " + lvl_updated);
+    levels[name] = lvl_updated;
+    client.say(opts.channels[0], "Level up!");
+  }
+
+  
+
 }
 
 function handleFirstChatter(name, target) {
@@ -1331,6 +1432,10 @@ function playSound(sound_path, duration=20000) {
 }
 
 function getLevel(xp) {
+  
+  if (xp == undefined)
+    return {lvl: 1, nextlvlxp: config.xp_base, xpleft: config.xp_base};
+
   const base = config.xp_base;
   const add = config.xp_added_per_lvl;
 
@@ -1348,7 +1453,7 @@ function getLevel(xp) {
     step += add;
   }
 
-  return lvl;
+  return {lvl: lvl, nextlvlxp: step, xpleft: xp * -1};
 }
 
 /**
@@ -1379,11 +1484,6 @@ function isUserKnown(user) {
   return false;
 }
 
-
-function handleIncrementBalance(user) {
-  updateUserBalance(user, getUserBalance(user) + config.cc_per_chat);
-}
-
 function incrementUserBalanceAndXP(user, balance_add=0, xp_add=0, cause=undefined) {
 
   let user_balance = 0;
@@ -1397,9 +1497,15 @@ function incrementUserBalanceAndXP(user, balance_add=0, xp_add=0, cause=undefine
     }
   }
 
+  if (user_xp == undefined)
+    user_xp = 0;
+
   if (cause != undefined) { // debug print
     console.log(user + " earns " + balance_add + "cc and " + xp_add + "xp (-> " + (user_xp + xp_add) + ") due to " + cause);
   }
+
+  if (xp_add > 0)
+    handleXpUpdate(user, user_xp + xp_add);
 
   updateUser(user, user_balance + balance_add, anthem=undefined, gold=undefined, xp=user_xp + xp_add);
 }
@@ -1421,6 +1527,15 @@ function getUserAnthem(user) {
     }
   }
   return undefined; // user not found
+}
+
+function getUserXp(user) {
+  for (acc of chatters.accounts) {
+    if (acc.name == user) {
+      return acc.xp;
+    }
+  }
+  return 0; // user not found
 }
 
 function isGoldStatusActive(user) {
@@ -1467,7 +1582,7 @@ function updateUser(user, balance, anthem=undefined, gold=undefined, xp=undefine
 
   // write changes to file
   try {
-    fs.writeFile('chatters.json', JSON.stringify(chatters), {flag:'w'});
+    fs.writeFile('chatters.json', JSON.stringify(chatters), callback=function(callback) {});
   } catch (e) {
     console.log(e);
   }
