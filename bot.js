@@ -1,5 +1,7 @@
 // V 2.5  // golden slots und mehr reward sounds
 
+// LICENSE: tmijs is MIT. The following work is MIT aswell. 
+// I do not take responsibility for functionality and reliability of this code.
 
 const tmi = require('tmi.js');
 const fs = require('fs');
@@ -8,7 +10,7 @@ const say = require('say');
 
 const CC_SYMBOL = "₵₵"; // Captain's Coin
 
-const LVL_EMBLEMS = ["♟", "♟♟", "♟♟♟", "🔱", "🔱🔱", "🔱🔱🔱", "💥", "💥💥", "💥💥💥", "☠️", "☠️☠️", "☠️☠️☠️", "💙", "💙💙", "💙💙💙", "🖤", "🖤🖤", "🖤🖤🖤", "💠", "💠💠", "💠💠💠", "🔰", "🔰🔰", "🔰🔰🔰", "💎", "💎💎", "💎💎💎", "🃏", "🃏🃏", "🃏🃏🃏", "⭐", "⭐⭐", "⭐⭐⭐", "🌌🌌🌌"];
+const LVL_EMBLEMS = ["🦐", "🦐🦐", "🦐🦐🦐", "🐟", "🐟🐟", "🐟🐟🐟", "🐠", "🐠🐠", "🐠🐠🐠", "🐡", "🐡🐡", "🐡🐡🐡", "🦀", "🦀🦀", "🦀🦀🦀", "🦞", "🦞🦞", "🦞🦞🦞", "🐙", "🐙🐙", "🐙🐙🐙", "🦈", "🦈🦈", "🦈🦈🦈", "🐋", "🐋🐋", "🐋🐋🐋", "☠️", "☠️☠️", "☠️☠️☠️", "🖤", "🖤🖤", "🖤🖤🖤", "💠", "💠💠", "💠💠💠", "💎", "💎💎", "💎💎💎", "🃏", "🃏🃏", "🃏🃏🃏", "⭐", "⭐⭐", "⭐⭐⭐", "🌌🌌🌌"];
 
 const DISCORD_INVITE = "https://discord.gg/X5KGBJGTPu";
 const REDDIT_LINK = "https://www.reddit.com/r/captaincasimir/";
@@ -75,7 +77,7 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "cc_cost_slots", type: 'n', default: 5, unit: "coins"},
   {name: "cc_cost_slotsx", type: 'n', default: 8, unit: "coins"},
   {name: "cc_slots_max_in", type: 'n', default: 100, unit: "coins"},
-  {name: "cc_cost_tts", type: 'n', default: 60, unit: "coins"},
+  {name: "cc_cost_tts", type: 'n', default: 80, unit: "coins"},
   {name: "cc_return_slots_basic", type: 'n', default: 250, unit: "coins"},
   {name: "cc_return_slots_peach", type: 'n', default: 1000, unit: "coins"},
   {name: "cc_return_slots_golden", type: 'n', default: 10000, unit: "coins"},
@@ -112,12 +114,13 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "max_lvl_tts_scaling", type: 'n', default: 50, unit: "level"},
   {name: "slot_rolls_per_lvl", type: 'n', default: 2, unit: "rolls"},
   {name: "max_lvl_slot_scaling", type: 'n', default: 90, unit: "lvl"},
-  {name: "slot_rolls_added_last_lvls", type: 'n', default: 200, unit: "rolls"},
+  {name: "slot_rolls_added_last_lvls", type: 'n', default: 20, unit: "rolls"},
   {name: "lvl_per_emblem", type: 'n', default: 5, unit: "lvl"},
+  {name: "cc_per_lvl", type: 'n', default: 200, unit: "coins"},
+  {name: "tts_chars_per_lvl", type: 'n', default: 5, unit: "symbols"},
 ]
 
-/*
- * Notes on the level system: Goal is an xp earn of 1000xp as an active user per stream (daily).
+/*Notes on the level system: Goal is an xp earn of 1000xp as an active user per stream (daily).
   Level 100 shall be achieved after 300 days of watching -> after 300 000 xp.
   expected default XP per stream:
   Expect 1 lurk -> 200xp
@@ -992,6 +995,8 @@ function levelCommand(target, context, self) {
   let progress = Math.floor((1 - ((0.0 + xp_left) / xp_next_level)) * 100);
 
   let emblem = LVL_EMBLEMS[Math.min(Math.floor(lvl / config.lvl_per_emblem), LVL_EMBLEMS.length - 1)];
+  if (context.username == PRIV_STREAMER)
+    emblem = "👨🏻‍✈️"; // chef will cheat levels for sure
   let message = "lvl " + lvl + " [" + emblem + "], " + progress + "% -> " + (lvl + 1);
   whisperBack(target, context, message);
 }
@@ -1356,11 +1361,59 @@ function handleXpUpdate(name, xp_updated) {
   if (lvl_before != lvl_updated) {
     console.log("Level up for " + name + " " + lvl_before + " > " + lvl_updated);
     levels[name] = lvl_updated;
-    client.say(opts.channels[0], "Level up!");
+    const emblem = LVL_EMBLEMS[Math.min(Math.floor(lvl_updated / config.lvl_per_emblem), LVL_EMBLEMS.length - 1)];
+    
+    
+    let reward_list = "-> +" + ((lvl_updated - lvl_before) * config.cc_per_lvl) + CC_SYMBOL;
+    
+    if (lvl_before < config.min_lvl_purchase && lvl_updated >= config.min_lvl_purchase) {
+      reward_list += ", !purchase unlocked"
+    }
+
+    if (lvl_before < config.min_lvl_slotsx && lvl_updated >= config.min_lvl_slotsx) {
+      reward_list += ", !slotsx unlocked"
+    }
+
+    if (lvl_before < config.min_lvl_golden_chance_1 && lvl_updated >= config.min_lvl_golden_chance_1) {
+      reward_list += ", +50% golden chance " + decodeURIComponent(config.golden_emote);
+    }
+
+    if (lvl_before < config.min_lvl_golden_chance_2 && lvl_updated >= config.min_lvl_golden_chance_2) {
+      reward_list += ", +100% golden chance " + decodeURIComponent(config.golden_emote);
+    }
+
+    for (let a of CC_ANTHEMS) {
+      if (isAnthemUnlocked(lvl_updated, a) && !isAnthemUnlocked(lvl_before, a)) {
+        reward_list += ", !anthem " + a.name;
+      }
+    }
+
+    if (lvl_before < config.min_lvl_tts && lvl_updated >= config.min_lvl_tts) {
+      reward_list += ", !tts unlocked"
+    }
+
+    if (lvl_updated > config.min_lvl_tts && lvl_updated <= config.max_lvl_tts_scaling) {
+      reward_list += ", +" + (lvl_updated - Math.max(lvl_before, config.min_lvl_tts)) * config.tts_chars_per_lvl + " TTS limit";
+    }
+
+    client.say(opts.channels[0], "⬆️🎉 Level up! " + name + " >> " + lvl_updated + " [" + emblem + "] " + reward_list);
+
+  }
+}
+
+function isAnthemUnlocked(lvl, anthem_obj) {
+
+  if (lvl < config.min_lvl_anthems) { // minimum lvl for anthems not reached
+    return false;
+  } else if (lvl > config.max_lvl_anthems) { // all anthems quaranteed
+    return true;
   }
 
-  
+  let anthem_index = CC_ANTHEMS.indexOf(anthem_obj);
 
+  // scale lvl by anthem price
+  let target_lvl = config.min_lvl_anthems + (anthem_index * 1.0 / (CC_ANTHEMS.length - 1)) * (config.max_lvl_anthems - config.min_lvl_anthems);
+  return lvl >= target_lvl;
 }
 
 function handleFirstChatter(name, target) {
@@ -1484,6 +1537,13 @@ function isUserKnown(user) {
   return false;
 }
 
+/**
+ * Adds given values to user xp and coin balance
+ * @param {string} user user name
+ * @param {number} balance_add balance update 
+ * @param {number} xp_add xp update
+ * @param {string} cause debug string
+ */
 function incrementUserBalanceAndXP(user, balance_add=0, xp_add=0, cause=undefined) {
 
   let user_balance = 0;
@@ -1500,8 +1560,15 @@ function incrementUserBalanceAndXP(user, balance_add=0, xp_add=0, cause=undefine
   if (user_xp == undefined)
     user_xp = 0;
 
+  let bonus = false;
+
+  if (isVIP(user) || isSubscriber(user)) { // apply sub/vip bonus if eligable
+    user_xp = user_xp * config.xp_factor_subsciber;
+    bonus = true;
+  }
+
   if (cause != undefined) { // debug print
-    console.log(user + " earns " + balance_add + "cc and " + xp_add + "xp (-> " + (user_xp + xp_add) + ") due to " + cause);
+    console.log(user + " earns " + balance_add + "cc and " + xp_add + (bonus ? "B" : "") + "xp (-> " + (user_xp + xp_add) + ") due to " + cause);
   }
 
   if (xp_add > 0)
