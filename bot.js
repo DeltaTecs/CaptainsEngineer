@@ -104,7 +104,7 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "xp_per_slot_win", type: 'n', default: 0, unit: "xp"},
   {name: "xp_per_reward", type: 'n', default: 50, unit: "xp"},
   {name: "xp_per_lurk", type: 'n', default: 200, unit: "xp"},
-  {name: "min_lvl_purchase", type: 'n', default: 2, unit: "level"},
+  {name: "min_lvl_sound", type: 'n', default: 2, unit: "level"},
   {name: "min_lvl_slotsx", type: 'n', default: 20, unit: "level"},
   {name: "min_lvl_anthems", type: 'n', default: 50, unit: "level"},
   {name: "max_lvl_anthems", type: 'n', default: 90, unit: "level"},
@@ -145,17 +145,17 @@ const CC_SOUNDS = [
 ]
 
 const CC_ANTHEMS = [
-  {name: "anthem-gulb", price: 1, sound: SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS},
-  {name: "anthem-magic", price: 2, sound: SOUND_MAGIC},
-  {name: "anthem-scream", price: 2, sound: SOUND_WILHELM_SCREAM},
-  {name: "anthem-airhorn", price: 3, sound: SOUND_AIRHORN},
-  {name: "anthem-inception", price: 4, sound: SOUND_INCEPTION},
-  {name: "anthem-jojo-tbc", price: 6, sound: SOUND_JOJO_TO_BE_CONTINUED},
-  {name: "anthem-hes-a-pirate", price: 8, sound: SOUND_HES_A_PIRATE},
-  {name: "anthem-brawl", price: 8, sound: SOUND_BRAWL},
-  {name: "anthem-jojo-ost", price: 8, sound: SOUND_JOJO_GOLDEN_WING},
-  {name: "anthem-jojo-stroheim", price: 8, sound: SOUND_JOJO_STROHEIM},
-  {name: "anthem-skrillex", price: 10, sound: SOUND_SKRILLEX}
+  {name: "gulb", price: 1, sound: SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS},
+  {name: "magic", price: 2, sound: SOUND_MAGIC},
+  {name: "scream", price: 2, sound: SOUND_WILHELM_SCREAM},
+  {name: "airhorn", price: 3, sound: SOUND_AIRHORN},
+  {name: "inception", price: 4, sound: SOUND_INCEPTION},
+  {name: "jojo-tbc", price: 6, sound: SOUND_JOJO_TO_BE_CONTINUED},
+  {name: "hes-a-pirate", price: 8, sound: SOUND_HES_A_PIRATE},
+  {name: "brawl", price: 8, sound: SOUND_BRAWL},
+  {name: "jojo-ost", price: 8, sound: SOUND_JOJO_GOLDEN_WING},
+  {name: "jojo-stroheim", price: 8, sound: SOUND_JOJO_STROHEIM},
+  {name: "skrillex", price: 10, sound: SOUND_SKRILLEX}
 ]
 
 var config;
@@ -469,23 +469,23 @@ function onCommand(target, context, commandName, self) {
     console.log(`* tts: ` + commandName.substring(4, commandName.length));
     ttsCommand(commandName.substring(4, commandName.length), target, context, self);
 
-  }  else if (commandName == "!purchase") {
+  } else if (commandName == "!purchase" || commandName == "!sound") {
 
-    console.log(`* purchase cmd`);
+    console.log(`* sound cmd`);
 
-    if (args.length == 1) {
-      // too few arguments
-      whisperBack(target, context, "invalid usage, !purchase <list | itemname>");
-      return;
+    soundCommand(args, target, context, self);
 
-    } else if (args[1] == "list") {
-      // show item list
-      purchaseListCommand(target, context, self);
+  } else if (commandName == "!anthem") {
 
-    } else {
-      // assume item purchase
-      purchaseItemCommand(args, target, context, self);
-    }
+    console.log(`* anthem cmd`);
+
+    anthemCommand(args, target, context, self);
+
+  } else if (commandName == "!anthems") {
+
+    console.log(`* anthems cmd`);
+
+    listAnthems(args, target, context, self);
 
   } else if (commandName == "!forceplay") {
 
@@ -537,9 +537,9 @@ function tutorialCommand(target, context, self) {
   client.say(target, tutorial);
   tutorial = "- item types: sounds (play instantly), anthems (play on first message)"
   client.say(target, tutorial);
-  tutorial = "- to list items to buy: !purchase list";
+  tutorial = "- to list sounds to play: !sound";
   client.say(target, tutorial);
-  tutorial = "- to buy and activate an item: !purchase <name>";
+  tutorial = "- to play a sound: !sound <name>";
   client.say(target, tutorial);
   tutorial = "- to buy and activate a tts message: !tts <message>";
   client.say(target, tutorial);
@@ -625,7 +625,7 @@ function forcePlayCommand(args, target, context, self) {
   if (context.username == PRIV_STREAMER || context.username == PRIV_SUPPORT) {
     // integrity guard
     if (args.length != 2 ) {
-      whisperBack(target, context, "invalid arguments, !forceplay <titel>, see list: !purchase list");
+      whisperBack(target, context, "invalid arguments, !forceplay <titel>, see list: !sound, !anthem");
       return;
     }
 
@@ -647,7 +647,7 @@ function forcePlayCommand(args, target, context, self) {
       }
     }
 
-    whisperBack(target, context, "sound not found: " + sound_name + ", see '!purchase list' for a list");    
+    whisperBack(target, context, "sound not found: " + sound_name + ", see '!sound' or '!anthem' for a list");    
   } // else: no athority, do nothing
 }
 
@@ -1204,7 +1204,7 @@ function transferCoinCommand(args, target, context, self) {
 }
 
 
-function purchaseListCommand(target, context, self) {
+function listSounds(target, context, self) {
 
   let list = "sounds: ";
 
@@ -1212,31 +1212,37 @@ function purchaseListCommand(target, context, self) {
     list += sound.name + " (" + (sound.price * sccfac()) + CC_SYMBOL + "), ";
   }
 
-  list = list.substring(0, list.length - 2);
-
-  list += "; anthems: ";
-
-  for (let sound of CC_ANTHEMS) {
-    list += sound.name + " (" + (sound.price * accfac()) + CC_SYMBOL + "), ";
-  }
-
-  list += "anthem-reset (free)";
-
   whisperBack(target, context, list);
-  whisperBack(target, context, "for Text-To-Speech (" + config.cc_cost_tts + CC_SYMBOL + "): !tts <text>");
 }
 
-function purchaseItemCommand(args, target, context, self) {
+function listAnthems(target, context, self) {
 
-  // assume args lenght atleast 2, checked in on cmd method
+  let list = "your available anthems: reset (free)";
+  const vip = isVIP(context.username) || isSubscriber(context.username);
 
-  let itemname = args[1];
+  for (let sound of CC_ANTHEMS) {
+    if (vip || isAnthemUnlocked(levels[context.username], sound)) {
+      list += ", " + sound.name + " " + (sound.price * accfac()) + CC_SYMBOL;
+    }
+  }
 
-  if (itemname == "anthem-reset") {
-    whisperBack(target, context, context.username + " will no longer have a sound played as welcome.");
-    updateUser(context.username, getUserBalance(context.username), anthem=null);
+  whisperBack(target, context, list);
+}
+
+function soundCommand(args, target, context, self) {
+
+  if (levels[context.username.toLowerCase()] < config.min_lvl_sound) {
+    whisperBack(target, context, "You are level " + levels[context.username.toLowerCase()] + ", unlock !sound at level " + config.min_lvl_sound);
     return;
   }
+
+  if (args.length == 1 || args[1] == "list" || args[1] == "l" || args[1] == "all") {
+    // show item list
+    listSounds(target, context, self);
+    return;
+  }
+
+  let itemname = args[1];
 
   // iterrate sounds
   for (let sound of CC_SOUNDS) {
@@ -1248,7 +1254,7 @@ function purchaseItemCommand(args, target, context, self) {
       const price = sound.price * sccfac();
 
       if (userbalance < price) {
-        whisperBack(target, context, "You have not enough Captain's Coin (" + userbalance + "/" + price + CC_SYMBOL + "), earn coin by chatting.");
+        whisperBack(target, context, "You have not enough Captain's Coin (" + userbalance + "/" + price + CC_SYMBOL + "), chat more.");
         return;
       } else {
         // purchase successfull
@@ -1257,13 +1263,44 @@ function purchaseItemCommand(args, target, context, self) {
         playSound(sound.sound);
         return;
       }
-
     }
+  }
+
+  
+  // assume no item name hit
+  whisperBack(target, context, itemname + " not found, try !sound");
+}
+
+ function anthemCommand(args, target, context, self) {
+
+  const vip = isVIP(context.username) || isSubscriber(context.username);
+
+  if (!vip && levels[context.username.toLowerCase()] < config.min_lvl_anthems) {
+    whisperBack(target, context, "You are level " + levels[context.username.toLowerCase()] + ", unlock !anthem at level " + config.min_lvl_sound + " or by subscribing to the channel!");
+    return;
+  }
+
+  if (args.length == 1 || args[1] == "list" || args[1] == "l" || args[1] == "all") {
+    // show item list
+    listAnthems(target, context, self);
+    return;
+  }
+
+
+  if (itemname == "reset") {
+    whisperBack(target, context, context.username + " will no longer have a welcome sound played");
+    updateUser(context.username, getUserBalance(context.username), anthem=null);
+    return;
   }
 
   // iterrate anthems
   for (let sound of CC_ANTHEMS) {
     if (sound.name == itemname) {
+
+      // check unlock
+      if (!vip && !isAnthemUnlocked(levels[context.username], sound)) {
+        whisperBack(target, context, "You didn't unlock this anthem yet. Level more or subscribe to the channel.");
+      }
 
       // check funding
       let userbalance = getUserBalance(context.username);
@@ -1275,7 +1312,7 @@ function purchaseItemCommand(args, target, context, self) {
         return;
       } else {
         // purchase successfull
-        client.say(target, context.username + " will now be greeted with " + sound.name + ". -" + price + CC_SYMBOL);
+        client.say(target, "🥳 " + context.username + " will now be greeted with " + sound.name + ". -" + price + CC_SYMBOL);
         updateUser(context.username, userbalance - price, anthem=sound.sound);
         return;
       }
@@ -1283,7 +1320,7 @@ function purchaseItemCommand(args, target, context, self) {
   }
 
   // assume no item name hit
-  whisperBack(target, context, "Item not found, check '!purchase list' for available items");
+  whisperBack(target, context, itemname + " not found, try !anthem");
 }
 
 // Function called when the "dice" command is issued
@@ -1366,8 +1403,8 @@ function handleXpUpdate(name, xp_updated) {
     
     let reward_list = "-> +" + ((lvl_updated - lvl_before) * config.cc_per_lvl) + CC_SYMBOL;
     
-    if (lvl_before < config.min_lvl_purchase && lvl_updated >= config.min_lvl_purchase) {
-      reward_list += ", !purchase unlocked"
+    if (lvl_before < config.min_lvl_sound && lvl_updated >= config.min_lvl_sound) {
+      reward_list += ", !sound unlocked"
     }
 
     if (lvl_before < config.min_lvl_slotsx && lvl_updated >= config.min_lvl_slotsx) {
@@ -1432,6 +1469,7 @@ function handleFirstChatter(name, target) {
 
 
     updateUser(name, config.cc_initial);
+    levels[name] = 1;
     client.say(target, decodeURIComponent(config.msg_welcome) + name + "!");
   }
 }
