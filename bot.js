@@ -95,7 +95,7 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "compact_jackpots", type: 'n', default: 1, unit: "0=off, 1=on"},
   {name: "slot_rolls_delay", type: 'n', default: 600, unit: "milliseconds"},
   {name: "max_lvl_reward", type: 'n', default: 100, unit: "levels"},
-  {name: "xp_factor_subsciber", type: 'n', default: 1.2, unit: "x-times"},
+  {name: "xp_factor_subsciber", type: 'n', default: 1.5, unit: "x-times"},
   {name: "xp_base", type: 'n', default: 500, unit: "xp"},
   {name: "xp_added_per_lvl", type: 'n', default: 50, unit: "xp"},
   {name: "xp_per_char", type: 'n', default: 0.3, unit: "xp"},
@@ -694,6 +694,11 @@ function ttsCommand(text, target, context, self) {
 
 function slotsCommand(args, target, context, self, sluts=false) {
 
+    if (sluts && levels[context.username] < config.min_lvl_slotsx) {
+      whisperBack(target, context, "You are level " + levels[context.username.toLowerCase()] + ", unlock !slotsx at level " + config.min_lvl_slotsx);
+      return;
+    }
+
     if (args.length > 1 && isNaN(args[1]) && args[1] != "all") {
       whisperBack(target, context, "invalid arguments, !slots [all|<amount>]");
       return;
@@ -1209,7 +1214,7 @@ function listSounds(target, context, self) {
   let list = "sounds: ";
 
   for (let sound of CC_SOUNDS) {
-    list += sound.name + " (" + (sound.price * sccfac()) + CC_SYMBOL + "), ";
+    list += sound.name + " " + (sound.price * sccfac()) + CC_SYMBOL + ", ";
   }
 
   whisperBack(target, context, list);
@@ -1271,12 +1276,12 @@ function soundCommand(args, target, context, self) {
   whisperBack(target, context, itemname + " not found, try !sound");
 }
 
- function anthemCommand(args, target, context, self) {
+function anthemCommand(args, target, context, self) {
 
   const vip = isVIP(context.username) || isSubscriber(context.username);
 
   if (!vip && levels[context.username.toLowerCase()] < config.min_lvl_anthems) {
-    whisperBack(target, context, "You are level " + levels[context.username.toLowerCase()] + ", unlock !anthem at level " + config.min_lvl_sound + " or by subscribing to the channel!");
+    whisperBack(target, context, "You are level " + levels[context.username.toLowerCase()] + ", unlock !anthem at level " + config.min_lvl_anthems + " or by subscribing to the channel!");
     return;
   }
 
@@ -1286,6 +1291,7 @@ function soundCommand(args, target, context, self) {
     return;
   }
 
+  let itemname = args[1];
 
   if (itemname == "reset") {
     whisperBack(target, context, context.username + " will no longer have a welcome sound played");
@@ -1670,12 +1676,25 @@ function updateUser(user, balance, anthem=undefined, gold=undefined, xp=undefine
   for (acc of chatters.accounts) {
     if (acc.name == user) {
       acc.balance = balance_parsed;
-      if (anthem != undefined)
-        acc.anthem = anthem == null ? undefined : anthem;
-      if (gold != undefined)
-        acc.gold = gold == null ? undefined : gold;
-      if (xp != undefined)
-        acc.xp = xp == null ? undefined : xp;
+
+      if (anthem == null) {
+        acc.anthem = undefined;
+      } else if (anthem != undefined) {
+        acc.anthem = anthem;
+      }
+
+      if (gold == null) {
+        acc.gold = undefined;
+      } else if (gold != undefined) {
+        acc.gold = gold;
+      }
+
+      if (xp == null) {
+        acc.xp = undefined;
+      } else if (xp != undefined) {
+        acc.xp = xp;
+      }
+
       updated = true;
       break;
     }
