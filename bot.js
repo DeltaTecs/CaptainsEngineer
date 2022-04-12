@@ -95,7 +95,7 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "compact_jackpots", type: 'n', default: 1, unit: "0=off, 1=on"},
   {name: "slot_rolls_delay", type: 'n', default: 600, unit: "milliseconds"},
   {name: "max_lvl_reward", type: 'n', default: 100, unit: "levels"},
-  {name: "xp_factor_subsciber", type: 'n', default: 1.5, unit: "x-times"},
+  {name: "xp_factor_subsciber", type: 'n', default: 1.2, unit: "x-times"},
   {name: "xp_base", type: 'n', default: 500, unit: "xp"},
   {name: "xp_added_per_lvl", type: 'n', default: 50, unit: "xp"},
   {name: "xp_per_char", type: 'n', default: 0.3, unit: "xp"},
@@ -485,7 +485,7 @@ function onCommand(target, context, commandName, self) {
 
     console.log(`* anthems cmd`);
 
-    listAnthems(args, target, context, self);
+    listAnthems(target, context, self);
 
   } else if (commandName == "!forceplay") {
 
