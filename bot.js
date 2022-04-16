@@ -76,12 +76,12 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "cc_initial", type: 'n', default: 50, unit: "coins"},
   {name: "cc_cost_slots", type: 'n', default: 5, unit: "coins"},
   {name: "cc_cost_slotsx", type: 'n', default: 8, unit: "coins"},
-  {name: "cc_slots_max_in", type: 'n', default: 100, unit: "coins"},
+  {name: "cc_slots_max_in", type: 'n', default: 10, unit: "coins"},
   {name: "cc_cost_tts", type: 'n', default: 80, unit: "coins"},
   {name: "cc_return_slots_basic", type: 'n', default: 250, unit: "coins"},
   {name: "cc_return_slots_peach", type: 'n', default: 1000, unit: "coins"},
   {name: "cc_return_slots_golden", type: 'n', default: 10000, unit: "coins"},
-  {name: "cc_per_chat", type: 'n', default: 1, unit: "coins"},
+  {name: "cc_per_chat", type: 'f', default: 1, unit: "coins"},
   {name: "cc_sound_cost_multiplier", type: 'n', default: 10, unit: "factor"},
   {name: "cc_anthem_cost_multiplier", type: 'n', default: 100, unit: "factor"},
   {name: "msg_welcome", type: 's', default: encodeURIComponent("Ahoy, Matey! ⛵ Welcome aboard ")} , // followed by: username
@@ -95,15 +95,17 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "compact_jackpots", type: 'n', default: 1, unit: "0=off, 1=on"},
   {name: "slot_rolls_delay", type: 'n', default: 600, unit: "milliseconds"},
   {name: "max_lvl_reward", type: 'n', default: 100, unit: "levels"},
-  {name: "xp_factor_subsciber", type: 'n', default: 1.5, unit: "x-times"},
+  {name: "xp_factor_subsciber", type: 'f', default: 1.5, unit: "x-times"},
   {name: "xp_base", type: 'n', default: 500, unit: "xp"},
   {name: "xp_added_per_lvl", type: 'n', default: 50, unit: "xp"},
-  {name: "xp_per_char", type: 'n', default: 0.3, unit: "xp"},
-  {name: "xp_per_captain_emote", type: 'n', default: 4, unit: "xp"},
-  {name: "xp_per_slot_cmd", type: 'n', default: 5, unit: "xp"},
-  {name: "xp_per_slot_win", type: 'n', default: 0, unit: "xp"},
-  {name: "xp_per_reward", type: 'n', default: 50, unit: "xp"},
+  {name: "xp_per_char", type: 'f', default: 0.5, unit: "xp"},
+  {name: "xp_per_captain_emote", type: 'f', default: 4, unit: "xp"},
+  {name: "xp_per_slot_cmd", type: 'f', default: 5, unit: "xp"},
+  {name: "xp_per_slot_win", type: 'f', default: 0, unit: "xp"},
+  {name: "xp_per_reward", type: 'f', default: 50, unit: "xp"},
   {name: "xp_per_lurk", type: 'n', default: 200, unit: "xp"},
+  {name: "xp_per_pirate_fight", type: 'n', default: 400, unit: "xp"},
+  {name: "xp_on_pirate_win", type: 'n', default: 100, unit: "xp"},
   {name: "min_lvl_sound", type: 'n', default: 2, unit: "level"},
   {name: "min_lvl_slotsx", type: 'n', default: 20, unit: "level"},
   {name: "min_lvl_anthems", type: 'n', default: 50, unit: "level"},
@@ -113,13 +115,16 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "min_lvl_tts", type: 'n', default: 10, unit: "level"},
   {name: "max_lvl_tts_scaling", type: 'n', default: 50, unit: "level"},
   {name: "slot_rolls_per_lvl", type: 'n', default: 2, unit: "rolls"},
-  {name: "max_lvl_slot_scaling", type: 'n', default: 90, unit: "lvl"},
+  {name: "max_lvl_slot_scaling", type: 'n', default: 89, unit: "lvl"},
   {name: "slot_rolls_added_last_lvls", type: 'n', default: 20, unit: "rolls"},
   {name: "lvl_per_emblem", type: 'n', default: 5, unit: "lvl"},
   {name: "cc_per_lvl", type: 'n', default: 200, unit: "coins"},
   {name: "tts_chars_per_lvl", type: 'n', default: 5, unit: "symbols"},
   {name: "min_delay_broadcast", type: 'n', default: 10, unit: "minutes"},
-  {name: "max_delay_broadcast", type: 'n', default: 30, unit: "minutes"}
+  {name: "max_delay_broadcast", type: 'n', default: 30, unit: "minutes"},
+  {name: "pirate_loss_factor", type: 'f', default: 0.5, unit: "factor"},
+  {name: "pirate_min_win", type: 'n', default: 100, unit: "coin"},
+  {name: "pirate_max_win", type: 'n', default: 1000, unit: "factor"}
 ]
 
 /*Notes on the level system: Goal is an xp earn of 1000xp as an active user per stream (daily).
@@ -163,25 +168,35 @@ const CC_ANTHEMS = [
 var config;
 initConfig();
 
+const golden_emote = decodeURIComponent(config.golden_emote);
+
 const BROADCASTS = [
-  {randspace: 10, event: undefined, message: "🎰 Gambling may cause addiction, no participation under 18, chance to win 1:67"},
-  {randspace: 10, event: undefined, message: "DYK: You earn " + config.cc_per_chat + CC_SYMBOL + " by chatting"},
-  {randspace: 10, event: undefined, message: "DYK: Subscribers earn " + (100 * (1 - config.xp_factor_subsciber)) + "% more xp"},
-  {randspace: 10, event: undefined, message: "DYK: You increase your chance of rolling a golden jackpot 50% when reaching lvl " + config.min_lvl_golden_chance_2},
-  {randspace: 10, event: undefined, message: "DYK: You can play a Text-To-Speech message with !tts (min lvl " + config.min_lvl_tts + ")"},
-  {randspace: 10, event: undefined, message: "DYK: By leveling you can increase your slot and TTS limit"},
-  {randspace: 10, event: undefined, message: "DYK: The chance to win a single roll of slots is 1,5625% 🍑🍒🍍🍇🍉🍐🍊🥥"},
-  {randspace: 10, event: undefined, message: "DYK: Special rewards end with level 100, but level emblems don't ;)"},
-  {randspace: 10, event: undefined, message: "DYK: An anthem is a theme that welcomes you personaly every stream. Unlock anthems by subscribing or by reaching level " + config.min_lvl_anthems + " (!anthem)"},
-  {randspace: 10, event: undefined, message: "DYK: By leveling to 100, you can reach a slots limit of 2000" + CC_SYMBOL + " 🎰"},
-  {randspace: 10, event: undefined, message: "DYK: Rolling a golden jackpot unlocks a special anthem and grants you gold status for a month 👑"},
-  {randspace: 10, event: undefined, message: "DYK: The Captain is a VERY big fan of Brause ;)"},
-  {randspace: 10, event: undefined, message: "Feel free to pm deltatecs bot features you would like to see ;)"},
-  {randspace: 10, event: undefined, message: "This vessel is equiped with several emergency mechanics. In case of fire or extreme weather conditions please refer to the Brause reward."},
-  {randspace: 10, event: undefined, message: "DYK: Transfer Captain's Coin 💰 with !transfer"},
-  {randspace: 10, event: undefined, message: "DYK: Check your place in the level ranking with !ranking"},
-  {randspace: 10, event: undefined, message: "DYK: Besides using a reward you can play sounds with !sound"},
-  {randspace: 10, event: undefined, message: "DYK: We have a slot machine 🎰 on board! Try !slots"}
+  /*{randspace: 200, event: undefined, message: "💡 Gambling may cause addiction 🎰 no participation under 18, chance to win 1:67"},
+  {randspace: 50, event: undefined, message: "💡 You earn " + config.cc_per_chat + CC_SYMBOL + " by chatting"},
+  {randspace: 80, event: undefined, message: "💡 Subscribers earn +" + (100 * (config.xp_factor_subsciber - 1)) + "% more xp"},
+  {randspace: 80, event: undefined, message: "💡 Subscribers can use !anthem from level 1"},
+  {randspace: 50, event: undefined, message: "💡 You increase your chance of rolling a golden jackpot 50% when reaching lvl " + config.min_lvl_golden_chance_2 + " " + golden_emote},
+  {randspace: 50, event: undefined, message: "💡 You can play a Text-To-Speech message with !tts (min lvl " + config.min_lvl_tts + ")"},
+  {randspace: 50, event: undefined, message: "💡 By leveling you can increase your slot and TTS limit"},
+  {randspace: 50, event: undefined, message: "💡 The chance to win a single roll of slots is 1,5625% 🍑🍒🍍🍇🍉🍐🍊🥥"},
+  {randspace: 50, event: undefined, message: "💡 Special rewards end with level 100, but level emblems don't ;)"},
+  {randspace: 50, event: undefined, message: "💡 An anthem is a theme that welcomes you personaly every stream. Unlock anthems by subscribing or by reaching level " + config.min_lvl_anthems + " (!anthem)"},
+  {randspace: 50, event: undefined, message: "💡 By leveling to 100, you can reach a slots limit of 2000" + CC_SYMBOL + " 🎰"},
+  {randspace: 50, event: undefined, message: "💡 Rolling a golden jackpot unlocks a special anthem and grants you gold status for a month 👑"},
+  {randspace: 30, event: undefined, message: "💡 The Captain is a VERY big fan of Brause ;)"},
+  {randspace: 50, event: undefined, message: "💡 Feel free to pm deltatecs bot features you would like to see ;)"},
+  {randspace: 20, event: undefined, message: "💡 This vessel is equiped with several emergency mechanics. In case of fire or extreme weather conditions please refer to the Brause reward."},
+  {randspace: 50, event: undefined, message: "💡 Transfer Captain's Coin 💰 with !transfer"},
+  {randspace: 50, event: undefined, message: "💡 Check your place in the level ranking with !ranking"},
+  {randspace: 50, event: undefined, message: "💡 Besides using a reward you can play sounds with !sound"},
+  {randspace: 50, event: undefined, message: "💡 We have a slot machine 🎰 on board! Try !slots"},*/
+  {randspace: 100, event: triggerEventHappyHr, message: "/announce 🚨 Happy Hour! 🚨  !slots are 20% off! (for " + config.min_delay_broadcast + " mins)"},
+  {randspace: 50, event: triggerEventMegaHappyHr, message: "/announce 🚨 Mega Happy Hour! 🚨  !slots are 40% off! (for " + config.min_delay_broadcast + " mins)"},
+  {randspace: 100, event: triggerEventXpBoost, message: "/announce 🚨 XP Boost! 🚨  All XP earned is multiplied x5! (for " + config.min_delay_broadcast + " mins)"},
+  {randspace: 10, event: triggerEventBlessing, message: "/announce 🚨 " + golden_emote + " Blessed! " + golden_emote + " 🚨  +200% golden jackpot chance " + golden_emote + " (for " + config.min_delay_broadcast + " mins)"},
+  {randspace: 50, event: triggerEventSuperSale, message: "/announce 🚨 Super Sale! 🚨  Sounds, anthems and tts are 90% off! (for " + config.min_delay_broadcast + " mins)"},
+  {randspace: 20, event: triggerEventMadSlots, message: "/announce 🚨🎰 Mad Slots! 🎰🚨  Slot limit is 5k " + CC_SYMBOL + "! (for " + config.min_delay_broadcast + " mins)"},
+  {randspace: 100000, event: triggerEventPirateAttack, message: "/announce 🚨🏴‍☠️⚔️ PIRATES! ⚔️🏴‍☠️🚨  Pirates are trying to hijack our boat! Use !fight ⚔️ You stand to loose/win " + CC_SYMBOL + "! Participation is rewarded with XP! 🏴‍☠️☠️ (" + config.min_delay_broadcast + " mins event)"}
 ]
 
 const slot_symbols = ['🍑', '🍒', '🍍', '🍇', '🍉', '🍐', '🍊', '🥥']; // propability of getting a triple is 1.56%
@@ -202,6 +217,11 @@ loadCredentials();
 
 console.log("target channel: " + opts.channels[0] + ", acc: " + opts.identity.username);
 
+/**
+ * time millis since unix, updated every 10ms
+ */
+var time;
+
 // initialize cooldown map
 var command_cooldowns = [];
 
@@ -210,13 +230,23 @@ var lurks = [];
 
 var sub_status = [];
 var vips = [];
+var levels = [];
+var pirate_participants = [];
 
-let levels = [];
 
 var last_tts = getTime() - config.tts_cooldown;
 
 // last tutorial display
 var last_tutorial_print = getTime() - config.tutorial_coldown;
+
+// event timestamps
+var event_happy_hr = 0; // 20% of slots
+var event_mega_happy_hr = 0; // 40% of slots
+var event_pirate_attack = 0; // !fight
+var event_xp_boost = 0; // double xp
+var event_blessing = 0; // +200% golden chance
+var event_super_sale = 0; // 90% of sounds, tts and anthems
+var event_mad_slots = 0; // slot limit 5000
 
 // no sounds mode
 var silent_mode = false;
@@ -236,6 +266,9 @@ client.on('connected', onConnectedHandler);
 
 var chatters = loadChatters();
 
+// set captains xp to max so he can use all features
+chatters.accounts.forEach(a => {if (a.name == PRIV_STREAMER) a.xp = 1000000;});
+
 backupChatters(); // backup just in case
 
 var users_seen = [];
@@ -253,6 +286,9 @@ function onMessageHandler (target, context, msg, self) {
   chat_target = target;
 
   sub_status[context.username.toLowerCase()] = context.subscriber;
+  if (context.username == PRIV_STREAMER) {
+    levels[PRIV_STREAMER] = config.max_lvl_reward;
+  }
 
   if (context["custom-reward-id"] != undefined) {
     onReward(target, context, self);
@@ -377,6 +413,7 @@ function onCommand(target, context, commandName, self) {
   // reset user cooldown
   command_cooldowns[context.username] = getTime();
 
+  let raw = commandName + "";
   args = commandName.replaceAll('@', '').split(" ");
   commandName = args[0].toLowerCase();
 
@@ -481,10 +518,20 @@ function onCommand(target, context, commandName, self) {
     console.log(`* brause cmd`);
     brauseCommand(args, target, context, self);
 
+  } else if (commandName == "!fight" || commandName == "!pirates") {
+
+    console.log(`* fight cmd`);
+    fightCommand(target, context);
+
   } else if (commandName == "!tts") {
 
-    console.log(`* tts: ` + commandName.substring(4, commandName.length));
-    ttsCommand(commandName.substring(4, commandName.length), target, context, self);
+    console.log(`* tts: ` + raw.substring(4, raw.length));
+    ttsCommand(raw.substring(4, raw.length), target, context, self);
+
+  } else if (commandName == "!stop" || commandName == "!stoptts") {
+
+    console.log("* stop tts");
+    stopTTSCommand(context);
 
   } else if (commandName == "!purchase" || commandName == "!sound") {
 
@@ -685,7 +732,7 @@ function ttsCommand(text, target, context, self) {
     return;
   }
 
-  if (levels[context.username.toLowerCase()] < config.min_lvl_tts) {
+  if (levels[context.username.toLowerCase()] < config.min_lvl_tts && context.username != PRIV_STREAMER) {
     whisperBack(target, context, "You are level " + levels[context.username.toLowerCase()] + ", unlock !tts at level " + config.min_lvl_tts);
     return;
   }
@@ -709,17 +756,52 @@ function ttsCommand(text, target, context, self) {
     return;
   }
 
-  if (getUserBalance(context.username) < config.cc_cost_tts) {
-    whisperBack(target, context, "You are broke. Text-To-Speech costs " + config.cc_cost_tts + CC_SYMBOL + "! Chat more.");
+  const cost = Math.floor(config.cc_cost_tts * (isEventActive(event_super_sale) ? 0.1 : 1));
+
+  if (getUserBalance(context.username) < cost) {
+    whisperBack(target, context, "You are broke. Text-To-Speech costs " + cost + CC_SYMBOL + "! Chat more.");
     return;
   }
 
-  updateUserBalance(context.username, getUserBalance(context.username) - config.cc_cost_tts);
+  updateUserBalance(context.username, getUserBalance(context.username) - cost);
 
   say.speak(text);
   last_tts = getTime();
 }
 
+function stopTTSCommand(context) {
+  if (context.username == PRIV_STREAMER || context.username == PRIV_SUPPORT) {
+    say.stop();
+  }
+}
+
+function fightCommand(target, context) {
+
+  if (!isEventActive(event_pirate_attack)) {
+    whisperBack(target, context, "The pirate event 🏴‍☠️ has ended :(");
+    return;
+  }
+
+  if (pirate_participants[context.username] != undefined) {
+    whisperBack(target, context, "You already fought in this battle 🏴‍☠️");
+    return;
+  }
+
+  const balance_before = getUserBalance(context.username);
+  const battle_win = getRandomInt(2) == 0;
+  const lost = getRandomInt(balance_before * config.pirate_loss_factor);
+  const won = getRandomInt(config.pirate_max_win - config.pirate_min_win) + config.pirate_min_win;
+
+  if (battle_win) {
+    client.say(target, "⚔️ " + context.username + " won the pirate battle! 💰 loot: +" + won + CC_SYMBOL + ", +" + config.xp_per_pirate_fight + "xp");
+    incrementUserBalanceAndXP(context.username, won, config.xp_per_pirate_fight, cause="piratebattle");
+  } else {
+    client.say(target, "⚔️ " + context.username + " lost the pirate battle  (+" + config.xp_per_pirate_fight + "xp) 💀 pirates stole " + lost + CC_SYMBOL);
+    incrementUserBalanceAndXP(context.username, -1 * lost, config.xp_per_pirate_fight, cause="piratebattle");
+  }
+
+  pirate_participants[context.username] = battle_win;
+}
 
 function slotsCommand(args, target, context, self, sluts=false) {
 
@@ -728,20 +810,20 @@ function slotsCommand(args, target, context, self, sluts=false) {
       return;
     }
 
-    if (args.length > 1 && isNaN(args[1]) && args[1] != "💰") {
+    if (args.length > 1 && isNaN(args[1]) && args[1] != "all") {
       whisperBack(target, context, "invalid arguments, !slots [all|<amount>]");
       return;
     }
 
     let amount = 0;
     const balance = getUserBalance(context.username);
-    const roll_cost = sluts ? config.cc_cost_slotsx : config.cc_cost_slots;
+    const base_roll_cost = sluts ? config.cc_cost_slotsx : config.cc_cost_slots;
+    const roll_cost = isEventActive(event_happy_hr) ? Math.floor(base_roll_cost * 0.8) : (isEventActive(event_mega_happy_hr) ? Math.floor(base_roll_cost * 0.6) : base_roll_cost);
     const compact_jackpots = config.compact_jackpots != 0;
     const slot_rolls_delay = config.slot_rolls_delay;
-    const golden_emote = decodeURIComponent(config.golden_emote);
     const rolls_mid_scaling = (Math.min(config.max_lvl_slot_scaling, levels[context.username.toLowerCase()]) - 1) * config.slot_rolls_per_lvl;
     const rolls_end_scaling = config.slot_rolls_added_last_lvls * (Math.max(0, Math.min(config.max_lvl_reward, levels[context.username.toLowerCase()] - config.max_lvl_slot_scaling)));
-    const user_slot_max = config.cc_slots_max_in + (roll_cost * (rolls_mid_scaling + rolls_end_scaling));
+    const user_slot_max = isEventActive(event_mad_slots) ? 5000 : config.cc_slots_max_in + (base_roll_cost * (rolls_mid_scaling + rolls_end_scaling));
 
     if (args.length == 1) {
       amount = roll_cost;
@@ -905,9 +987,15 @@ function getSlotOutput(username, sluts=false, goldstatus=false) {
 
   symbols = [];
 
-  const golden_emote = decodeURIComponent(config.golden_emote);
+  let rand_golden = config.rand_golden;
+  
+  if (isEventActive(event_blessing))
+    rand_golden -= 22;
+  else if (levels[username.toLowerCase()] >= config.min_lvl_golden_chance_2)
+    rand_golden -= 15;
+  else if (levels[username.toLowerCase()] >= config.min_lvl_golden_chance_1)
+    rand_golden -= 9;
 
-  const rand_golden = config.rand_golden - (levels[username.toLowerCase()] >= config.min_lvl_golden_chance_1 ? (levels[username.toLowerCase()] >= config.min_lvl_golden_chance_2 ? 15 : 9) : 0)
   for (let i = 0; i < 3; i++) {
     if (getRandomInt(rand_golden) == 0) { // force golden
       symbols.push(" " + golden_emote + " ");
@@ -968,28 +1056,28 @@ function goldenEvent(target, username) {
     delay += rain_delay;
   }
 
-  const ge = decodeURIComponent(config.golden_emote);
+  const ge = golden_emote;
 
   scheduleDelayedMessage(target, delay, "Congratulations " + username + "!! You achieved the impossible! You have gold status for 30 days and will greeted with a special anthem from now on!");
   scheduleDelayedMessage(target, delay + 1000, ge + " " + ge + " " + ge + " " + ge + " " + ge + " " + ge + " " + ge + " " + ge + " " + ge + " " + ge + " " + ge + " " + ge + " " + ge + " " + ge + " " + ge + " " + ge);
 
-  updateUser(username, getUserBalance(username), anthem=SOUND_FANFARE, gold=(new Date().getTime()));
+  updateUser(username, getUserBalance(username), anthem=SOUND_FANFARE, gold=(time));
 }
 
-function topLevelEvent(target, context, lvl) {
+function topLevelEvent(target, name, lvl) {
 
-  if (context.username == PRIV_STREAMER)
+  if (name == PRIV_STREAMER)
     return; // no congrats for cheating mr casimir
 
   if (lvl == 100) {
-    const message = "Congratulations " + context.username + " on behalf of the crew for reaching level 100! Thank you for beeing an active member. We hope the journey has been pleasant for you. There are no rewards to be unlocked beyond this point, however, you may continue to level, just for the prestige ;)  Cheers!  sign. Your Captain & Staff";
-    scheduleDelayedMessage(target, 1000, message);
+    const message = "🥂 Congratulations " + name + " on behalf of the crew for reaching level 100! Thank you for beeing such an active member. We hope the journey has been pleasant for you. There are no rewards to be unlocked beyond this point, however, you may continue to level, just for the prestige ;)  Cheers!  sign. Your Captain & Staff 👨‍✈️";
+    scheduleDelayedMessage(target, 2100, message);
   } else if (lvl == 500) {
-    const message = "Congratulations " + context.username + " on behalf of the crew for reaching level 500! You reached the mountain top but kept on climbing, we glad to have you.  Cheers!  sign. Your Captain & Staff";
-    scheduleDelayedMessage(target, 1000, message);
+    const message = "🥂 Congratulations " + name + " on behalf of the crew for reaching level 500! You reached the mountain top but kept on climbing, we are glad to have you.  Cheers!  sign. Your Captain & Staff 👨‍✈️";
+    scheduleDelayedMessage(target, 2100, message);
   } else if (lvl == 1000) {
-    const message = "Congratulations " + context.username + " on behalf of the crew for reaching level 1000! Who is the machine here? You or the CaptainsEngineer?  Cheers!  sign. Your Captain & Staff";
-    scheduleDelayedMessage(target, 1000, message);
+    const message = "🥂 Congratulations " + name + " on behalf of the crew for reaching level 1000! Who is the machine here? You or the CaptainsEngineer?  Cheers!  sign. Your Captain & Staff 👨‍✈️";
+    scheduleDelayedMessage(target, 2100, message);
   }
 }
 
@@ -1046,7 +1134,11 @@ function rankingCommand(target, context, self) {
 
   let message = "Top sailors: "
 
-  for (let i = 0; i < 10; i++) {
+  let own_rank;
+  let own_lvl;
+  let own_emblem;
+
+  for (let i = 0; i < arr.length; i++) {
     if (arr.length <= i)
       break;
     if (arr[i].name == PRIV_STREAMER) {
@@ -1054,11 +1146,23 @@ function rankingCommand(target, context, self) {
       continue;
     }
     const lvl = getLevel(arr[i].xp).lvl;
+
+    if (arr[i].name == context.username) {
+      own_rank = i + 1;
+      own_lvl = lvl;
+      own_emblem = LVL_EMBLEMS[Math.min(Math.floor(lvl / config.lvl_per_emblem), LVL_EMBLEMS.length - 1)];
+    }
+
+    if (i >= 10)
+      continue; // stop printing, keep iterating to find target user
     const emblem = LVL_EMBLEMS[Math.min(Math.floor(lvl / config.lvl_per_emblem), LVL_EMBLEMS.length - 1)];
     message += "#" + (i + 1) + " lvl " + lvl + " [" + emblem + "] " + arr[i].name + ", ";
   }
   message = message.substring(0, message.length - 2);
   client.say(target, message);
+  if (context.username != PRIV_STREAMER && own_rank > 10) {
+    client.say(target, context.username + " is #" + own_rank + " lvl " + own_lvl + " [" + own_emblem + "]");
+  }
 }
 
 function levelCommand(target, context, self) {
@@ -1089,7 +1193,7 @@ function giveXpCommand(args, target, context, self) {
 
     let targetUser = args[1].toLowerCase();
     let amount = parseInt(args[2], 10);
-    incrementUserBalanceAndXP(targetUser, balance_add = 0, xp_add = amount, cause = "per command");
+    incrementUserBalanceAndXP(targetUser, balance_add = 0, xp_add = amount, cause = "command");
     whisperBack(target, context, "Gave " + amount + "xp to " + targetUser);
   } // else: no athority, do nothing
 }
@@ -1122,9 +1226,16 @@ function configCommand(args, target, context, self) {
           return;
         }
 
+        if (setting.type == 'f' && isNaN(args[2])) {
+          whisperBack(target, context, args[1] + " has to be a float (" + setting.unit + ")");
+          return;
+        }
+
         let val = setting.type == 's' ? encodeURIComponent(args[2]) : args[2];
         if (setting.type == 'n')
           val = parseInt(val, 10);
+        else if (setting.type == 'f')
+          val = parseFloat(val);
         eval("config." + setting.name + " = val;");
         console.log("set " + setting.name + " to " + args[2]);
         whisperBack(target, context, "set " + setting.name + " to " + args[2]);
@@ -1235,9 +1346,9 @@ function burnCoinCommand(args, target, context, self) {
 
   let amount = parseInt(args[1], 10);
 
-  const balance_after = Math.max(getUserBalance(targetUser) - amount, 0);
-  updateUserBalance(targetUser, balance_after); // remove requested amount from save file
-  whisperBack(target, context, targetUser + " burned " + amount + CC_SYMBOL + " 🔥");
+  const balance_after = Math.max(getUserBalance(context.username) - amount, 0);
+  updateUserBalance(context.username, balance_after); // remove requested amount from save file
+  whisperBack(target, context, "🔥 burned " + amount + CC_SYMBOL);
 }
 
 
@@ -1381,7 +1492,7 @@ function anthemCommand(args, target, context, self) {
 
   if (itemname == "reset") {
     whisperBack(target, context, context.username + " will no longer have a welcome sound played");
-    updateUser(context.username, getUserBalance(context.username), anthem=null);
+    updateUser(context.username, getUserBalance(context.username), anthem=-1);
     return;
   }
 
@@ -1427,6 +1538,12 @@ function onConnectedHandler (addr, port) {
   console.log(`* Connected to ${addr}:${port}`);
   updateVips();
   scheduleBroadcast();
+  updateTime();
+}
+
+function updateTime() {
+  time = new Date().getTime();
+  setTimeout(updateTime, 10);
 }
 
 function updateVips() {
@@ -1460,20 +1577,91 @@ function initUserLevels() {
 function scheduleBroadcast() {
   let delay = (config.min_delay_broadcast + getRandomInt(config.max_delay_broadcast - config.min_delay_broadcast + 1)) * 60000;
 
-  let broadcast_picked = getRandomInt(1000);
-  let broadcasts_summed = 1000;
+  let broadcasts_summed = 0;
+  BROADCASTS.forEach(b => broadcasts_summed += b.randspace);
+  let broadcast_picked = getRandomInt(broadcasts_summed);
+
   for (let b of BROADCASTS) {
     broadcasts_summed -= b.randspace;
 
-    if (broadcast_picked >= broadcast_summed) {
+    if (broadcast_picked >= broadcasts_summed) {
       scheduleDelayedMessage(opts.channels[0], delay, b.message);
-      if (b.event != undefined);
-        b.event();
+      if (b.event != undefined)
+        setTimeout(b.event, delay + 10);
       break;
     }
-
   }
+  setTimeout(scheduleBroadcast, delay);
+}
 
+function triggerEventHappyHr() {
+  // 20% of slots
+  console.log("event: happy hr");
+  event_happy_hr = time;
+}
+
+function triggerEventMegaHappyHr() {
+  // 40% of slots
+  console.log("event: mega happy hr");
+  event_mega_happy_hr = time;
+}
+
+function triggerEventPirateAttack() {
+  // !fight
+  console.log("event: pirate attack");
+  event_pirate_attack = time;
+  pirate_participants = []; // reset participants
+  setTimeout(function() {
+    let win = false;
+    for (let acc of chatters.accounts) {
+      if (pirate_participants[acc.name] == true)
+        win = true;
+    }
+    if (win) {
+      client.say(opts.channels[0], "🏴‍☠️🔥 The pirates were successfuly defeated! (+" + config.xp_on_pirate_win + "xp for all participants)");
+      
+      chatters.accounts.forEach(acc => {
+        if (pirate_participants[acc.name] != undefined)
+          incrementUserBalanceAndXP(acc.name, 0, config.xp_on_pirate_win, cause="piratewin-after-event");
+        });
+
+    } else {
+      client.say(opts.channels[0], "🏴‍☠️⚔️ The pirates won")
+    }
+  }, config.min_delay_broadcast * 60000);
+}
+
+function triggerEventXpBoost() {
+  // double xp
+  console.log("event: xp boost");
+  event_xp_boost = time;
+}
+
+function triggerEventBlessing() {
+  // +200% golden chance
+  console.log("event: blessed");
+  event_blessing = time;
+}
+
+function triggerEventSuperSale() {
+  // 90% of sounds, tts and anthems
+  console.log("event: super sale");
+  event_super_sale = time;
+}
+
+function triggerEventMadSlots() {
+  // slot limit 5000
+  console.log("event: mad slots");
+  event_mad_slots = time;
+}
+
+/**
+ * returns wether the event time stamp value means the event is currently active
+ * @param {*} timestamp 
+ */
+function isEventActive(timestamp) {
+  const max_duration = config.min_delay_broadcast;
+  return time - timestamp <= max_duration * 60000;
 }
 
 function handleChatRewards(name, message) {
@@ -1487,7 +1675,7 @@ function handleChatRewards(name, message) {
     return;
   } else if (message.startsWith("!tts ")) { 
     xp_added = message.length * config.xp_per_char; // add char xp even for tts
-    incrementUserBalanceAndXP(name, cc_added, xp_added, "tts command");
+    return;
   } else if (message.startsWith('!')) {
     return; // no rewards for other commands. Rewards for lurk and slot win are handled seperatly
   }
@@ -1524,11 +1712,11 @@ function handleXpUpdate(name, xp_updated) {
     }
 
     if (lvl_before < config.min_lvl_golden_chance_1 && lvl_updated >= config.min_lvl_golden_chance_1) {
-      reward_list += ", +50% golden chance " + decodeURIComponent(config.golden_emote);
+      reward_list += ", +50% golden chance " + golden_emote;
     }
 
     if (lvl_before < config.min_lvl_golden_chance_2 && lvl_updated >= config.min_lvl_golden_chance_2) {
-      reward_list += ", +100% golden chance " + decodeURIComponent(config.golden_emote);
+      reward_list += ", +100% golden chance " + golden_emote;
     }
 
     for (let a of CC_ANTHEMS) {
@@ -1551,10 +1739,10 @@ function handleXpUpdate(name, xp_updated) {
       reward_list += ", +" + (lvl_updated - lvl_before) * config.slot_rolls_added_last_lvls * config.cc_cost_slots + CC_SYMBOL + " 🎰 limit";
     }
 
-    client.say(opts.channels[0], "⬆️🎉 Level up! " + name + " >> " + lvl_updated + " [" + emblem + "] " + reward_list);
-
+    const message = "⬆️🎉 Level up! " + name + " >> " + lvl_updated + " [" + emblem + "] " + reward_list;
+    scheduleDelayedMessage(opts.channels[0], 2010, message);
     if (lvl_updated == 100 || lvl_updated == 500 || lvl_updated == 1000)
-      topLevelEvent(target, context, lvl_updated);
+      topLevelEvent(opts.channels[0], name, lvl_updated);
   }
 }
 
@@ -1671,14 +1859,14 @@ function getLevel(xp) {
  * CC cost factor to purchase sounds
  */
 function sccfac() {
-  return config.cc_sound_cost_multiplier;
+  return config.cc_sound_cost_multiplier * (isEventActive(event_super_sale) ? 0.1 : 1);
 }
 
 /**
  * CC cost factor to purchase anthems
  */
  function accfac() {
-  return config.cc_anthem_cost_multiplier;
+  return config.cc_anthem_cost_multiplier * (isEventActive(event_super_sale) ? 0.1 : 1);
 }
 
 function getRandomInt(max) {
@@ -1720,7 +1908,9 @@ function incrementUserBalanceAndXP(user, balance_add=0, xp_add=0, cause=undefine
 
   let bonus = false;
 
-  if (isVIP(user) || isSubscriber(user)) { // apply sub/vip bonus if eligable
+  if (cause != "command" && isEventActive(event_xp_boost)) {
+    xp_add = xp_add * 5;
+  } else  if (cause != "command" && (isVIP(user) || isSubscriber(user))) { // apply sub/vip bonus if eligable
     xp_add = xp_add * config.xp_factor_subsciber;
     bonus = true;
   }
@@ -1766,7 +1956,7 @@ function getUserXp(user) {
 function isGoldStatusActive(user) {
   if (getUserGoldStatus(user) == undefined)
     return false;
-  return getUserGoldStatus(user) > (new Date().getTime()) - config.gold_status_duration;
+  return getUserGoldStatus(user) > (time) - config.gold_status_duration;
 }
 
 function getUserGoldStatus(user) {
@@ -1779,31 +1969,37 @@ function getUserGoldStatus(user) {
 }
 
 function updateUserBalance(user, balance) {
-  updateUser(user, balance, getUserAnthem(user));
+  updateUser(user, balance);
 }
 
+/**
+ * Updates user values and writes to json
+ * @param {string} user user in lower case letters
+ * @param {number} balance user balance
+ * @param {string} anthem sound o be played as anthem as .exe file,  -1 if write as undefined
+ * @param {number} gold gold status timestamp, -1 if write as undefined
+ * @param {number} xp xp, -1 if write to undefined
+ */
 function updateUser(user, balance, anthem=undefined, gold=undefined, xp=undefined) {
-
-  let balance_parsed = parseInt(balance, 10);
   
   updated = false;
   for (acc of chatters.accounts) {
     if (acc.name == user) {
-      acc.balance = balance_parsed;
+      acc.balance = balance;
 
-      if (anthem == null) {
+      if (anthem == -1) {
         acc.anthem = undefined;
       } else if (anthem != undefined) {
         acc.anthem = anthem;
       }
 
-      if (gold == null) {
+      if (gold == -1) {
         acc.gold = undefined;
       } else if (gold != undefined) {
         acc.gold = gold;
       }
 
-      if (xp == null) {
+      if (xp == -1) {
         acc.xp = undefined;
       } else if (xp != undefined) {
         acc.xp = xp;
