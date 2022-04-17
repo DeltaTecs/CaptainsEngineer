@@ -193,14 +193,13 @@ const BROADCASTS = [
   {randspace: 50, event: undefined, message: "💡 You increase your chance of rolling a golden jackpot 50% when reaching lvl " + config.min_lvl_golden_chance_2 + " " + golden_emote},
   {randspace: 50, event: undefined, message: "💡 You can play a Text-To-Speech message with !tts (min lvl " + config.min_lvl_tts + ")"},
   {randspace: 50, event: undefined, message: "💡 By leveling you can increase your slot and TTS limit"},
-  {randspace: 50, event: undefined, message: "💡 The chance to win a single roll of slots is 1,5625% 🍑🍒🍍🍇🍉🍐🍊🥥"},
+  {randspace: 50, event: undefined, message: "💡 The chance to win a single roll of slots is ~1,5% 🍑🍒🍍🍇🍉🍐🍊🥥"},
   {randspace: 50, event: undefined, message: "💡 Special rewards end with level 100, but level emblems don't ;)"},
   {randspace: 50, event: undefined, message: "💡 An anthem is a theme that welcomes you personaly every stream. Unlock anthems by subscribing or by reaching level " + config.min_lvl_anthems + " (!anthem)"},
   {randspace: 50, event: undefined, message: "💡 By leveling to 100, you can reach a slots limit of 2000" + CC_SYMBOL + " 🎰"},
   {randspace: 50, event: undefined, message: "💡 Rolling a golden jackpot unlocks a special anthem and grants you gold status for a month 👑"},
   {randspace: 30, event: undefined, message: "💡 The Captain is a VERY big fan of Brause, checkout his 100 Brause Challenge stream ;)"},
   {randspace: 50, event: undefined, message: "💡 Feel free to pm deltatecs bot features you would like to see ;)"},
-  {randspace: 20, event: undefined, message: "💡 This vessel is equiped with several emergency mechanics. In case of fire or extreme weather conditions please refer to the Brause reward."},
   {randspace: 50, event: undefined, message: "💡 Transfer Captain's Coin 💰 with !transfer"},
   {randspace: 50, event: undefined, message: "💡 Check your place in the level ranking with !ranking"},
   {randspace: 50, event: undefined, message: "💡 Besides using a reward you can play sounds with !sound"},
@@ -214,13 +213,6 @@ const BROADCASTS = [
   {randspace: 50, event: triggerEventPirateAttack, message: "/announce 🚨🏴‍☠️⚔️ PIRATES! ⚔️🏴‍☠️🚨  Pirates are trying to hijack our boat! Use !fight ⚔️ You stand to loose/win " + CC_SYMBOL + "! Participation is rewarded with XP! 🏴‍☠️☠️ (" + config.min_delay_broadcast + " mins event)"}
 ]
 
-var config;
-initConfig();
-
-const BROADCASTS = [
-  {randspace: 10, event: undefined, message: "🎰 Gambling may lead to addiction, no participation under 18, chance to win 1:67"},
-  {randspace: 10, event: undefined, message: "Did you know you get " + config.cc_per_chat}
-]
 
 // bot token
 //oauth:vzlot0hklicwjsfm52tcih14fuonz1
