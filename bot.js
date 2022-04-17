@@ -186,7 +186,7 @@ initConfig();
 const golden_emote = decodeURIComponent(config.golden_emote);
 
 const BROADCASTS = [
-  /*{randspace: 200, event: undefined, message: "💡 Gambling may cause addiction 🎰 no participation under 18, chance to win 1:67"},
+  {randspace: 200, event: undefined, message: "💡 Gambling may cause addiction 🎰 no participation under 18, chance to win 1:67"},
   {randspace: 50, event: undefined, message: "💡 You earn " + config.cc_per_chat + CC_SYMBOL + " by chatting"},
   {randspace: 80, event: undefined, message: "💡 Subscribers earn +" + (100 * (config.xp_factor_subsciber - 1)) + "% more xp"},
   {randspace: 80, event: undefined, message: "💡 Subscribers can use !anthem from level 1"},
@@ -198,20 +198,20 @@ const BROADCASTS = [
   {randspace: 50, event: undefined, message: "💡 An anthem is a theme that welcomes you personaly every stream. Unlock anthems by subscribing or by reaching level " + config.min_lvl_anthems + " (!anthem)"},
   {randspace: 50, event: undefined, message: "💡 By leveling to 100, you can reach a slots limit of 2000" + CC_SYMBOL + " 🎰"},
   {randspace: 50, event: undefined, message: "💡 Rolling a golden jackpot unlocks a special anthem and grants you gold status for a month 👑"},
-  {randspace: 30, event: undefined, message: "💡 The Captain is a VERY big fan of Brause ;)"},
+  {randspace: 30, event: undefined, message: "💡 The Captain is a VERY big fan of Brause, checkout his 100 Brause Challenge stream ;)"},
   {randspace: 50, event: undefined, message: "💡 Feel free to pm deltatecs bot features you would like to see ;)"},
   {randspace: 20, event: undefined, message: "💡 This vessel is equiped with several emergency mechanics. In case of fire or extreme weather conditions please refer to the Brause reward."},
   {randspace: 50, event: undefined, message: "💡 Transfer Captain's Coin 💰 with !transfer"},
   {randspace: 50, event: undefined, message: "💡 Check your place in the level ranking with !ranking"},
   {randspace: 50, event: undefined, message: "💡 Besides using a reward you can play sounds with !sound"},
-  {randspace: 50, event: undefined, message: "💡 We have a slot machine 🎰 on board! Try !slots"},*/
+  {randspace: 50, event: undefined, message: "💡 We have a slot machine 🎰 on board! Try !slots"},
   {randspace: 100, event: triggerEventHappyHr, message: "/announce 🚨 Happy Hour! 🚨  !slots are 20% off! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 50, event: triggerEventMegaHappyHr, message: "/announce 🚨 Mega Happy Hour! 🚨  !slots are 40% off! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 100, event: triggerEventXpBoost, message: "/announce 🚨 XP Boost! 🚨  All XP earned is multiplied x5! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 10, event: triggerEventBlessing, message: "/announce 🚨 " + golden_emote + " Blessed! " + golden_emote + " 🚨  +200% golden jackpot chance " + golden_emote + " (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 50, event: triggerEventSuperSale, message: "/announce 🚨 Super Sale! 🚨  Sounds, anthems and tts are 90% off! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 20, event: triggerEventMadSlots, message: "/announce 🚨🎰 Mad Slots! 🎰🚨  Slot limit is 5k " + CC_SYMBOL + "! (for " + config.min_delay_broadcast + " mins)"},
-  {randspace: 100000, event: triggerEventPirateAttack, message: "/announce 🚨🏴‍☠️⚔️ PIRATES! ⚔️🏴‍☠️🚨  Pirates are trying to hijack our boat! Use !fight ⚔️ You stand to loose/win " + CC_SYMBOL + "! Participation is rewarded with XP! 🏴‍☠️☠️ (" + config.min_delay_broadcast + " mins event)"}
+  {randspace: 50, event: triggerEventPirateAttack, message: "/announce 🚨🏴‍☠️⚔️ PIRATES! ⚔️🏴‍☠️🚨  Pirates are trying to hijack our boat! Use !fight ⚔️ You stand to loose/win " + CC_SYMBOL + "! Participation is rewarded with XP! 🏴‍☠️☠️ (" + config.min_delay_broadcast + " mins event)"}
 ]
 
 var config;
