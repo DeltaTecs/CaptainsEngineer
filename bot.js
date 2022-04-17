@@ -161,14 +161,20 @@ const CC_SOUNDS = [
 ]
 
 const CC_ANTHEMS = [
-  {name: "gulb", price: 1, sound: SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS},
   {name: "magic", price: 2, sound: SOUND_MAGIC},
   {name: "scream", price: 2, sound: SOUND_WILHELM_SCREAM},
-  {name: "airhorn", price: 3, sound: SOUND_AIRHORN},
-  {name: "inception", price: 4, sound: SOUND_INCEPTION},
   {name: "jojo-tbc", price: 6, sound: SOUND_JOJO_TO_BE_CONTINUED},
   {name: "hes-a-pirate", price: 8, sound: SOUND_HES_A_PIRATE},
   {name: "brawl", price: 8, sound: SOUND_BRAWL},
+  {name: "soviet", price: 8, sound: SOUND_SOVIET_ANTHEM},
+  {name: "crazy-frog", price: 8, sound: SOUND_CRAZY_FROG},
+  {name: "axel-f", price: 8, sound: SOUND_AXEL_F},
+  {name: "chippin-in", price: 8, sound: SOUND_CHIPPIN_IN},
+  {name: "elden-ring", price: 8, sound: SOUND_ELDEN_RING},
+  {name: "cyberpunk", price: 8, sound: SOUND_SPOILER},
+  {name: "cantina", price: 8, sound: SOUND_CANTINA_BAND},
+  {name: "wild-west", price: 8, sound: SOUND_WILD_WEST},
+  {name: "007", price: 8, sound: SOUND_007},
   {name: "jojo-ost", price: 8, sound: SOUND_JOJO_GOLDEN_WING},
   {name: "jojo-stroheim", price: 8, sound: SOUND_JOJO_STROHEIM},
   {name: "skrillex", price: 10, sound: SOUND_SKRILLEX}
