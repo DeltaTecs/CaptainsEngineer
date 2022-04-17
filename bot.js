@@ -342,7 +342,7 @@ function onReward(target, context, self) {
 
   console.log("id: " + context["custom-reward-id"]);
 
-  incrementUserBalanceAndXP(context.username, xp_add=config.xp_per_reward, cause="reward");
+  incrementUserBalanceAndXP(context.username, balance_add=0, xp_add=config.xp_per_reward, cause="reward");
   
   if (context["custom-reward-id"] === REWARD_ID_BRAUSE) {
   
