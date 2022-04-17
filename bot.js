@@ -1026,7 +1026,7 @@ function getSlotOutput(username, sluts=false, goldstatus=false) {
       symbols.push(" " + golden_emote + " ");
     } else if (sluts) { // !sluts / !slotsx
       symbols.push(slut_symbols[getRandomInt(slut_symbols.length)]);
-    } else if (goldstatus) { // !slots but after golden win
+    } else if (goldstatus && username != PRIV_STREAMER) { // !slots but after golden win
       symbols.push(slot_symbols_gold[getRandomInt(slot_symbols_gold.length)]);
     } else { // !slots default
       symbols.push(slot_symbols[getRandomInt(slot_symbols.length)]);
