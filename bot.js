@@ -591,7 +591,7 @@ function onCommand(target, context, commandName, self) {
     console.log(`* level cmd`);
     levelCommand(target, context, self);
 
-  } else if (commandName === '!top' || commandName === '!rank' || commandName === '!ranking' || commandName === '!top10'  || commandName === '!levels') {
+  } else if (commandName === '!top' || commandName === '!rank' || commandName === '!ranking' || commandName === '!top5'  || commandName === '!levels') {
 
     console.log(`* ranking cmd`);
     rankingCommand(target, context, self);
@@ -1162,30 +1162,31 @@ function rankingCommand(target, context, self) {
   let own_rank;
   let own_lvl;
   let own_emblem;
+  let sub = 0;
 
   for (let i = 0; i < arr.length; i++) {
     if (arr.length <= i)
       break;
     if (arr[i].name == PRIV_STREAMER) {
-      i--;
+      sub = 1;
       continue;
     }
     const lvl = getLevel(arr[i].xp).lvl;
 
     if (arr[i].name == context.username) {
-      own_rank = i + 1;
+      own_rank = i + 1 - sub;
       own_lvl = lvl;
       own_emblem = LVL_EMBLEMS[Math.min(Math.floor(lvl / config.lvl_per_emblem), LVL_EMBLEMS.length - 1)];
     }
 
-    if (i >= 10)
+    if (i >= 5 - sub)
       continue; // stop printing, keep iterating to find target user
     const emblem = LVL_EMBLEMS[Math.min(Math.floor(lvl / config.lvl_per_emblem), LVL_EMBLEMS.length - 1)];
-    message += "#" + (i + 1) + " lvl " + lvl + " [" + emblem + "] " + arr[i].name + ", ";
+    message += "#" + (i + 1 - sub) + " lvl " + lvl + " [" + emblem + "] " + arr[i].name + ", ";
   }
   message = message.substring(0, message.length - 2);
   client.say(target, message);
-  if (context.username != PRIV_STREAMER && own_rank > 10) {
+  if (context.username != PRIV_STREAMER && own_rank > 5) {
     client.say(target, context.username + " is #" + own_rank + " lvl " + own_lvl + " [" + own_emblem + "]");
   }
 }
