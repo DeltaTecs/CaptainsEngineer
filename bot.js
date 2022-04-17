@@ -53,6 +53,15 @@ const SOUND_WASTED = "wasted.mp3";
 const SOUND_CHALLENGE = "challenge.mp3";
 const SOUND_FANFARE = "fanfare.mp3";
 const SOUND_GOLDEN_JACKPOT = "golden-jackpot.mp3";
+const SOUND_SOVIET_ANTHEM = "soviet.mp3";
+const SOUND_CRAZY_FROG = "crazy-frog.mp3";
+const SOUND_AXEL_F = "axel-f.mp3";
+const SOUND_CHIPPIN_IN = "chippinin.mp3";
+const SOUND_ELDEN_RING = "elden-ring.mp3";
+const SOUND_SPOILER = "spoiler.mp3";
+const SOUND_CANTINA_BAND = "cantina-band.mp3";
+const SOUND_WILD_WEST = "wild-west.mp3";
+const SOUND_007 = "007.mp3";
 
 const REWARD_ID_STRECH = "8c31a6f0-b319-4865-9c4a-e9b57b960311";
 const REWARD_ID_BRAUSE = "a37d499f-1550-488b-896a-2b43e2ec9c2f";
@@ -199,6 +208,17 @@ const BROADCASTS = [
   {randspace: 100000, event: triggerEventPirateAttack, message: "/announce 🚨🏴‍☠️⚔️ PIRATES! ⚔️🏴‍☠️🚨  Pirates are trying to hijack our boat! Use !fight ⚔️ You stand to loose/win " + CC_SYMBOL + "! Participation is rewarded with XP! 🏴‍☠️☠️ (" + config.min_delay_broadcast + " mins event)"}
 ]
 
+var config;
+initConfig();
+
+const BROADCASTS = [
+  {randspace: 10, event: undefined, message: "🎰 Gambling may lead to addiction, no participation under 18, chance to win 1:67"},
+  {randspace: 10, event: undefined, message: "Did you know you get " + config.cc_per_chat}
+]
+
+// bot token
+//oauth:vzlot0hklicwjsfm52tcih14fuonz1
+
 const slot_symbols = ['🍑', '🍒', '🍍', '🍇', '🍉', '🍐', '🍊', '🥥']; // propability of getting a triple is 1.56%
 const slut_symbols = ['💦', '🧡', '💅', '🍆', '😩', '👅', '💋', '🔞']; // propability of getting a triple is 1.56%
 const slot_symbols_gold = ['💎', '👑', '⛲', '🦞', '🏰', '💂', '🏆']; // propability of getting a triple is 2.04%
@@ -276,6 +296,7 @@ var users_seen = [];
 var chat_target;
 
 initUserLevels();
+
 
 // Connect to Twitch:
 client.connect();
