@@ -1179,7 +1179,7 @@ function rankingCommand(target, context, self) {
       own_emblem = LVL_EMBLEMS[Math.min(Math.floor(lvl / config.lvl_per_emblem), LVL_EMBLEMS.length - 1)];
     }
 
-    if (i >= 5 - sub)
+    if (i > 5 + sub)
       continue; // stop printing, keep iterating to find target user
     const emblem = LVL_EMBLEMS[Math.min(Math.floor(lvl / config.lvl_per_emblem), LVL_EMBLEMS.length - 1)];
     message += "#" + (i + 1 - sub) + " lvl " + lvl + " [" + emblem + "] " + arr[i].name + ", ";
@@ -2093,7 +2093,7 @@ function updateUser(user, balance, anthem=undefined, gold=undefined, xp=undefine
   }
 
   if (!updated) { // no update so far, assume new user
-    chatters.accounts.push({name : user, balance : balance_parsed, anthem: anthem, gold: gold, xp: xp});
+    chatters.accounts.push({name : user, balance : balance, anthem: anthem, gold: gold, xp: xp});
   }
 
   // write changes to file
