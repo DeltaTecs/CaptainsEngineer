@@ -2120,8 +2120,8 @@ function backupChatters() {
   const backup_id = getRandomInt(1000);
 
   try {
-    if (!fs.existsSync(backups))
-      fs.mkdirSync(backups);
+    if (!fs.existsSync('backups'))
+      fs.mkdirSync('backups');
     fs.writeFileSync('backups/chatters_backup-' + backup_id + '.json', JSON.stringify(chatters), {flag:'w'});
   } catch (e) {
     console.log(e);
