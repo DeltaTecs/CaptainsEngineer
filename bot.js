@@ -558,6 +558,12 @@ function onCommand(target, context, commandName, self) {
 
     soundCommand(args, target, context, self);
 
+  } else if (commandName == "!so" || commandName == "!see") {
+
+    console.log(`* sound cmd`);
+
+    soCommand(args, target, context, self);
+
   } else if (commandName == "!anthem") {
 
     console.log(`* anthem cmd`);
@@ -1271,6 +1277,60 @@ function configCommand(args, target, context, self) {
   }
 }
 
+function configCommand(args, target, context, self) {
+  
+  // check if authorised
+  if (context.username == PRIV_STREAMER || context.username == PRIV_SUPPORT) {
+
+    if (args.length < 2) {
+      whisperBack(target, context, "invalid arguments, !config <variable> [value]");
+      return;
+    }
+
+    for (let setting of CONFIGURABLE) {
+      if (args[1] == setting.name) {
+
+        if (args.length == 2) {
+          whisperBack(target, context, args[1] + " is " + eval("config." + setting.name));
+          return;
+        }
+
+        if (setting.type == 'o') { // volume for example is an array of volume entries
+          whisperBack(target, context, args[1] + " is set/used by a different command");
+          return;
+        }
+
+        if (setting.type == 'n' && isNaN(args[2])) {
+          whisperBack(target, context, args[1] + " has to be a number (" + setting.unit + ")");
+          return;
+        }
+
+        if (setting.type == 'f' && isNaN(args[2])) {
+          whisperBack(target, context, args[1] + " has to be a float (" + setting.unit + ")");
+          return;
+        }
+
+        let val = setting.type == 's' ? encodeURIComponent(args[2]) : args[2];
+        if (setting.type == 'n')
+          val = parseInt(val, 10);
+        else if (setting.type == 'f')
+          val = parseFloat(val);
+        eval("config." + setting.name + " = val;");
+        console.log("set " + setting.name + " to " + args[2]);
+        whisperBack(target, context, "set " + setting.name + " to " + args[2]);
+        saveConfig();
+        return;
+      }
+    }
+
+    let all_settings = "";
+    for (let setting of CONFIGURABLE) {
+      all_settings += setting.name + ", ";
+    }
+    whisperBack(target, context, args[1] + " not found. Available: " + all_settings);
+  }
+}
+
 function volumeCommand(args, target, context, self) {
   
   // check if authorised
@@ -1758,10 +1818,12 @@ function handleXpUpdate(name, xp_updated) {
       reward_list += ", +" + (lvl_updated - lvl_before) * config.slot_rolls_added_last_lvls * config.cc_cost_slots + CC_SYMBOL + " 🎰 limit";
     }
 
-    const message = "⬆️🎉 Level up! " + name + " >> " + lvl_updated + " [" + emblem + "] " + reward_list;
-    scheduleDelayedMessage(opts.channels[0], 2010, message);
-    if (lvl_updated == 100 || lvl_updated == 500 || lvl_updated == 1000)
-      topLevelEvent(opts.channels[0], name, lvl_updated);
+    if (name != PRIV_STREAMER) {
+      const message = "⬆️🎉 Level up! " + name + " >> " + lvl_updated + " [" + emblem + "] " + reward_list;
+      scheduleDelayedMessage(opts.channels[0], 2010, message);
+      if (lvl_updated == 100 || lvl_updated == 500 || lvl_updated == 1000)
+        topLevelEvent(opts.channels[0], name, lvl_updated);
+    }
   }
 }
 
