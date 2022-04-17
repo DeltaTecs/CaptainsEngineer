@@ -62,6 +62,11 @@ const SOUND_SPOILER = "spoiler.mp3";
 const SOUND_CANTINA_BAND = "cantina-band.mp3";
 const SOUND_WILD_WEST = "wild-west.mp3";
 const SOUND_007 = "007.mp3";
+const SOUND_STRANGER_THINGS = "stranger-things.mp3";
+const SOUND_X_FILES = "x-files.mp3";
+const SOUND_NICE = "nice.mp3";
+const SOUND_OOF = "oof.mp3";
+const SOUND_OK_LETS_GO = "ok-lets-go.mp3";
 
 const REWARD_ID_STRECH = "8c31a6f0-b319-4865-9c4a-e9b57b960311";
 const REWARD_ID_BRAUSE = "a37d499f-1550-488b-896a-2b43e2ec9c2f";
@@ -151,11 +156,16 @@ const CC_SOUNDS = [
   {name: "gulb", price: 1, sound: SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS},
   {name: "nani", price: 2, sound: SOUND_NANI},
   {name: "magic", price: 2, sound: SOUND_MAGIC},
+  {name: "nice", price: 2, sound: SOUND_NICE},
+  {name: "oof", price: 2, sound: SOUND_OOF},
   {name: "scream", price: 2, sound: SOUND_WILHELM_SCREAM},
   {name: "wasted", price: 3, sound: SOUND_WASTED},
   {name: "airhorn", price: 4, sound: SOUND_AIRHORN},
   {name: "fail", price: 4, sound: SOUND_FAIL},
+  {name: "ok-lets-go", price: 4, sound: SOUND_OK_LETS_GO},
   {name: "inception", price: 6, sound: SOUND_INCEPTION},
+  {name: "to-be-continued", price: 6, sound: SOUND_JOJO_TO_BE_CONTINUED},
+  {name: "x-files", price: 6, sound: SOUND_X_FILES},
   {name: "to-be-continued", price: 6, sound: SOUND_JOJO_TO_BE_CONTINUED},
   {name: "earrape", price: 100, sound: SOUND_THOMAS}
 ]
@@ -173,10 +183,11 @@ const CC_ANTHEMS = [
   {name: "elden-ring", price: 8, sound: SOUND_ELDEN_RING},
   {name: "cyberpunk", price: 8, sound: SOUND_SPOILER},
   {name: "cantina", price: 8, sound: SOUND_CANTINA_BAND},
-  {name: "wild-west", price: 8, sound: SOUND_WILD_WEST},
-  {name: "007", price: 8, sound: SOUND_007},
   {name: "jojo-ost", price: 8, sound: SOUND_JOJO_GOLDEN_WING},
   {name: "jojo-stroheim", price: 8, sound: SOUND_JOJO_STROHEIM},
+  {name: "wild-west", price: 8, sound: SOUND_WILD_WEST},
+  {name: "007", price: 8, sound: SOUND_007},
+  {name: "strangerthings", price: 8, sound: SOUND_STRANGER_THINGS},
   {name: "skrillex", price: 10, sound: SOUND_SKRILLEX}
 ]
 
@@ -190,6 +201,7 @@ const BROADCASTS = [
   {randspace: 50, event: undefined, message: "💡 You earn " + config.cc_per_chat + CC_SYMBOL + " by chatting"},
   {randspace: 80, event: undefined, message: "💡 Subscribers earn +" + (100 * (config.xp_factor_subsciber - 1)) + "% more xp"},
   {randspace: 80, event: undefined, message: "💡 Subscribers can use !anthem from level 1"},
+  {randspace: 80, event: undefined, message: "💡 You earn XP by chatting, using captain emotes, channel rewards and slots <3"},
   {randspace: 50, event: undefined, message: "💡 You increase your chance of rolling a golden jackpot 50% when reaching lvl " + config.min_lvl_golden_chance_2 + " " + golden_emote},
   {randspace: 50, event: undefined, message: "💡 You can play a Text-To-Speech message with !tts (min lvl " + config.min_lvl_tts + ")"},
   {randspace: 50, event: undefined, message: "💡 By leveling you can increase your slot and TTS limit"},
@@ -448,7 +460,7 @@ function onCommand(target, context, commandName, self) {
     client.say(target, `42069 seconds`);
     console.log(`* watchtime`);
 
-  } else if (commandName == "!slots") {
+  } else if (commandName == "!slots" || commandName == "!inserts") {
 
     console.log(`* slots`);
     slotsCommand(args, target, context, self, sluts=false);
@@ -862,7 +874,7 @@ function slotsCommand(args, target, context, self, sluts=false) {
 
 
     if (amount < roll_cost) {
-      whisperBack(target, context, "Not enough coin. Turning the slots once costs " + roll_cost + CC_SYMBOL);
+      whisperBack(target, context, "To few coin inserted. Turning the slots once costs " + roll_cost + CC_SYMBOL);
       return;
     }
 
