@@ -36,13 +36,22 @@ All viewer commands are available to broadcasters etc aswell
 - `!discord` alias `!dc`: Will print the Discord in chat
 - `!reddit`: will print the Reddit link in chat
 - `!gulb`: will play a short gulping sound
-- `!lurk`: will display a message indicating that the viewer is away from stream but remains on site, upon non frequent usage a minor coin reward is issued
+- `!lurk`: will display a message indicating that the viewer is away from stream but remains on site, upon non frequent usage a minor coin reward is issued as well a descend amount of XP
 - `!tutorial` alias `!help`: will print a bot tutorial in chat. This feature is deprecated and to be replaced by bot tutorials in info boxes
 - `!balance`: will print the viewer's balance in chat
 - `!transfer <user> <amount>`: will attempt to transfer the specified amount of coin from the viewer's account to the specified user
-- `!tts <text>`: will attempt to redem a text to speech message for a certain amount of coin. Maximum tts length and cooldown can be adjusted by the broadcaster.
-- `!purchase <item name|'list'>`: will either print a list of all items subject to purchase or attempt to purchase a specified item. Available are sound effects and anthems. While sounds are played instantly, anthems are played everytime the user write their first chat message per stream
+- `!tts <text>`: will attempt to redem a text to speech message for a certain amount of coin. Maximum tts length and cooldown can be adjusted by the broadcaster, limit scales with level
+- `!sound <name>`: will play a sound
+- `!sounds | !sound list`: will display available sounds
 - `!slots [amount|'all']` alias `!slotsx [amount|'all']`: will withdraw the amount entered into the slot machine and make as many rolls as are possible with the inputed amount. Winnings are aggregated and displayed. Upon optaining a jackpot, a sound is played and a reward issued. A basic jackpot condition is met when three equal symbols align in a single roll, a super jackpot only takes place if three special symbols are rolled, per default the peach. `!slotsx` will display different symbols, take more money but also play an additional winning sound. There is an additional super rare jackpot which's symbol can be set to an emote or anything. With a very low propability (by default 1/71) a slot gets overwritten with said symbol during a roll. If all three slots appear to be overwritten a golden jackpot takes place. It will trigger a special sound, event aswell as reward.
+- `!anthem <name>`: will set an anthem
+- `!anthems | !anthem list`: will list all avaibale anthems
+- `!fight`: will fight in the pirate hijack even
+- `!burn <amount>`: will burn given amount of captains coin
+- `!anthem <name>`: will set an anthem
+- `!lvl | !xp | !level`: will show level progress
+- `!top | !ranking | !top10 | !levels`: will show furthes progressed viewers (xp)
+
 
 ## Commands: As a broadcaster / admin
 Additional commands available to people specified in `PRIV_STREAMER` and sometimes `PRIV_SUPPORT` are
@@ -55,6 +64,7 @@ Additional commands available to people specified in `PRIV_STREAMER` and sometim
 - `!forceplay <item name>`: will instantly play the specified sound/anthem
 - `!challenge <hunt|global> <text>`: will add a challenge to the saved challenges, randomly printed when the challenge reward is used. There are two categorys: hunt and global challenges. Global challenges usage is not implemented as of 4-4.22.
 - `!config <variable> [value]`: will set a certain config value. See available config values below. Not specifying a value will print the current variable value.
+- `!stop | !stoptts`: will stop the current tts message
 
 ## Available config variables for deep customization
 - `tts_limit`, number, default `60`: Maximum amount of character allowed to be used in a text to speech message
@@ -83,7 +93,37 @@ Additional commands available to people specified in `PRIV_STREAMER` and sometim
 - `cc_sound_cost_multiplier`, number, default `10`: Price multiplier for purchasing instant sound effects
 - `cc_anthem_cost_multiplier`, number, default `100`: Price multiplier for purchasing anthems (repeating sounds)
 - `compact_jackpots`, number, default `1`:  Wether slot jackpots should be summarized instead of a disting jackpot message for all of them (0 = detailed, 1 = compressed)
-- `slot_rolls_delay`, number, default `600`: Amount of milliseconds in delay between slot row prints in chat
+- `max_lvl_reward`, number, default `100`:
+- `xp_factor_subsciber`, float, default `1.5`:
+- `xp_base`, number, default `1.5`:
+- `xp_added_per_lvl`, number, default `600`:
+- `xp_per_char`, number, default `600`:
+- `xp_per_captain_emote`, number, default `600`:
+- `xp_per_slot_cmd`, number, default `600`:
+- `xp_per_slot_win`, number, default `600`:
+- `xp_per_reward`, number, default `600`:
+- `xp_per_lurk`, number, default `600`:
+- `xp_per_pirate_fight`, number, default `600`:
+- `xp_on_pirate_win`, number, default `600`:
+- `min_lvl_sound`, number, default `600`:
+- `min_lvl_slotsx`, number, default `600`:
+- `min_lvl_anthems`, number, default `600`:
+- `max_lvl_anthems`, number, default `600`:
+- `min_lvl_golden_chance_1`, number, default `600`:
+- `min_lvl_golden_chance_2`, number, default `600`:
+- `min_lvl_tts`, number, default `600`:
+- `max_lvl_tts_scaling`, number, default `600`:
+- `slot_rolls_per_lvl`, number, default `600`:
+- `max_lvl_slot_scaling`, number, default `600`:
+- `slot_rolls_added_last_lvls`, number, default `600`:
+- `lvl_per_emblem`, number, default `600`:
+- `cc_per_lvl`, number, default `600`:
+- `tts_chars_per_lvl`, number, default `600`:
+- `min_delay_broadcast`, number, default `600`:
+- `max_delay_broadcast`, number, default `600`:
+- `pirate_loss_factor`, number, default `600`:
+- `pirate_min_win`, number, default `600`:
+- `pirate_max_win`, number, default `600`:
 
 
 
