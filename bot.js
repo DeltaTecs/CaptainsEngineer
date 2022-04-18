@@ -860,7 +860,10 @@ function slotsCommand(args, target, context, self, sluts=false) {
     const slot_rolls_delay = config.slot_rolls_delay;
     const rolls_mid_scaling = (Math.min(config.max_lvl_slot_scaling, levels[context.username.toLowerCase()]) - 1) * config.slot_rolls_per_lvl;
     const rolls_end_scaling = config.slot_rolls_added_last_lvls * (Math.max(0, Math.min(config.max_lvl_reward, levels[context.username.toLowerCase()] - config.max_lvl_slot_scaling)));
-    const user_slot_max = isEventActive(event_mad_slots) ? 5000 : config.cc_slots_max_in + (base_roll_cost * (rolls_mid_scaling + rolls_end_scaling));
+    let user_slot_max = isEventActive(event_mad_slots) ? 5000 : config.cc_slots_max_in + (base_roll_cost * (rolls_mid_scaling + rolls_end_scaling));
+    if (context.username == PRIV_STREAMER) {
+      user_slot_max = 999999999;
+    }
 
     if (args.length == 1) {
       amount = roll_cost;
