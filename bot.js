@@ -1375,6 +1375,13 @@ function volumeCommand(args, target, context, self) {
 
     if (args.length == 2) {
 
+      if (args[1] == "standard" || args[1] == "reset") {
+        config.mastervolume = 100;
+        config.volume = [];
+        whisperBack(target, context, "Volumes reset");
+        return;
+      }
+
       if (args[1].startsWith('+') || args[1].startsWith('-')) {
 
         // assume additivemod
