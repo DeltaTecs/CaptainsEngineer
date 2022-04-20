@@ -1508,9 +1508,10 @@ function volumesCommand(args, target, context, self) {
     let message = "\n\n***** Sound overview *****\n";
     message += "***** Commands: \n";
     message += "Set master volume:  !volume <value>\n";
-    message += "Adjust master colume: !volume +/-<adjustment>\n";
+    message += "Adjust master volume: !volume +/-<adjustment>\n";
     message += "Adjust single volume:  !volume <file> <value>\n";
-    message += "Adjust master colume: !volume <file> +/-<adjustment>\n";
+    message += "Adjust master volume: !volume <file> +/-<adjustment>\n";
+    message += "Reset all volumes:  !volume reset\n";
     message += "***** Current Setting: \n";
     message += "Master volume: " + config.mastervolume + "%\n";
     message += "--- Anthems: value, file \n";
