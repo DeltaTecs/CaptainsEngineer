@@ -7,6 +7,8 @@ const tmi = require('tmi.js');
 const fs = require('fs');
 const { exec } = require('child_process');
 const say = require('say');
+const express = require('express');
+const app = express();
 
 const CC_SYMBOL = "₵₵"; // Captain's Coin
 
@@ -138,7 +140,8 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "max_delay_broadcast", type: 'n', default: 30, unit: "minutes"},
   {name: "pirate_loss_factor", type: 'f', default: 0.5, unit: "factor"},
   {name: "pirate_min_win", type: 'n', default: 100, unit: "coin"},
-  {name: "pirate_max_win", type: 'n', default: 1000, unit: "factor"}
+  {name: "pirate_max_win", type: 'n', default: 1000, unit: "factor"},
+  {name: "msg_so", type: 's', default: encodeURIComponent("👨‍✈️☝️ Make sure to check out ")}
 ]
 
 /*Notes on the level system: Goal is an xp earn of 1000xp as an active user per stream (daily).
@@ -166,7 +169,6 @@ const CC_SOUNDS = [
   {name: "inception", price: 6, sound: SOUND_INCEPTION},
   {name: "to-be-continued", price: 6, sound: SOUND_JOJO_TO_BE_CONTINUED},
   {name: "x-files", price: 6, sound: SOUND_X_FILES},
-  {name: "to-be-continued", price: 6, sound: SOUND_JOJO_TO_BE_CONTINUED},
   {name: "earrape", price: 100, sound: SOUND_THOMAS}
 ]
 
@@ -529,6 +531,11 @@ function onCommand(target, context, commandName, self) {
     console.log(`* volume cmd`);
     volumeCommand(args, target, context, self);
 
+  } else if (commandName == "!volumes" || commandName == "!volums") {
+
+    console.log(`* volumes cmd`);
+    volumesCommand(args, target, context, self);
+
   } else if (commandName == "!config" || commandName == "!set") {
 
     console.log(`* config cmd`);
@@ -572,7 +579,7 @@ function onCommand(target, context, commandName, self) {
 
   } else if (commandName == "!so" || commandName == "!see") {
 
-    console.log(`* sound cmd`);
+    console.log(`* so cmd`);
 
     soCommand(args, target, context, self);
 
@@ -1352,34 +1359,78 @@ function volumeCommand(args, target, context, self) {
   // check if authorised
   if (context.username == PRIV_STREAMER || context.username == PRIV_SUPPORT) {
 
+    if (args.length == 1) {
+      whisperBack(target, context, "Master volume is " + config.mastervolume + "%, show overview in console with !volumes");
+      return;
+    }
+
     if (args.length > 3) {
       whisperBack(target, context, "invalid arguments, !volume [<global volume>]|[<file> <volume>], volume greater 0");
       return;
     }
 
-    // integrity guard
-    if (args.length == 2 && (isNaN(args[1]) || args[1] < 0)) {
-      whisperBack(target, context, "invalid arguments, !volume [<global volume>]|[<file> <volume>], volume greater 0");
-      return;
-    }
+  //  if (args[1].startsWith('+') || args[1].startsWith('-')) {
+      // assume additive modifier
 
-    // integrity guard
-    if (args.length == 3 && (isNaN(args[2]) || args[1] < 0)) {
-      whisperBack(target, context, "invalid arguments, !volume [<global volume>]|[<file> <volume>], volume greater 0");
-      return;
-    }
-
-    if (args.length == 1) {
-      whisperBack(target, context, "Master volume is " + config.mastervolume + "%");
-      return;
-    }
 
     if (args.length == 2) {
 
-      let gain = args[1];
-      config.mastervolume = gain;
-      saveConfig();
-      whisperBack(target, context, "Master volume set to " + gain + "%");
+      if (args[1].startsWith('+') || args[1].startsWith('-')) {
+
+        // assume additivemod
+        let mod = args[1].substring(1, args[1].length);
+        if (isNaN(mod)) {
+          whisperBack(target, context, "invalid modifier, must be +/-<value>");
+          return
+        } else {
+          config.mastervolume = parseInt(config.mastervolume, 10) + parseInt(args[1], 10);
+          saveConfig();
+          whisperBack(target, context, "Master volume set to " + config.mastervolume + "%");  
+        }
+
+      } else if (isNaN(args[1])) {
+        
+        let target_sound = args[1];
+
+        // check if target file exists
+        try {
+          if (!fs.existsSync(target_sound)) {
+            whisperBack(target, context, "No such file " + target_sound);
+            let filenames = "";
+            fs.readdir(".", (err, files) => {
+              files.forEach(file => {
+                if (file.endsWith(".mp3")) {
+                  filenames += file + ", ";
+                }
+              });
+              whisperBack(target, context, "Available: " + filenames);
+            });
+            return;
+          }
+        } catch(err) {
+          console.log(err)
+        }
+
+      let found = false;
+      for (let s of config.volume) {
+        if (s.file == target_sound) {
+          whisperBack(target, context, target_sound + " volume set to " + s.volume + "%");  
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        whisperBack(target, context, target_sound + " volume set to 100%");  
+      }
+
+      } else {
+
+        let gain = args[1];
+        config.mastervolume = gain;
+        saveConfig();
+        whisperBack(target, context, "Master volume set to " + gain + "%");  
+      }
 
     } else if (args.length == 3) {
 
@@ -1413,7 +1464,13 @@ function volumeCommand(args, target, context, self) {
       let overwritten = false;
       for (let s of config.volume) {
         if (s.file == target_sound) {
-          s.volume = gain;
+          if (gain.startsWith('+') || gain.startsWith('-')) {
+            s.volume = parseInt(s.volume, 10) + parseInt(gain, 10);
+            whisperBack(target, context, "Set " + target_sound + " volume multiplier to " + (parseInt(s.volume, 10)) + "%");
+          } else {
+            s.volume = gain;
+            whisperBack(target, context, "Set " + target_sound + " volume multiplier to " + gain + "%");
+          }
           overwritten = true;
           break;
         }
@@ -1421,12 +1478,71 @@ function volumeCommand(args, target, context, self) {
 
 
       if (!overwritten) {
-        config.volume.push({file : target_sound, volume : gain});
+        if (gain.startsWith('+') || gain.startsWith('-')) {
+          config.volume.push({file : target_sound, volume : 100 + parseInt(gain, 10)});
+          whisperBack(target, context, "Set " + target_sound + " volume multiplier to " + (100 + parseInt(gain, 10)) + "%");
+        } else {
+          config.volume.push({file : target_sound, volume : gain});
+          whisperBack(target, context, "Set " + target_sound + " volume multiplier to " + gain + "%");
+        }
       }
 
       saveConfig();
-      whisperBack(target, context, "Set " + target_sound + " volume multiplier to " + gain + "%");
     }
+
+  } // else: no athority, do nothing
+}
+
+function volumesCommand(args, target, context, self) {
+  
+  // check if authorised
+  if (context.username == PRIV_STREAMER || context.username == PRIV_SUPPORT) {
+
+    let message = "\n\n***** Sound overview *****\n";
+    message += "***** Commands: \n";
+    message += "Set master volume:  !volume <value>\n";
+    message += "Adjust master colume: !volume +/-<adjustment>\n";
+    message += "Adjust single volume:  !volume <file> <value>\n";
+    message += "Adjust master colume: !volume <file> +/-<adjustment>\n";
+    message += "***** Current Setting: \n";
+    message += "Master volume: " + config.mastervolume + "%\n";
+    message += "--- Anthems: value, file \n";
+    for (let a of CC_ANTHEMS) {
+      let vol = 100;
+      for (let s of config.volume)
+        if (s.file == a.sound) {
+          vol = s.volume;
+          break;
+        }
+        message += " " + vol + "%  \t" + a.sound + " \t aka '" + a.name +  "'\n";
+      }
+    message += "--- Sounds: value, file\n";
+    for (let a of CC_SOUNDS) {
+      let vol = 100;
+      for (let s of config.volume)
+        if (s.file == a.sound) {
+          vol = s.volume;
+          break;
+        }
+      message += " " + vol + "%  \t" + a.sound + " \t aka '" + a.name +  "'\n";
+    }
+    message += "--- Others: value, file\n";
+
+    let others = [SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS, SOUND_ENORM, SOUND_OH_YEAH, SOUND_FAIL, SOUND_INCEPTION, SOUND_FOX_INTRO, SOUND_INTRO_CLIP, SOUND_AYE_AYE_CAPTAIN, SOUND_JACKPOT, SOUND_SUPER_JACKPOT, SOUND_GOLDEN_JACKPOT, SOUND_SON_OF_A_BITCH, SOUND_BADUMTS, SOUND_CHALLENGE, SOUND_FANFARE];
+    for (let a of others) {
+      let vol = 100;
+      for (let s of config.volume)
+        if (s.file == a) {
+          vol = s.volume;
+          break;
+        }
+      message += " " + vol + "% \t " + a + "\n";
+    }
+    message += "**************************\n\n";
+
+    console.log(message);
+
+    whisperBack(target, context, "Volume overview printed in console");
 
   } // else: no athority, do nothing
 }
@@ -1567,6 +1683,22 @@ function soundCommand(args, target, context, self) {
   // assume no item name hit
   whisperBack(target, context, itemname + " not found, try !sound");
 }
+
+function soCommand(args, target, context, self) {
+
+  if (context.username == PRIV_STREAMER || context.username == PRIV_SUPPORT || context.username == PRIV_MOD_0 || context.username == PRIV_MOD_1){
+
+    if (args.length < 2) {
+      whisperBack(target, context, "invalid usage: !so <username>");
+      return;
+    }
+
+    let linked = args[1].toLowerCase().replaceAll('@', '');
+
+    client.say(target, decodeURIComponent(config.msg_so) + " " + linked + " https://www.twitch.tv/"+  linked);  
+  }
+}
+
 
 function anthemCommand(args, target, context, self) {
 
@@ -2216,4 +2348,17 @@ function whisperBackAndDelete(target, context, message) {
 // returns time in seconds since process start
 function getTime() {
   return process.hrtime()[0];
+}
+
+function initExpress() {
+  app.use(express.bodyParser());
+  app.post('/', function(request, response) {
+    console.log('POST /');
+    console.dir(request.body);
+    response.writeHead(200, {'Content-Type': 'text/html'});
+    response.end('thanks');
+  });
+  const port = 3000;
+  app.listen(port);
+  console.log(`Listening at http://localhost:${port}`); 
 }
