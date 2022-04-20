@@ -7,8 +7,8 @@ const tmi = require('tmi.js');
 const fs = require('fs');
 const { exec } = require('child_process');
 const say = require('say');
-const express = require('express');
-const app = express();
+//const express = require('express');
+//const app = express();
 
 const CC_SYMBOL = "₵₵"; // Captain's Coin
 
