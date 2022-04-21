@@ -218,13 +218,14 @@ const BROADCASTS = [
   {randspace: 50, event: undefined, message: "💡 Check your place in the level ranking with !ranking"},
   {randspace: 50, event: undefined, message: "💡 Besides using a reward you can play sounds with !sound"},
   {randspace: 50, event: undefined, message: "💡 We have a slot machine 🎰 on board! Try !slots"},
+  {randspace: 50, event: undefined, message: "💡 This bot and a detailed manual are available at https://github.com/DeltaTecs/CaptainsEngineer"},
   {randspace: 100, event: triggerEventHappyHr, message: "/announce 🚨 Happy Hour! 🚨  !slots are 20% off! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 50, event: triggerEventMegaHappyHr, message: "/announce 🚨 Mega Happy Hour! 🚨  !slots are 40% off! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 100, event: triggerEventXpBoost, message: "/announce 🚨 XP Boost! 🚨  All XP earned is multiplied x5! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 10, event: triggerEventBlessing, message: "/announce 🚨 " + golden_emote + " Blessed! " + golden_emote + " 🚨  +200% golden jackpot chance " + golden_emote + " (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 50, event: triggerEventSuperSale, message: "/announce 🚨 Super Sale! 🚨  Sounds, anthems and tts are 90% off! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 20, event: triggerEventMadSlots, message: "/announce 🚨🎰 Mad Slots! 🎰🚨  Slot limit is 5k " + CC_SYMBOL + "! (for " + config.min_delay_broadcast + " mins)"},
-  {randspace: 50, event: triggerEventPirateAttack, message: "/announce 🚨🏴‍☠️⚔️ PIRATES! ⚔️🏴‍☠️🚨  Pirates are trying to hijack our boat! Use !fight ⚔️ You stand to loose/win " + CC_SYMBOL + "! Participation is rewarded with XP! 🏴‍☠️☠️ (" + config.min_delay_broadcast + " mins event)"}
+  {randspace: 70, event: triggerEventPirateAttack, message: "/announce 🚨🏴‍☠️⚔️ PIRATES! ⚔️🏴‍☠️🚨  Pirates are trying to hijack our boat! Use !fight ⚔️ You stand to loose/win " + CC_SYMBOL + "! Participation is rewarded with XP! 🏴‍☠️☠️ (" + config.min_delay_broadcast + " mins event)"}
 ]
 
 
