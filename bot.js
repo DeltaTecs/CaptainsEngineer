@@ -571,13 +571,13 @@ function onCommand(target, context, commandName, self) {
     console.log("* stop tts");
     stopTTSCommand(context);
 
-  } else if (commandName == "!purchase" || commandName == "!sound") {
+  } else if (commandName == "!purchase" || commandName == "!sound" || commandName == "!play") {
 
     console.log(`* sound cmd`);
 
     soundCommand(args, target, context, self);
 
-  } else if (commandName == "!so" || commandName == "!see") {
+  } else if (commandName == "!so" || commandName == "!see" || commandName == "!seealso"  || commandName == "!sa") {
 
     console.log(`* so cmd`);
 
@@ -791,7 +791,7 @@ function ttsCommand(text, target, context, self) {
   const tts_limit = config.tts_limit + config.tts_chars_per_lvl * Math.min(config.max_lvl_tts_scaling - config.min_lvl_tts, levels[context.username.toLowerCase()] - config.min_lvl_tts);
 
   if (text.length > tts_limit) {
-    whisperBack(target, context, "TTS character limit exceeded. The maximum is " + config.tts_limit + ", your message has " + text.length);
+    whisperBack(target, context, "TTS character limit exceeded. Your maximum is " + tts_limit + ", your message has " + text.length);
     return;
   }
 
