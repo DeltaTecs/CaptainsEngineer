@@ -14,9 +14,6 @@ const CC_SYMBOL = "₵₵"; // Captain's Coin
 
 const LVL_EMBLEMS = ["🦐", "🦐🦐", "🦐🦐🦐", "🐟", "🐟🐟", "🐟🐟🐟", "🐠", "🐠🐠", "🐠🐠🐠", "🐡", "🐡🐡", "🐡🐡🐡", "🦀", "🦀🦀", "🦀🦀🦀", "🦞", "🦞🦞", "🦞🦞🦞", "🐙", "🐙🐙", "🐙🐙🐙", "🦈", "🦈🦈", "🦈🦈🦈", "🐋", "🐋🐋", "🐋🐋🐋", "☠️", "☠️☠️", "☠️☠️☠️", "🖤", "🖤🖤", "🖤🖤🖤", "💠", "💠💠", "💠💠💠", "💎", "💎💎", "💎💎💎", "🃏", "🃏🃏", "🃏🃏🃏", "⭐", "⭐⭐", "⭐⭐⭐", "🌌🌌🌌"];
 
-const DISCORD_INVITE = "https://discord.gg/X5KGBJGTPu";
-const REDDIT_LINK = "https://www.reddit.com/r/captaincasimir/";
-
 // full access, unlimited slots
 const PRIV_STREAMER = "captaincasimir";
 // administrative access
@@ -141,7 +138,9 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "pirate_loss_factor", type: 'f', default: 0.5, unit: "factor"},
   {name: "pirate_min_win", type: 'n', default: 100, unit: "coin"},
   {name: "pirate_max_win", type: 'n', default: 1000, unit: "factor"},
-  {name: "msg_so", type: 's', default: encodeURIComponent("👨‍✈️☝️ Make sure to check out ")}
+  {name: "msg_so", type: 's', default: encodeURIComponent("👨‍✈️☝️ Make sure to check out ")},
+  {name: "link_discord", type: 's', default: encodeURIComponent("https://discord.gg/X5KGBJGTPu")},
+  {name: "link_reddit", type: 's', default: encodeURIComponent("https://www.reddit.com/r/captaincasimir/")}
 ]
 
 /*Notes on the level system: Goal is an xp earn of 1000xp as an active user per stream (daily).
@@ -476,12 +475,12 @@ function onCommand(target, context, commandName, self) {
   } else if (commandName === '!discord' || commandName === '!dc') {
 
     console.log(`* discord`);
-    client.say(target, DISCORD_INVITE);
+    client.say(target, decodeURIComponent(config.link_discord));
 
   } else if (commandName === '!reddit') {
 
     console.log(`* reddit`);
-    client.say(target, REDDIT_LINK);
+    client.say(target, decodeURIComponent(config.link_reddit));
 
   } else if (commandName === '!tm') {
 
