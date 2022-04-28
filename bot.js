@@ -2261,8 +2261,30 @@ function updateUser(user, balance, anthem=undefined, gold=undefined, xp=undefine
 
 function loadChatters() {
   createIfUnexistent('chatters.json', JSON.stringify({accounts: [{name : "obama69", balance : 420}]}));
+
   let rawdata = fs.readFileSync('chatters.json');
-  return JSON.parse(rawdata);
+  let parsed;
+
+
+  parsed = JSON.parse(rawdata);
+
+  /*    bugged
+  try {
+    parsed = JSON.parse(rawdata);
+  } catch (err) {
+    // parsing failed, savefile corrupted, load newest backup
+    try {
+      loadBackup(0);
+      rawdata = fs.readFileSync('chatters.json');
+      parsed = JSON.parse(rawdata);
+    } catch (err) {
+      console.log("ERR: recovery failed");
+      throw err;
+    }
+  }
+  */
+
+  return parsed;
 }
 
 function loadChallenges() {
@@ -2282,6 +2304,30 @@ function backupChatters() {
   } catch (e) {
     console.log(e);
   }
+}
+
+function loadBackup(offset) {
+// bugged
+
+
+  console.log("RECOVERY: Recovery requested");
+
+  fs.readdirSync(path="backups", (err, files) => {
+    console.log(files);
+
+
+    files.sort((a, b) => fs.statSync(a).mtime - fs.statSync(b).mtime);
+
+    let chosen = files[Math.min(files.length - 1, offset)];
+
+    console.log("RECOVERY: Loading backup " + chosen);
+
+    try {
+     // fs.unlinkSync("chatters.json");
+    } catch(err) {}
+
+   // fs.copyFileSync("backups/" + chosen, "chatters.json");
+  });
 }
 
 function writeChallenges(challenges) {
