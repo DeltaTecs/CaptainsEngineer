@@ -2265,10 +2265,6 @@ function loadChatters() {
   let rawdata = fs.readFileSync('chatters.json');
   let parsed;
 
-
-  parsed = JSON.parse(rawdata);
-
-  /*    bugged
   try {
     parsed = JSON.parse(rawdata);
   } catch (err) {
@@ -2282,7 +2278,7 @@ function loadChatters() {
       throw err;
     }
   }
-  */
+  
 
   return parsed;
 }
@@ -2307,27 +2303,16 @@ function backupChatters() {
 }
 
 function loadBackup(offset) {
-// bugged
-
 
   console.log("RECOVERY: Recovery requested");
-
-  fs.readdirSync(path="backups", (err, files) => {
-    console.log(files);
-
-
-    files.sort((a, b) => fs.statSync(a).mtime - fs.statSync(b).mtime);
-
-    let chosen = files[Math.min(files.length - 1, offset)];
-
-    console.log("RECOVERY: Loading backup " + chosen);
-
-    try {
-     // fs.unlinkSync("chatters.json");
-    } catch(err) {}
-
-   // fs.copyFileSync("backups/" + chosen, "chatters.json");
-  });
+  let files = fs.readdirSync(path="backups");
+  files.sort((a, b) => fs.statSync("backups/" + b).mtime - fs.statSync("backups/" + a).mtime);
+  let chosen = files[Math.min(files.length - 1, offset)];
+  console.log("RECOVERY: Loading backup " + chosen);
+  try {
+    fs.unlinkSync("chatters.json");
+  } catch(err) {}
+  fs.copyFileSync("backups/" + chosen, "chatters.json");
 }
 
 function writeChallenges(challenges) {
