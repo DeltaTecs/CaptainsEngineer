@@ -101,7 +101,7 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "msg_lurk_0", type: 's', default: encodeURIComponent("Thank you for boarding the ship ")},
   {name: "msg_lurk_1", type: 's', default: encodeURIComponent("⛵ Lay back and enjoy your drink <3")},
   {name: "death_cnt_prefix", type: 's', default: encodeURIComponent("DEATHS: ")},
-  {name: "bause_cnt_prefix", type: 's', default: encodeURIComponent("BRAUSE: ")},
+  {name: "brause_cnt_prefix", type: 's', default: encodeURIComponent("BRAUSE: ")},
   {name: "rand_golden", type: 'n', default: 71, unit: "(1 in x)"}, // one in 71 fruits is a golden captain -> prop of getting a tripple is 0.0003%
   {name: "golden_emote", type: 's', default: encodeURIComponent("captai1955Golden")},
   {name: "gold_status_duration", type: 'n', default: 1000 * 60 * 60 * 24 * 30, unit: "milliseconds"}, // gold status gives golden slots
