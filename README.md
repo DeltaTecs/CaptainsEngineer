@@ -93,6 +93,8 @@ Additional commands available to people specified in `PRIV_STREAMER` and sometim
 - `cc_sound_cost_multiplier`, number, default `10`: Price multiplier for purchasing instant sound effects
 - `cc_anthem_cost_multiplier`, number, default `100`: Price multiplier for purchasing anthems (repeating sounds)
 - `compact_jackpots`, number, default `1`:  Wether slot jackpots should be summarized instead of a disting jackpot message for all of them (0 = detailed, 1 = compressed)
+- `brause_cnt_prefix`, number, default `600`:
+- `death_cnt_prefix`, number, default `600`:
 - `max_lvl_reward`, number, default `100`:
 - `xp_factor_subsciber`, float, default `1.5`:
 - `xp_base`, number, default `1.5`:
