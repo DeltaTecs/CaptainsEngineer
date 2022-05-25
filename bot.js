@@ -37,6 +37,7 @@ const SOUND_INTRO_CLIP = "intro_clip.mp3";
 const SOUND_AYE_AYE_CAPTAIN = "aye-aye-captain.mp3";
 const SOUND_JACKPOT = "jackpot.mp3";
 const SOUND_SUPER_JACKPOT = "super-jackpot.mp3";
+const SOUND_BRAUSE_JACKPOT = "brause-jackpot.mp3";
 const SOUND_SON_OF_A_BITCH = "son-of-a-bitch.mp3";
 const SOUND_BRAWL = "brawl.mp3";
 const SOUND_JOJO_GOLDEN_WING = "jojo-golden-wind.mp3";
@@ -103,6 +104,7 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "death_cnt_prefix", type: 's', default: encodeURIComponent("DEATHS: ")},
   {name: "brause_cnt_prefix", type: 's', default: encodeURIComponent("BRAUSE: ")},
   {name: "rand_golden", type: 'n', default: 71, unit: "(1 in x)"}, // one in 71 fruits is a golden captain -> prop of getting a tripple is 0.0003%
+  {name: "rand_brause", type: 'n', default: 14, unit: "(1 in x)"}, // one in 14 fruits is a brause captain -> prop of getting a tripple is 0.03%
   {name: "golden_emote", type: 's', default: encodeURIComponent("captai1955Golden")},
   {name: "gold_status_duration", type: 'n', default: 1000 * 60 * 60 * 24 * 30, unit: "milliseconds"}, // gold status gives golden slots
   {name: "compact_jackpots", type: 'n', default: 1, unit: "0=off, 1=on"},
@@ -140,7 +142,8 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "pirate_max_win", type: 'n', default: 1000, unit: "factor"},
   {name: "msg_so", type: 's', default: encodeURIComponent("👨‍✈️☝️ Make sure to check out ")},
   {name: "link_discord", type: 's', default: encodeURIComponent("https://discord.gg/X5KGBJGTPu")},
-  {name: "link_reddit", type: 's', default: encodeURIComponent("https://www.reddit.com/r/captaincasimir/")}
+  {name: "link_reddit", type: 's', default: encodeURIComponent("https://www.reddit.com/r/captaincasimir/")},
+  {name: "brause_emote", type: 's', default: encodeURIComponent("🧃")}
 ]
 
 /*Notes on the level system: Goal is an xp earn of 1000xp as an active user per stream (daily).
@@ -196,6 +199,7 @@ var config;
 initConfig();
 
 const golden_emote = decodeURIComponent(config.golden_emote);
+const brause_emote = decodeURIComponent(config.brause_emote);
 
 const BROADCASTS = [
   {randspace: 200, event: undefined, message: "💡 Gambling may cause addiction 🎰 no participation under 18, chance to win 1:67"},
@@ -217,11 +221,12 @@ const BROADCASTS = [
   {randspace: 50, event: undefined, message: "💡 Check your place in the level ranking with !ranking"},
   {randspace: 50, event: undefined, message: "💡 Besides using a reward you can play sounds with !sound"},
   {randspace: 50, event: undefined, message: "💡 We have a slot machine 🎰 on board! Try !slots"},
+  {randspace: 50, event: undefined, message: "💡 There is a brause jackpot! Make sure CaptainCasimir takes one when you roll one! " + decodeURIComponent(config.brause_emote)},
   {randspace: 50, event: undefined, message: "💡 This bot and a detailed manual are available at https://github.com/DeltaTecs/CaptainsEngineer"},
   {randspace: 100, event: triggerEventHappyHr, message: "/announce 🚨 Happy Hour! 🚨  !slots are 20% off! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 50, event: triggerEventMegaHappyHr, message: "/announce 🚨 Mega Happy Hour! 🚨  !slots are 40% off! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 100, event: triggerEventXpBoost, message: "/announce 🚨 XP Boost! 🚨  All XP earned is multiplied x5! (for " + config.min_delay_broadcast + " mins)"},
-  {randspace: 10, event: triggerEventBlessing, message: "/announce 🚨 " + golden_emote + " Blessed! " + golden_emote + " 🚨  +200% golden jackpot chance " + golden_emote + " (for " + config.min_delay_broadcast + " mins)"},
+  {randspace: 15, event: triggerEventBlessing, message: "/announce 🚨 " + golden_emote + " Blessed! " + golden_emote + " 🚨  +200% golden jackpot chance " + golden_emote + " (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 50, event: triggerEventSuperSale, message: "/announce 🚨 Super Sale! 🚨  Sounds, anthems and tts are 90% off! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 20, event: triggerEventMadSlots, message: "/announce 🚨🎰 Mad Slots! 🎰🚨  Slot limit is 5k " + CC_SYMBOL + "! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 70, event: triggerEventPirateAttack, message: "/announce 🚨🏴‍☠️⚔️ PIRATES! ⚔️🏴‍☠️🚨  Pirates are trying to hijack our boat! Use !fight ⚔️ You stand to loose/win " + CC_SYMBOL + "! Participation is rewarded with XP! 🏴‍☠️☠️ (" + config.min_delay_broadcast + " mins event)"}
@@ -924,13 +929,14 @@ function slotsCommand(args, target, context, self, sluts=false) {
     }
 
     
-    let golden_count = 0;
+    let special_count = 0;
     if (total_win == 0) {
-      // try to pick slots out with golden emote if possible
+      // try to pick slots out with golden/brause emote if possible
       for (let win of wins) {
         let count = (win.symbols[0] == " " + golden_emote + " " ? 1 : 0) + (win.symbols[1] == " " + golden_emote + " " ? 1 : 0) + (win.symbols[2] == " " + golden_emote + " " ? 1 : 0);
-        if (count > golden_count) {
-          golden_count = count;
+        count += (win.symbols[0] == " " + brause_emote + " " ? 1 : 0) + (win.symbols[1] == " " + brause_emote + " " ? 1 : 0) + (win.symbols[2] == " " + brause_emote + " " ? 1 : 0);
+        if (count > special_count) {
+          special_count = count;
           slots_out_chosen = win.symbols;
         }
       }
@@ -965,7 +971,7 @@ function slotsCommand(args, target, context, self, sluts=false) {
         }, delay + 1900);
       }
 
-      if (win_max.rank == 3 && context.username != PRIV_STREAMER) { // golden win present
+      if (win_max.rank == 4 && context.username != PRIV_STREAMER) { // golden win present
         setTimeout(function() {
           goldenEvent(target, context.username);
         }, delay);
@@ -1035,7 +1041,8 @@ function getSlotOutput(username, sluts=false, goldstatus=false) {
   symbols = [];
 
   let rand_golden = config.rand_golden;
-  
+  let rand_brause = config.rand_brause;
+
   if (isEventActive(event_blessing))
     rand_golden -= 22;
   else if (levels[username.toLowerCase()] >= config.min_lvl_golden_chance_2)
@@ -1046,6 +1053,8 @@ function getSlotOutput(username, sluts=false, goldstatus=false) {
   for (let i = 0; i < 3; i++) {
     if (getRandomInt(rand_golden) == 0) { // force golden
       symbols.push(" " + golden_emote + " ");
+    } else if (getRandomInt(rand_brause) == 0) { // force brause
+      symbols.push(" " + brause_emote + " ");
     } else if (sluts) { // !sluts / !slotsx
       symbols.push(slut_symbols[getRandomInt(slut_symbols.length)]);
     } else if (goldstatus && username != PRIV_STREAMER) { // !slots but after golden win
@@ -1063,10 +1072,15 @@ function getSlotOutput(username, sluts=false, goldstatus=false) {
   if (symbols[0] == symbols[1] && symbols[1] == symbols[2]) { // some win present
 
     if (symbols[0] == " " + golden_emote + " ") { // golden win
-      win_rank = 3;
+      win_rank = 4;
       win_return = config.cc_return_slots_golden;
       win_message = username + " FOUND THE SECRET GOLDEN CAPTAIN'S TREASURE!!! " + golden_emote + " 💰💰💰 " + golden_emote + " 💰💰💰 " + "  +";
       win_sound = SOUND_GOLDEN_JACKPOT;
+    } else if (symbols[0] == " " + brause_emote + " ") { // brause win
+      win_rank = 3;
+      win_return = config.cc_return_slots_peach;
+      win_message = brause_emote + " " + username + " rolled a Brause jackpot!!! CaptainCasimir has to snack 1 Brause!!!" + brause_emote + " " + brause_emote + " +";
+      win_sound = SOUND_BRAUSE_JACKPOT;
     } else if (symbols[0] == '🍑' || symbols[0] == '💦' || symbols[0] == '💎') { // super win
       win_rank = 2;
       win_return = config.cc_return_slots_peach;
