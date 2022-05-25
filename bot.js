@@ -1079,7 +1079,7 @@ function getSlotOutput(username, sluts=false, goldstatus=false) {
     } else if (symbols[0] == " " + brause_emote + " ") { // brause win
       win_rank = 3;
       win_return = config.cc_return_slots_peach;
-      win_message = brause_emote + " " + username + " rolled a Brause jackpot!!! CaptainCasimir has to snack 1 Brause!!!" + brause_emote + " " + brause_emote + " +";
+      win_message = brause_emote + " " + username + " rolled a Brause jackpot!!! CaptainCasimir has to snack 1 Brause!!! " + brause_emote + " " + brause_emote + " +";
       win_sound = SOUND_BRAUSE_JACKPOT;
     } else if (symbols[0] == '🍑' || symbols[0] == '💦' || symbols[0] == '💎') { // super win
       win_rank = 2;
