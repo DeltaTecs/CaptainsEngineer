@@ -67,9 +67,10 @@ const SOUND_X_FILES = "x-files.mp3";
 const SOUND_NICE = "nice.mp3";
 const SOUND_OOF = "oof.mp3";
 const SOUND_OK_LETS_GO = "ok-lets-go.mp3";
+const SOUND_AMONGUS = "amongus.mp3";
 
 const REWARD_ID_STRECH = "8c31a6f0-b319-4865-9c4a-e9b57b960311";
-const REWARD_ID_BRAUSE = "a37d499f-1550-488b-896a-2b43e2ec9c2f";
+const REWARD_ID_SOUND_AMONGUS = "a37d499f-1550-488b-896a-2b43e2ec9c2f";
 const REWARD_ID_SOUND_THOMAS = "afcbdea0-0eee-4a35-8d18-a1e71e62703f";
 const REWARD_ID_SOUND_FAIL = "3efc8ce0-3da1-40a7-83b5-a2725ab2b1f9";
 const REWARD_ID_SOUND_INCEPTION = "fe96b4b0-11f2-449d-92e1-65cde878e110";
@@ -166,6 +167,7 @@ const CC_SOUNDS = [
   {name: "scream", price: 2, sound: SOUND_WILHELM_SCREAM},
   {name: "wasted", price: 3, sound: SOUND_WASTED},
   {name: "airhorn", price: 4, sound: SOUND_AIRHORN},
+  {name: "amongus", price: 4, sound: SOUND_AMONGUS},
   {name: "fail", price: 4, sound: SOUND_FAIL},
   {name: "ok-lets-go", price: 4, sound: SOUND_OK_LETS_GO},
   {name: "inception", price: 6, sound: SOUND_INCEPTION},
@@ -363,9 +365,9 @@ function onReward(target, context, self) {
 
   incrementUserBalanceAndXP(context.username, balance_add=0, xp_add=config.xp_per_reward, cause="reward");
   
-  if (context["custom-reward-id"] === REWARD_ID_BRAUSE) {
+  if (context["custom-reward-id"] === REWARD_ID_SOUND_AMONGUS) {
   
-    playSound(SOUND_ENORM);
+    playSound(SOUND_AMONGUS);
   
   } else if (context["custom-reward-id"] === REWARD_ID_STRECH) {
 
