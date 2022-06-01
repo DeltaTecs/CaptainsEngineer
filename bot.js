@@ -219,7 +219,7 @@ const BROADCASTS = [
   {randspace: 50, event: undefined, message: "💡 An anthem is a theme that welcomes you personaly every stream. Unlock anthems by subscribing or by reaching level " + config.min_lvl_anthems + " (!anthem)"},
   {randspace: 50, event: undefined, message: "💡 By leveling to 100, you can reach a slots limit of 2000" + CC_SYMBOL + " 🎰"},
   {randspace: 50, event: undefined, message: "💡 Rolling a golden jackpot unlocks a special anthem and grants you gold status for a month 👑"},
-  {randspace: 30, event: undefined, message: "💡 The Captain is a VERY big fan of Brause, checkout his 100 Brause Challenge stream ;)"},
+  {randspace: 30, event: undefined, message: "💡 The Captain is a VERY big fan of Brause, checkout his 100 Brause Challenge stream ;) https://www.twitch.tv/videos/1293860643"},
   {randspace: 50, event: undefined, message: "💡 Feel free to pm deltatecs bot features you would like to see ;)"},
   {randspace: 50, event: undefined, message: "💡 Transfer Captain's Coin 💰 with !transfer"},
   {randspace: 50, event: undefined, message: "💡 Check your place in the level ranking with !ranking"},
