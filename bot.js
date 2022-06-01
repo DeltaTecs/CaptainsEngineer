@@ -230,7 +230,7 @@ const BROADCASTS = [
   {randspace: 100, event: triggerEventHappyHr, message: "/announce 🚨 Happy Hour! 🚨  !slots are 20% off! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 50, event: triggerEventMegaHappyHr, message: "/announce 🚨 Mega Happy Hour! 🚨  !slots are 40% off! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 100, event: triggerEventXpBoost, message: "/announce 🚨 XP Boost! 🚨  All XP earned is multiplied x5! (for " + config.min_delay_broadcast + " mins)"},
-  {randspace: 15, event: triggerEventBlessing, message: "/announce 🚨 " + golden_emote + " Blessed! " + golden_emote + " 🚨  +200% golden jackpot chance " + golden_emote + " (for " + config.min_delay_broadcast + " mins)"},
+  {randspace: 15, event: triggerEventBlessing, message: "/announce 🚨 " + golden_emote + " Blessed! " + golden_emote + " 🚨  +1000% golden jackpot chance " + golden_emote + " (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 50, event: triggerEventSuperSale, message: "/announce 🚨 Super Sale! 🚨  Sounds, anthems and tts are 90% off! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 20, event: triggerEventMadSlots, message: "/announce 🚨🎰 Mad Slots! 🎰🚨  Slot limit is 5k " + CC_SYMBOL + "! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 70, event: triggerEventPirateAttack, message: "/announce 🚨🏴‍☠️⚔️ PIRATES! ⚔️🏴‍☠️🚨  Pirates are trying to hijack our boat! Use !fight ⚔️ You stand to loose/win " + CC_SYMBOL + "! Participation is rewarded with XP! 🏴‍☠️☠️ (" + config.min_delay_broadcast + " mins event)"}
@@ -285,7 +285,7 @@ var event_happy_hr = 0; // 20% of slots
 var event_mega_happy_hr = 0; // 40% of slots
 var event_pirate_attack = 0; // !fight
 var event_xp_boost = 0; // double xp
-var event_blessing = 0; // +200% golden chance
+var event_blessing = 0; // +1000% golden chance
 var event_super_sale = 0; // 90% of sounds, tts and anthems
 var event_mad_slots = 0; // slot limit 5000
 
@@ -1048,7 +1048,7 @@ function getSlotOutput(username, sluts=false, goldstatus=false) {
   let rand_brause = config.rand_brause;
 
   if (isEventActive(event_blessing))
-    rand_golden -= 22;
+    rand_golden -= 39;
   else if (levels[username.toLowerCase()] >= config.min_lvl_golden_chance_2)
     rand_golden -= 15;
   else if (levels[username.toLowerCase()] >= config.min_lvl_golden_chance_1)
@@ -1891,7 +1891,7 @@ function triggerEventXpBoost() {
 }
 
 function triggerEventBlessing() {
-  // +200% golden chance
+  // +1000% golden chance
   console.log("event: blessed");
   event_blessing = time;
 }
