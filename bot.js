@@ -68,6 +68,7 @@ const SOUND_NICE = "nice.mp3";
 const SOUND_OOF = "oof.mp3";
 const SOUND_OK_LETS_GO = "ok-lets-go.mp3";
 const SOUND_AMONGUS = "amongus.mp3";
+const SOUND_LAUGHING = "laughing.mp3";
 
 const REWARD_ID_STRECH = "8c31a6f0-b319-4865-9c4a-e9b57b960311";
 const REWARD_ID_SOUND_AMONGUS = "a37d499f-1550-488b-896a-2b43e2ec9c2f";
@@ -169,6 +170,7 @@ const CC_SOUNDS = [
   {name: "airhorn", price: 4, sound: SOUND_AIRHORN},
   {name: "amongus", price: 4, sound: SOUND_AMONGUS},
   {name: "fail", price: 4, sound: SOUND_FAIL},
+  {name: "laugh", price: 4, sound: SOUND_LAUGHING},
   {name: "ok-lets-go", price: 4, sound: SOUND_OK_LETS_GO},
   {name: "inception", price: 6, sound: SOUND_INCEPTION},
   {name: "to-be-continued", price: 6, sound: SOUND_JOJO_TO_BE_CONTINUED},
@@ -1186,7 +1188,7 @@ function challengeCommand(args, cmd, target, context, self) {
 
 function checkProvanity(text) {
   let t = text.toLowerCase();
-  return t.replaceAll(' ', '').includes('neger') || t.includes('negger') || t.includes('nigger') || t.includes('niger') || t.includes('nigga') || t.includes('niga') || t.includes('bitch') || t.includes('hure') || t.includes('arsch') || t.includes('wichser') || t.includes('schwanz') || t.includes('penis') || t.includes('bastard') || t.includes('bastart') || t.includes('schwuchtel') || t.includes('faggot') || t.includes('simp');
+  return t.replaceAll(' ', '').includes('neger') || t.includes('negger') || t.includes('nigger')|| t.includes('nigga') || t.includes('niga') || t.includes('bitch') || t.includes('hure') || t.includes('arsch') || t.includes('wichser') || t.includes('schwanz') || t.includes('penis') || t.includes('bastard') || t.includes('bastart') || t.includes('schwuchtel') || t.includes('faggot') || t.includes('simp');
 }
 
 function rankingCommand(target, context, self) {
