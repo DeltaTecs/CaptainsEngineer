@@ -69,9 +69,10 @@ const SOUND_OOF = "oof.mp3";
 const SOUND_OK_LETS_GO = "ok-lets-go.mp3";
 const SOUND_AMONGUS = "amongus.mp3";
 const SOUND_LAUGHING = "laughing.mp3";
+const SOUND_SACKGESICHT = "sackgesicht.mp3";
 
 const REWARD_ID_STRECH = "8c31a6f0-b319-4865-9c4a-e9b57b960311";
-const REWARD_ID_SOUND_AMONGUS = "a37d499f-1550-488b-896a-2b43e2ec9c2f";
+const REWARD_ID_SOUND_SACKGESICHT = "a37d499f-1550-488b-896a-2b43e2ec9c2f";
 const REWARD_ID_SOUND_THOMAS = "afcbdea0-0eee-4a35-8d18-a1e71e62703f";
 const REWARD_ID_SOUND_FAIL = "3efc8ce0-3da1-40a7-83b5-a2725ab2b1f9";
 const REWARD_ID_SOUND_INCEPTION = "fe96b4b0-11f2-449d-92e1-65cde878e110";
@@ -367,9 +368,9 @@ function onReward(target, context, self) {
 
   incrementUserBalanceAndXP(context.username, balance_add=0, xp_add=config.xp_per_reward, cause="reward");
   
-  if (context["custom-reward-id"] === REWARD_ID_SOUND_AMONGUS) {
+  if (context["custom-reward-id"] === REWARD_ID_SOUND_SACKGESICHT) {
   
-    playSound(SOUND_AMONGUS);
+    playSound(SOUND_SACKGESICHT);
   
   } else if (context["custom-reward-id"] === REWARD_ID_STRECH) {
 
@@ -1190,6 +1191,43 @@ function checkProvanity(text) {
   let t = text.toLowerCase();
   return t.replaceAll(' ', '').includes('neger') || t.includes('negger') || t.includes('nigger')|| t.includes('nigga') || t.includes('niga') || t.includes('bitch') || t.includes('hure') || t.includes('arsch') || t.includes('wichser') || t.includes('schwanz') || t.includes('penis') || t.includes('bastard') || t.includes('bastart') || t.includes('schwuchtel') || t.includes('faggot') || t.includes('simp');
 }
+
+function transferAccountCommand(args, target, context, self) {
+
+    // check if authorised
+    if (context.username != PRIV_STREAMER && context.username != PRIV_SUPPORT) {
+      return;
+    }
+
+    // integrity guard
+    if (args.length != 3) {
+      whisperBack(target, context, "invalid arguments, !transferaccount <old username> <new username>");
+      return;
+    }
+  
+    let oldUser = args[1].toLowerCase();
+    let newUser = args[2].toLowerCase();
+  
+    // check target exsiting
+    if (isUserKnown(oldUser) == false) {
+      whisperBack(target, context, targetUser + " is not in the save list");
+      return;
+    }
+  
+    for (let a of chatters.accounts) {
+      if (a.name == oldUser) {
+        a.name = newUser;
+        // write changes to file
+        try {
+          fs.writeFile('chatters.json', JSON.stringify(chatters), callback=function(callback) {});
+        } catch (e) {
+          console.log(e);
+        }
+        client.say(target, context.username + " send " + targetUser + " " + amount + CC_SYMBOL);
+        break;
+      }
+    }
+  }
 
 function rankingCommand(target, context, self) {
 
