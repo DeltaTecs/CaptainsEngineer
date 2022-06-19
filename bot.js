@@ -200,8 +200,6 @@ const CC_ANTHEMS = [
   {name: "skrillex", price: 10, sound: SOUND_SKRILLEX}
 ]
 
-const SOUNDS_DIR = "sounds\\";
-
 var config;
 initConfig();
 
@@ -1456,13 +1454,10 @@ function volumeCommand(args, target, context, self) {
       } else if (isNaN(args[1])) {
         
         let target_sound = args[1];
-        if (!target_sound.endsWith(".mp3")) {
-          target_sound = target_sound + ".mp3";
-        }
 
         // check if target file exists
         try {
-          if (!fs.existsSync(SOUNDS_DIR + target_sound)) {
+          if (!fs.existsSync(target_sound)) {
             whisperBack(target, context, "No such file " + target_sound);
             let filenames = "";
             fs.readdir(".", (err, files) => {
@@ -1506,12 +1501,13 @@ function volumeCommand(args, target, context, self) {
       let gain = args[2];
 
       if (!target_sound.endsWith(".mp3")) {
-        target_sound = target_sound + ".mp3";
+        whisperBack(target, context, "Sounds have .mp3 format");
+        return;
       }
 
       // check if target file exists
       try {
-        if (!fs.existsSync(SOUNDS_DIR + target_sound)) {
+        if (!fs.existsSync(target_sound)) {
           whisperBack(target, context, "No such file " + target_sound);
           let filenames = "";
           fs.readdir(".", (err, files) => {
@@ -2123,7 +2119,7 @@ function playSound(sound_path, duration=20000) {
     }
   }
 
-  exec('vlc\\vlc.exe -Irc -Idummy --gain ' + gain + ' ' + SOUNDS_DIR + sound_path + ' vlc://quit', (err, stdout, stderr) => {});
+  exec('vlc\\vlc.exe -Irc -Idummy --gain ' + gain + ' ' + sound_path + ' vlc://quit', (err, stdout, stderr) => {});
   console.log("playing sound " + sound_path);
 }
 
