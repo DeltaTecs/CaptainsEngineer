@@ -1,3 +1,22 @@
+- 💰 Currency: Captain's Coin (₵₵)
+- get ₵₵ for chatting and more
+- unlock commands and more by leveling
+- Basics:
+ !discord, !reddit : socials
+ !lurk : show you are lurking now
+ !slots : 🎰 try your luck (₵₵)
+ !balance : check your ₵₵ balance 🏦
+ !transfer : send someone ₵₵ 💰
+ !burn : burn ₵₵ for nothing 🔥
+ !lvl : check your level progress
+ !ranking : check level ranking
+- Unlockable:
+ !sound : instant play a sound 🔊 (₵₵)
+ !tts : send Text-To-Speech 🔊 (₵₵)
+ !anthem : set your personal theme 📯 (₵₵)
+ !slotsx : special slot machine 🔞 (₵₵)
+
+
 The CaptainsEngineer is a Twitch Chat Bot designed to assist and enrich the live streaming experience. Originaly designed for "CaptainCasimir"'s channel, it is configurable to be deployed on any channel and provides a maritim context ;)
 
 
