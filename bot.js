@@ -1966,6 +1966,7 @@ function handleChatRewards(name, message) {
     return;
   } else if (message.startsWith("!tts ")) { 
     xp_added = message.length * config.xp_per_char; // add char xp even for tts
+    incrementUserBalanceAndXP(name, cc_added, xp_added, "tts command");
     return;
   } else if (message.startsWith('!')) {
     return; // no rewards for other commands. Rewards for lurk and slot win are handled seperatly
