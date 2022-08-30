@@ -146,7 +146,8 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "msg_so", type: 's', default: encodeURIComponent("👨‍✈️☝️ Make sure to check out ")},
   {name: "link_discord", type: 's', default: encodeURIComponent("https://discord.gg/X5KGBJGTPu")},
   {name: "link_reddit", type: 's', default: encodeURIComponent("https://www.reddit.com/r/captaincasimir/")},
-  {name: "brause_emote", type: 's', default: encodeURIComponent("🧃")}
+  {name: "brause_emote", type: 's', default: encodeURIComponent("🧃")},
+  {name: "juwlz_referal", type: 's', default: encodeURIComponent("🖤 Check out JulwzDblack! 🖤 https://www.twitch.tv/juwlzdblack")}
 ]
 
 /*Notes on the level system: Goal is an xp earn of 1000xp as an active user per stream (daily).
@@ -592,6 +593,12 @@ function onCommand(target, context, commandName, self) {
     console.log(`* so cmd`);
 
     soCommand(args, target, context, self);
+
+  } else if (commandName == "!juwlz" || commandName == "!jewls"  || commandName == "!jewlz") {
+
+    console.log(`* juwlz cmd`);
+
+    juwlzCommand(args, target, context, self);
 
   } else if (commandName == "!anthem") {
 
@@ -1760,6 +1767,13 @@ function soCommand(args, target, context, self) {
     let linked = args[1].toLowerCase().replaceAll('@', '');
 
     client.say(target, decodeURIComponent(config.msg_so) + " " + linked + " https://www.twitch.tv/"+  linked);  
+  }
+}
+
+function juwlzCommand(args, target, context, self) {
+
+  if (context.username.toLowerCase() == "juwlzdblack" || context.username == PRIV_STREAMER || context.username == PRIV_SUPPORT || context.username == PRIV_MOD_0 || context.username == PRIV_MOD_1){
+    client.say(target, decodeURIComponent(config.juwlz_referal));  
   }
 }
 
