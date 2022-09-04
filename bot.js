@@ -147,7 +147,8 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "link_discord", type: 's', default: encodeURIComponent("https://discord.gg/X5KGBJGTPu")},
   {name: "link_reddit", type: 's', default: encodeURIComponent("https://www.reddit.com/r/captaincasimir/")},
   {name: "brause_emote", type: 's', default: encodeURIComponent("🧃")},
-  {name: "juwlz_referal", type: 's', default: encodeURIComponent("🖤 Check out JulwzDblack! 🖤 https://www.twitch.tv/juwlzdblack")}
+  {name: "juwlz_referal", type: 's', default: encodeURIComponent("🖤 Check out JulwzDblack! 🖤 https://www.twitch.tv/juwlzdblack")},
+  {name: "enable_slots_bill", type: 'n', default: 0, unit: "0=off, 1=on"}
 ]
 
 /*Notes on the level system: Goal is an xp earn of 1000xp as an active user per stream (daily).
@@ -552,7 +553,12 @@ function onCommand(target, context, commandName, self) {
     console.log(`* config cmd`);
     configCommand(args, target, context, self);
 
-  } else if (commandName == "!transfer" || commandName == "!give") {
+  } else if (commandName == "!rename") {
+
+    console.log(`* rename cmd`);
+    renameCommand(args, target, context, self);
+
+  }  else if (commandName == "!transfer" || commandName == "!give") {
 
     console.log(`* transfer coin cmd`);
     transferCoinCommand(args, target, context, self);
@@ -1040,7 +1046,7 @@ function slotsCommand(args, target, context, self, sluts=false) {
   
     }
 
-    if (total_win > config.cc_return_slots_basic) {
+    if (total_win > config.cc_return_slots_basic && config.enable_slots_bill > 0) {
       // print bill only if atleast two basic wins or a super win
       setTimeout(function() {
         client.say(target, balance + CC_SYMBOL + " >> " + (balance - amount + total_win) + CC_SYMBOL + "", user=context.username);
@@ -1831,6 +1837,30 @@ function anthemCommand(args, target, context, self) {
   whisperBack(target, context, itemname + " not found, try !anthem");
 }
 
+function renameCommand(args, target, context, self) {
+  
+  if (context.username != PRIV_STREAMER && context.username != PRIV_SUPPORT) {
+    return;
+  }
+
+  // integrity guard
+  if (args.length != 3) {
+    whisperBack(target, context, "invalid arguments, !rename <username before> <username now>");
+    return;
+  }
+
+  let name_original = args[1].toLowerCase();
+  let name_new = args[2].toLowerCase();
+
+  let res = renameUser(name_original, name_new);
+
+  if (res != undefined) {
+    client.say(target, name_original + "'s account was successfully assigned to " + name_new);
+  } else {
+    client.say(target, name_original + "'s account was not found");
+  }
+}
+
 // Function called when the "dice" command is issued
 function rollDice () {
   const sides = 6;
@@ -2278,6 +2308,52 @@ function getUserGoldStatus(user) {
 
 function updateUserBalance(user, balance) {
   updateUser(user, balance);
+}
+
+/**
+ * Changes username to be identified with in the database
+ * @param {*} name_original 
+ * @param {*} name_new 
+ * @return undefined if user not found, new username if user found
+ */
+function renameUser(name_original, name_new) {
+
+  name_original = name_original.toLowerCase();
+  name_new = name_new.toLowerCase();
+
+  // pick potential duplicate for deletion
+  let to_delete = undefined;
+  for (acc of chatters.accounts) {
+    if (acc.name == name_new) {
+      to_delete = acc;
+      break;
+    }
+  }
+
+  let found = false;
+  for (acc of chatters.accounts) {
+    if (acc.name == name_original) {
+      found = true;
+      acc.name = name_new;
+      break;
+    }
+  }
+
+  if (found) {
+    // delete duplicate if present
+    if (to_delete != undefined) {
+      chatters.accounts.splice(chatters.accounts.indexOf(to_delete), 1);
+    }
+
+    // write changes to file
+    try {
+      fs.writeFile('chatters.json', JSON.stringify(chatters), callback=function(callback) {});
+    } catch (e) {
+      console.log(e);
+    }
+    return name_new;
+  } else
+    return undefined;
 }
 
 /**
