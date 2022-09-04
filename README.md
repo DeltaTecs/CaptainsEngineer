@@ -84,6 +84,8 @@ Additional commands available to people specified in `PRIV_STREAMER` and sometim
 - `!challenge <hunt|global> <text>`: will add a challenge to the saved challenges, randomly printed when the challenge reward is used. There are two categorys: hunt and global challenges. Global challenges usage is not implemented as of 4-4.22.
 - `!config <variable> [value]`: will set a certain config value. See available config values below. Not specifying a value will print the current variable value.
 - `!stop | !stoptts`: will stop the current tts message
+- `!rename <name before> <name after>`: will assign the userdata currently appointet to <name before> to the user with the name <name after>. This is usefull if a user changes their name
+
 
 ## Available config variables for deep customization
 - `tts_limit`, number, default `60`: Maximum amount of character allowed to be used in a text to speech message
@@ -112,39 +114,45 @@ Additional commands available to people specified in `PRIV_STREAMER` and sometim
 - `cc_sound_cost_multiplier`, number, default `10`: Price multiplier for purchasing instant sound effects
 - `cc_anthem_cost_multiplier`, number, default `100`: Price multiplier for purchasing anthems (repeating sounds)
 - `compact_jackpots`, number, default `1`:  Wether slot jackpots should be summarized instead of a disting jackpot message for all of them (0 = detailed, 1 = compressed)
-- `brause_cnt_prefix`, number, default `600`:
-- `death_cnt_prefix`, number, default `600`:
-- `max_lvl_reward`, number, default `100`:
-- `xp_factor_subsciber`, float, default `1.5`:
-- `xp_base`, number, default `1.5`:
-- `xp_added_per_lvl`, number, default `600`:
-- `xp_per_char`, number, default `600`:
-- `xp_per_captain_emote`, number, default `600`:
-- `xp_per_slot_cmd`, number, default `600`:
-- `xp_per_slot_win`, number, default `600`:
-- `xp_per_reward`, number, default `600`:
-- `xp_per_lurk`, number, default `600`:
-- `xp_per_pirate_fight`, number, default `600`:
-- `xp_on_pirate_win`, number, default `600`:
-- `min_lvl_sound`, number, default `600`:
-- `min_lvl_slotsx`, number, default `600`:
-- `min_lvl_anthems`, number, default `600`:
-- `max_lvl_anthems`, number, default `600`:
-- `min_lvl_golden_chance_1`, number, default `600`:
-- `min_lvl_golden_chance_2`, number, default `600`:
-- `min_lvl_tts`, number, default `600`:
-- `max_lvl_tts_scaling`, number, default `600`:
-- `slot_rolls_per_lvl`, number, default `600`:
-- `max_lvl_slot_scaling`, number, default `600`:
-- `slot_rolls_added_last_lvls`, number, default `600`:
-- `lvl_per_emblem`, number, default `600`:
-- `cc_per_lvl`, number, default `600`:
-- `tts_chars_per_lvl`, number, default `600`:
-- `min_delay_broadcast`, number, default `600`:
-- `max_delay_broadcast`, number, default `600`:
-- `pirate_loss_factor`, number, default `600`:
-- `pirate_min_win`, number, default `600`:
-- `pirate_max_win`, number, default `600`:
+- `brause_cnt_prefix`, string, default `BRAUSE: `: Which message is saved in front of the brause counter
+- `death_cnt_prefix`, string, default `DEATHS: `: Which message is saved in front of the death counter
+- `max_lvl_reward`, number, default `100`: The maximum level to be rewarded with cc and the like
+- `xp_factor_subsciber`, float, default `1.5`: sub and vip xp bonus fctor applied for all actions
+- `xp_base`, number, default `500`: xp needed for lvl  = base + lvl * xp_added_per_lvl
+- `xp_added_per_lvl`, number, default `50`: xp needed for lvl  = base + lvl * xp_added_per_lvl
+- `xp_per_char`, float, default `0.5`: xp per char a chat message contains, counts for tts aswell
+- `xp_per_captain_emote`, float, default `2`: xp per channel emote
+- `xp_per_slot_cmd`, float, default `5`: xp per slot machine
+- `xp_per_slot_win`, float, default `0`: xp per slot win
+- `xp_per_reward`, float, default `50`: xp per channel reward usage
+- `xp_per_lurk`, number, default `200`: xp per lurk command (eligable every hr)
+- `xp_per_pirate_fight`, number, default `400`: xp per pirate fight participation
+- `xp_on_pirate_win`, number, default `100`: additional xp on pirate fight win and participation
+- `min_lvl_sound`, number, default `2`: level to unlock !sounds
+- `min_lvl_slotsx`, number, default `20`: level to unlock !slotsx
+- `min_lvl_anthems`, number, default `50`: level to unlock !anthem
+- `max_lvl_anthems`, number, default `90`: level where no new anthems are unlocked
+- `min_lvl_golden_chance_1`, number, default `91`: level for first large gold chance increase
+- `min_lvl_golden_chance_2`, number, default `100`: level for second large gold change increase
+- `min_lvl_tts`, number, default `10`: level to unlock !tts
+- `max_lvl_tts_scaling`, number, default `50`: max level where no more chars are unlocked for tts size
+- `slot_rolls_per_lvl`, number, default `2`: slots rolls unlocked per level
+- `max_lvl_slot_scaling`, number, default `89`: last level to get a small slot increase, the 10 after will get a large one
+- `slot_rolls_added_last_lvls`, number, default `20`: slot increase for last levels
+- `lvl_per_emblem`, number, default `5`: levels until emblem change f.e.  🐟 -> 🐟🐟
+- `cc_per_lvl`, number, default `200`: coin reward for leveling up
+- `tts_chars_per_lvl`, number, default `5`: tts size unlocked with level
+- `min_delay_broadcast`, number, default `10`: soonest broadcast
+- `max_delay_broadcast`, number, default `30`: latest broadcasts
+- `pirate_loss_factor`, float, default `0.5`: coin lost when loosing pirate fight
+- `pirate_min_win`, number, default `100`: min coin won when winning pirate battle
+- `pirate_max_win`, number, default `1000`: max coin won when winning pirate battle
+- `msg_so`, string, default `👨‍✈️☝️ Make sure to check out `: See also message to refer to other streamers will be followed by a link to the channel
+- `link_discord`, string, default `discord invite here...`: discord link !dc
+- `link_reddit`, string, default `reddit link here...`: reddit link !reddit
+- `brause_emote`, string, default `🧃`: brause emote used for brause jackpot
+- `juwlz_referal`, string, default `🖤 Check out JulwzDblack! 🖤 https://www.twitch.tv/juwlzdblack`: !juwlz output
+- `enable_slots_bill`, number, default `0`: if a slot summary is to be shown when wining much
 
 
 
