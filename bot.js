@@ -227,7 +227,6 @@ const BROADCASTS = [
   {randspace: 50, event: undefined, message: "💡 Check your place in the level ranking with !ranking"},
   {randspace: 50, event: undefined, message: "💡 Besides using a reward you can play sounds with !sound"},
   {randspace: 50, event: undefined, message: "💡 We have a slot machine 🎰 on board! Try !slots"},
-  {randspace: 50, event: undefined, message: "💡 There is a brause jackpot! Make sure CaptainCasimir takes one when you roll one! " + decodeURIComponent(config.brause_emote)},
   {randspace: 50, event: undefined, message: "💡 This bot and a detailed manual are available at https://github.com/DeltaTecs/CaptainsEngineer"},
   {randspace: 100, event: triggerEventHappyHr, message: "/announce 🚨 Happy Hour! 🚨  !slots are 20% off! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 50, event: triggerEventMegaHappyHr, message: "/announce 🚨 Mega Happy Hour! 🚨  !slots are 40% off! (for " + config.min_delay_broadcast + " mins)"},
