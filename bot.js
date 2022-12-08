@@ -507,7 +507,7 @@ function onCommand(target, context, commandName, self) {
     console.log(`* lurk`);
     lurkCommand(target, context, self);
 
-  } else if (commandName === '!silent' || commandName === '!silence') {
+  } else if (commandName === '!silent' || commandName === '!silence' || commandName === '!mute' ) {
 
     console.log(`* toggle mute`);
     muteCommand(target, context, self);
