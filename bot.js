@@ -70,6 +70,7 @@ const SOUND_OK_LETS_GO = "ok-lets-go.mp3";
 const SOUND_AMONGUS = "amongus.mp3";
 const SOUND_LAUGHING = "laughing.mp3";
 const SOUND_SACKGESICHT = "sackgesicht.mp3";
+const SOUND_PAUSE_ANTHEM = "kgpausa-anthem.mp3";
 
 const REWARD_ID_STRECH = "8c31a6f0-b319-4865-9c4a-e9b57b960311";
 const REWARD_ID_SOUND_SACKGESICHT = "a37d499f-1550-488b-896a-2b43e2ec9c2f";
@@ -2123,6 +2124,13 @@ function handleAnthem(name, target) {
 
   if (users_seen.indexOf(name) == -1) {
     users_seen.push(name);
+
+    if (name == "KgPausA") {
+      // play Pausas own anthem
+      playSound(SOUND_PAUSE_ANTHEM);
+      return;
+    }
+
     let anthem = getUserAnthem(name);
     if (anthem != undefined) {
       playSound(anthem);
