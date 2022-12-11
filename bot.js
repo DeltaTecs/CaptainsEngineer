@@ -2125,7 +2125,7 @@ function handleAnthem(name, target) {
   if (users_seen.indexOf(name) == -1) {
     users_seen.push(name);
 
-    if (name == "KgPausA") {
+    if (name.toLowerCase() == "kgpausa") {
       // play Pausas own anthem
       playSound(SOUND_PAUSE_ANTHEM);
       return;
