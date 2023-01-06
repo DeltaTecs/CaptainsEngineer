@@ -71,6 +71,7 @@ const SOUND_AMONGUS = "amongus.mp3";
 const SOUND_LAUGHING = "laughing.mp3";
 const SOUND_SACKGESICHT = "sackgesicht.mp3";
 const SOUND_PAUSE_ANTHEM = "kgpausa-anthem.mp3";
+const SOUND_BENIS = "benis.mp3";
 
 const REWARD_ID_STRECH = "8c31a6f0-b319-4865-9c4a-e9b57b960311";
 const REWARD_ID_SOUND_SACKGESICHT = "a37d499f-1550-488b-896a-2b43e2ec9c2f";
@@ -186,6 +187,7 @@ const CC_ANTHEMS = [
   {name: "magic", price: 2, sound: SOUND_MAGIC},
   {name: "scream", price: 2, sound: SOUND_WILHELM_SCREAM},
   {name: "jojo-tbc", price: 6, sound: SOUND_JOJO_TO_BE_CONTINUED},
+  {name: "benis", price: 6, sound: SOUND_BENIS},
   {name: "hes-a-pirate", price: 8, sound: SOUND_HES_A_PIRATE},
   {name: "brawl", price: 8, sound: SOUND_BRAWL},
   {name: "soviet", price: 8, sound: SOUND_SOVIET_ANTHEM},
