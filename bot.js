@@ -1778,7 +1778,7 @@ function cantinaCommand(args, target, context, self) {
 
   const price = config.cc_cost_cantina_band;
 
-  if (getTime() - cantina_hired <  config.cc_cost_cantina_band) {
+  if (getTime() - cantina_hired <  config.cantina_band_duration) {
     // cantina was recently hired, do not pay again
     cantina_hired = getTime();
     playSound(SOUND_CANTINA_BAND);
