@@ -103,6 +103,7 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "cc_per_chat", type: 'f', default: 1, unit: "coins"},
   {name: "cc_sound_cost_multiplier", type: 'n', default: 10, unit: "factor"},
   {name: "cc_anthem_cost_multiplier", type: 'n', default: 100, unit: "factor"},
+  {name: "cc_cost_cantina_band", type: 'n', default: 1000, unit: "coins"},
   {name: "msg_welcome", type: 's', default: encodeURIComponent("Ahoy, Matey! ⛵ Welcome aboard ")} , // followed by: username
   {name: "msg_lurk_0", type: 's', default: encodeURIComponent("Thank you for boarding the ship ")},
   {name: "msg_lurk_1", type: 's', default: encodeURIComponent("⛵ Lay back and enjoy your drink <3")},
@@ -150,7 +151,9 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "link_reddit", type: 's', default: encodeURIComponent("https://www.reddit.com/r/captaincasimir/")},
   {name: "brause_emote", type: 's', default: encodeURIComponent("🧃")},
   {name: "juwlz_referal", type: 's', default: encodeURIComponent("🖤 Check out JulwzDblack! 🖤 https://www.twitch.tv/juwlzdblack")},
-  {name: "enable_slots_bill", type: 'n', default: 0, unit: "0=off, 1=on"}
+  {name: "enable_slots_bill", type: 'n', default: 0, unit: "0=off, 1=on"},
+  {name: "cantina_band_duration", type: 'n', default: 0, unit: "seconds"}
+
 ]
 
 /*Notes on the level system: Goal is an xp earn of 1000xp as an active user per stream (daily).
@@ -295,6 +298,9 @@ var event_mad_slots = 0; // slot limit 5000
 
 // no sounds mode
 var silent_mode = false;
+
+// when the cantina band was bought before
+var cantina_hired = 0;
 
 // death counter this session
 var deaths = 0;
@@ -606,6 +612,12 @@ function onCommand(target, context, commandName, self) {
     console.log(`* juwlz cmd`);
 
     juwlzCommand(args, target, context, self);
+
+  } else if (commandName == "!spieldenselbensongnochmal" || commandName == "!selbensongnochmal"  || commandName == "!again") {
+
+    console.log(`* selber song nochmal cmd`);
+
+    cantinaCommand(args, target, context, self);
 
   } else if (commandName == "!anthem") {
 
@@ -1760,6 +1772,32 @@ function soundCommand(args, target, context, self) {
   
   // assume no item name hit
   whisperBack(target, context, itemname + " not found, try !sound");
+}
+
+function cantinaCommand(args, target, context, self) {
+
+  const price = config.cc_cost_cantina_band;
+
+  if (getTime() - cantina_hired <  config.cc_cost_cantina_band) {
+    // cantina was recently hired, do not pay again
+    cantina_hired = getTime();
+    playSound(SOUND_CANTINA_BAND);
+  } else {
+    // band need to be hired, require funds
+    
+    // check funding
+    let userbalance = getUserBalance(context.username);
+    if (userbalance < price) {
+      whisperBack(target, context, "You don't have enough Captain's Coin (" + userbalance + "/" + price + CC_SYMBOL + ") to hire the band");
+      return;
+    } else {
+      client.say(target, context.username + " hired the cantina band, use !spieldenselbensongnochmal in time -" + price + CC_SYMBOL);
+      updateUserBalance(context.username, userbalance - price);
+      playSound(SOUND_CANTINA_BAND);
+      cantina_hired = getTime();
+      return;
+    }
+  }
 }
 
 function soCommand(args, target, context, self) {
