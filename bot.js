@@ -178,6 +178,7 @@ const CC_SOUNDS = [
   {name: "airhorn", price: 4, sound: SOUND_AIRHORN},
   {name: "amongus", price: 4, sound: SOUND_AMONGUS},
   {name: "fail", price: 4, sound: SOUND_FAIL},
+  {name: "cantina", price: 4, sound: SOUND_CANTINA_BAND},
   {name: "laugh", price: 4, sound: SOUND_LAUGHING},
   {name: "ok-lets-go", price: 4, sound: SOUND_OK_LETS_GO},
   {name: "inception", price: 6, sound: SOUND_INCEPTION},
@@ -237,9 +238,9 @@ const BROADCASTS = [
   {randspace: 100, event: triggerEventHappyHr, message: "/announce 🚨 Happy Hour! 🚨  !slots are 20% off! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 50, event: triggerEventMegaHappyHr, message: "/announce 🚨 Mega Happy Hour! 🚨  !slots are 40% off! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 100, event: triggerEventXpBoost, message: "/announce 🚨 XP Boost! 🚨  All XP earned is multiplied x5! (for " + config.min_delay_broadcast + " mins)"},
-  {randspace: 15, event: triggerEventBlessing, message: "/announce 🚨 " + golden_emote + " Blessed! " + golden_emote + " 🚨  +1000% golden jackpot chance " + golden_emote + " (for " + config.min_delay_broadcast + " mins)"},
+  {randspace: 25, event: triggerEventBlessing, message: "/announce 🚨 " + golden_emote + " Blessed! " + golden_emote + " 🚨  +1000% golden jackpot chance " + golden_emote + " (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 50, event: triggerEventSuperSale, message: "/announce 🚨 Super Sale! 🚨  Sounds, anthems and tts are 90% off! (for " + config.min_delay_broadcast + " mins)"},
-  {randspace: 20, event: triggerEventMadSlots, message: "/announce 🚨🎰 Mad Slots! 🎰🚨  Slot limit is 5k " + CC_SYMBOL + "! (for " + config.min_delay_broadcast + " mins)"},
+  {randspace: 25, event: triggerEventMadSlots, message: "/announce 🚨🎰 Mad Slots! 🎰🚨  Slot limit is 5k " + CC_SYMBOL + "! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 70, event: triggerEventPirateAttack, message: "/announce 🚨🏴‍☠️⚔️ PIRATES! ⚔️🏴‍☠️🚨  Pirates are trying to hijack our boat! Use !fight ⚔️ You stand to loose/win " + CC_SYMBOL + "! Participation is rewarded with XP! 🏴‍☠️☠️ (" + config.min_delay_broadcast + " mins event)"}
 ]
 
@@ -616,6 +617,12 @@ function onCommand(target, context, commandName, self) {
   } else if (commandName == "!spieldenselbensongnochmal" || commandName == "!selbensongnochmal"  || commandName == "!again") {
 
     console.log(`* selber song nochmal cmd`);
+
+    sameSongCommand(args, target, context, self);
+
+  } else if (commandName == "!hirecantina" || commandName == "!hireband"  || commandName == "!cantina") {
+
+    console.log(`* hire band cmd`);
 
     cantinaCommand(args, target, context, self);
 
@@ -1772,6 +1779,18 @@ function soundCommand(args, target, context, self) {
   
   // assume no item name hit
   whisperBack(target, context, itemname + " not found, try !sound");
+}
+
+function sameSongCommand(args, target, context, self) {
+
+  if (getTime() - cantina_hired <  config.cantina_band_duration) {
+    // cantina was recently hired, do not pay again
+    cantina_hired = getTime();
+    playSound(SOUND_CANTINA_BAND);
+  } else {
+    // band needs to be hired
+    whisperBack(target, context, "The band left " + (getTime() - cantina_hired) + " seconds ago, use !cantina to hire (" + config.cc_cost_cantina_band + CC_SYMBOL + ")");
+  }
 }
 
 function cantinaCommand(args, target, context, self) {
