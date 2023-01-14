@@ -2,3 +2,4 @@ node_modules/*
 vlc/*
 *.json
 credentials.json
+google-key.json

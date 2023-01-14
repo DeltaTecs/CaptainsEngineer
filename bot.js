@@ -7,6 +7,7 @@ const tmi = require('tmi.js');
 const fs = require('fs');
 const { exec } = require('child_process');
 const say = require('say');
+const {resolve} = require('path');
 //const express = require('express');
 //const app = express();
 
@@ -586,12 +587,17 @@ function onCommand(target, context, commandName, self) {
     console.log(`* fight cmd`);
     fightCommand(target, context);
 
+  } else if (commandName == "!ttslegacy") {
+
+    console.log(`* tts: ` + raw.substring(10, raw.length));
+    ttsLegacyCommand(raw.substring(10, raw.length), target, context, self);
+
   } else if (commandName == "!tts") {
 
     console.log(`* tts: ` + raw.substring(4, raw.length));
     ttsCommand(raw.substring(4, raw.length), target, context, self);
 
-  } else if (commandName == "!stop" || commandName == "!stoptts") {
+  }  else if (commandName == "!stop" || commandName == "!stoptts") {
 
     console.log("* stop tts");
     stopTTSCommand(context);
@@ -813,7 +819,7 @@ function tmCommand(target, context, self) {
 }
 
 
-function ttsCommand(text, target, context, self) {
+function ttsLegacyCommand(text, target, context, self) {
 
   if (silent_mode) {
     return;
@@ -853,6 +859,50 @@ function ttsCommand(text, target, context, self) {
   updateUserBalance(context.username, getUserBalance(context.username) - cost);
 
   say.speak(text);
+  last_tts = getTime();
+}
+
+function ttsCommand(text, target, context, self) {
+
+  if (silent_mode) {
+    return;
+  }
+
+  if (levels[context.username.toLowerCase()] < config.min_lvl_tts && context.username != PRIV_STREAMER) {
+    whisperBack(target, context, "You are level " + levels[context.username.toLowerCase()] + ", unlock !tts at level " + config.min_lvl_tts);
+    return;
+  }
+
+  const time_to_wait = config.tts_cooldown - (getTime() - last_tts);
+
+  if (time_to_wait > 0) {
+    whisperBack(target, context, "TTS was used recently, please wait " + time_to_wait + "s ");
+    return;
+  }
+
+  const tts_limit = config.tts_limit + config.tts_chars_per_lvl * Math.min(config.max_lvl_tts_scaling - config.min_lvl_tts, levels[context.username.toLowerCase()] - config.min_lvl_tts);
+
+  if (text.length > tts_limit) {
+    whisperBack(target, context, "TTS character limit exceeded. Your maximum is " + tts_limit + ", your message has " + text.length);
+    return;
+  }
+
+  if (checkProvanity(text)) {
+    whisperBack(target, context, "TTS request dropped because of provanity. Don't be a dick when using tts pls.");
+    return;
+  }
+
+  const cost = Math.floor(config.cc_cost_tts * (isEventActive(event_super_sale) ? 0.1 : 1));
+
+  if (getUserBalance(context.username) < cost) {
+    whisperBack(target, context, "You are broke. Text-To-Speech costs " + cost + CC_SYMBOL + "! Chat more.");
+    return;
+  }
+
+  updateUserBalance(context.username, getUserBalance(context.username) - cost);
+
+  externalTts(text);
+
   last_tts = getTime();
 }
 
@@ -2601,15 +2651,19 @@ function getTime() {
   return process.hrtime()[0];
 }
 
-function initExpress() {
-  app.use(express.bodyParser());
-  app.post('/', function(request, response) {
-    console.log('POST /');
-    console.dir(request.body);
-    response.writeHead(200, {'Content-Type': 'text/html'});
-    response.end('thanks');
-  });
-  const port = 3000;
-  app.listen(port);
-  console.log(`Listening at http://localhost:${port}`); 
+
+/**
+ * Runs the java tts engine with a given input
+ * @param {*} text 
+ */
+function externalTts(text) {
+  const ttsFileName = "tts-engine\\ttsWindow\\tts-" + getRandomInt(9999999999) + ".txt"
+  try {
+    fs.writeFileSync(ttsFileName, text, {flag:'w'});
+  } catch (e) {
+    console.log(e);
+  }
+  const keyPath = resolve('./google-key.json');
+  console.log("executing: " + 'set "GOOGLE_APPLICATION_CREDENTIALS=' + keyPath + '" && java -jar tts-engine\\ttsWindow\\ttsWindow.jar ' + ttsFileName);
+  exec('set "GOOGLE_APPLICATION_CREDENTIALS=' + keyPath + '" && java -jar tts-engine\\ttsWindow\\ttsWindow.jar ' + ttsFileName, (err, stdout, stderr) => {});
 }
