@@ -771,7 +771,7 @@ function lurkCommand(target, context, self) {
 
 function muteCommand(target, context, self) {
 
-  if (context.username != PRIV_STREAMER) {
+  if (context.username != PRIV_STREAMER && context.username != PRIV_SUPPORT) {
     return;
   }
 
