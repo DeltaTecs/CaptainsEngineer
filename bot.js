@@ -26,6 +26,8 @@ const PRIV_MOD_1 = "stefan_2202";
 const FILENAME_DEATH_COUNTER = "deathcounter.txt"
 const FILENAME_BRAUSE_COUNTER = "brausecounter.txt"
 
+const DURATION_CANTNA = 7.5;
+
 const SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS = "ctn_uuh.mp3";
 const SOUND_ENORM = "enorm.mp3";
 const SOUND_OH_YEAH = "oh-yeah.mp3";
@@ -1835,8 +1837,12 @@ function sameSongCommand(args, target, context, self) {
 
   if (getTime() - cantina_hired <  config.cantina_band_duration) {
     // cantina was recently hired, do not pay again
-    cantina_hired = getTime();
-    playSound(SOUND_CANTINA_BAND);
+    setTimeout(function() {
+      playSound(SOUND_CANTINA_BAND);
+    }, 1000 * (Math.max(DURATION_CANTNA - (getTime() - cantina_hired), 0)));
+    console.log("cantina hired: " + cantina_hired + "playing in " + (Math.max(DURATION_CANTNA - (getTime() - cantina_hired), 0)));
+    cantina_hired += DURATION_CANTNA;
+    console.log("cantina hired after increment: " + cantina_hired);
   } else {
     // band needs to be hired
     whisperBack(target, context, "The band left " + (getTime() - cantina_hired) + " seconds ago, use !cantina to hire (" + config.cc_cost_cantina_band + CC_SYMBOL + ")");
