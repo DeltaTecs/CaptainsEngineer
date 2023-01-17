@@ -87,6 +87,7 @@ const REWARD_ID_CHALLENGE_GLOBAL = "-bec3-dc0d5132ba6c";
 const REWARD_ID_CHALLENGE_HUNT = "5d798aed-c0bd-48f2-aaae-2ab3b24dea81";
 const REWARD_ID_AIRHORN = "42eb57c3-2b1f-4700-a35a-2713bd9ed519";
 const REWARD_ID_BADUMTS = "a8f76e26-aa73-494c-a75b-49ac5d6b6783";
+const REWARD_ID_TTS = "68bc9f6b-2601-4bf5-a30a-2d60eaf7daf4";
 
 const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seconds"},
   {name: "tts_limit", type: 'n', default: 60, unit: "symbols"},
@@ -347,7 +348,7 @@ function onMessageHandler (target, context, msg, self) {
   }
 
   if (context["custom-reward-id"] != undefined) {
-    onReward(target, context, self);
+    onReward(msg, target, context, self);
     return;
   }
 
@@ -375,7 +376,7 @@ function onMessageHandler (target, context, msg, self) {
 }
 
 
-function onReward(target, context, self) {
+function onReward(msg, target, context, self) {
 
   console.log("id: " + context["custom-reward-id"]);
 
@@ -416,6 +417,19 @@ function onReward(target, context, self) {
   } else if (context["custom-reward-id"] === REWARD_ID_BADUMTS) {
 
     playSound(SOUND_BADUMTS, 10500);
+
+  } else if (context["custom-reward-id"] === REWARD_ID_TTS) {
+
+    if (silent_mode) {
+      return;
+    }
+  
+    if (checkProvanity(text)) {
+      whisperBack(target, context, "TTS request dropped because of provanity. Don't be a dick when using tts pls.");
+      return;
+    }
+
+    externalTts(msg);
 
   } else if (context["custom-reward-id"] === REWARD_ID_CHALLENGE_GLOBAL) {
 
