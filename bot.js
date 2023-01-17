@@ -424,7 +424,7 @@ function onReward(msg, target, context, self) {
       return;
     }
   
-    if (checkProvanity(text)) {
+    if (checkProvanity(msg)) {
       whisperBack(target, context, "TTS request dropped because of provanity. Don't be a dick when using tts pls.");
       return;
     }
