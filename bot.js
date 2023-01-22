@@ -157,7 +157,8 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "brause_emote", type: 's', default: encodeURIComponent("🧃")},
   {name: "juwlz_referal", type: 's', default: encodeURIComponent("🖤 Check out JulwzDblack! 🖤 https://www.twitch.tv/juwlzdblack")},
   {name: "enable_slots_bill", type: 'n', default: 0, unit: "0=off, 1=on"},
-  {name: "cantina_band_duration", type: 'n', default: 0, unit: "seconds"}
+  {name: "cantina_band_duration", type: 'n', default: 0, unit: "seconds"},
+  {name: "link_timetable", type: 's', default: encodeURIComponent("")},
 
 ]
 
@@ -210,7 +211,7 @@ const CC_ANTHEMS = [
   {name: "jojo-stroheim", price: 8, sound: SOUND_JOJO_STROHEIM},
   {name: "wild-west", price: 8, sound: SOUND_WILD_WEST},
   {name: "007", price: 8, sound: SOUND_007},
-  {name: "outsider", price: 8, sound: SOUND_AXEL_F},
+  {name: "outsider", price: 8, sound: SOUND_OUTSIDER},
   {name: "strangerthings", price: 8, sound: SOUND_STRANGER_THINGS},
   {name: "skrillex", price: 10, sound: SOUND_SKRILLEX}
 ]
@@ -516,7 +517,12 @@ function onCommand(target, context, commandName, self) {
     console.log(`* discord`);
     client.say(target, decodeURIComponent(config.link_discord));
 
-  } else if (commandName === '!reddit') {
+  } else if (commandName === '!timetable' || commandName === '!tt') {
+
+    console.log(`* timetable`);
+    client.say(target, decodeURIComponent(config.link_timetable));
+
+  }  else if (commandName === '!reddit') {
 
     console.log(`* reddit`);
     client.say(target, decodeURIComponent(config.link_reddit));
