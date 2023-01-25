@@ -504,7 +504,7 @@ function onCommand(target, context, commandName, self) {
     client.say(target, `42069 seconds`);
     console.log(`* watchtime`);
 
-  } else if (commandName == "!slots" || commandName == "!inserts") {
+  } else if (commandName == "!slots" || commandName == "!inserts" || commandName == "!gamble" || commandName == "!slot" || commandName == "!lot" || commandName == "!slt") {
 
     console.log(`* slots`);
     slotsCommand(args, target, context, self, sluts=false);
