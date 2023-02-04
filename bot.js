@@ -1084,7 +1084,7 @@ function slotsCommand(args, target, context, self, sluts=false) {
   let slots_out_fancy_2 = "[" + slots_out_chosen[0] + "|" + slots_out_chosen[1] + "|" + slots_out_chosen[2] + "]_📍";
 
   if (config.compact_slots == 1) {
-    scheduleDelayedMessage(target, 0, slots_out_fancy_2);
+    scheduleDelayedMessage(target, 0, slots_out_fancy_2 + " " + input_display);
   } else {
     scheduleDelayedMessage(target, 0, slots_out_fancy_0);
     scheduleDelayedMessage(target, slot_rolls_delay, slots_out_fancy_1);
