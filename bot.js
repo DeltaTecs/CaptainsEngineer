@@ -161,7 +161,8 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "enable_slots_bill", type: 'n', default: 0, unit: "0=off, 1=on"},
   {name: "cantina_band_duration", type: 'n', default: 0, unit: "seconds"},
   {name: "link_timetable", type: 's', default: encodeURIComponent("")},
-  {name: "enable_slot_roll_multiplicator", type: 'n', default: 1, unit: "0=off, 1=on"}
+  {name: "enable_slot_roll_multiplicator", type: 'n', default: 1, unit: "0=off, 1=on"},
+  {name: "compact_slots", type: 'n', default: 0, unit: "0=off, 1=on"}
 ]
 
 /*Notes on the level system: Goal is an xp earn of 1000xp as an active user per stream (daily).
@@ -249,7 +250,7 @@ const BROADCASTS = [
   {randspace: 100, event: triggerEventHappyHr, message: "/announce 🚨 Happy Hour! 🚨  !slots are 20% off! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 50, event: triggerEventMegaHappyHr, message: "/announce 🚨 Mega Happy Hour! 🚨  !slots are 40% off! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 100, event: triggerEventXpBoost, message: "/announce 🚨 XP Boost! 🚨  All XP earned is multiplied x5! (for " + config.min_delay_broadcast + " mins)"},
-  {randspace: 25, event: triggerEventBlessing, message: "/announce 🚨 " + golden_emote + " Blessed! " + golden_emote + " 🚨  +1000% golden jackpot chance " + golden_emote + " (for " + config.min_delay_broadcast + " mins)"},
+  {randspace: 25, event: triggerEventBlessing, message: "/announce 🚨 " + golden_emote + " Blessed! " + golden_emote + " 🚨  1:200 golden jackpot chance " + golden_emote + " (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 50, event: triggerEventSuperSale, message: "/announce 🚨 Super Sale! 🚨  Sounds, anthems and tts are 90% off! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 25, event: triggerEventMadSlots, message: "/announce 🚨🎰 Mad Slots! 🎰🚨  Slot limit is 5k " + CC_SYMBOL + "! (for " + config.min_delay_broadcast + " mins)"},
   {randspace: 70, event: triggerEventPirateAttack, message: "/announce 🚨🏴‍☠️⚔️ PIRATES! ⚔️🏴‍☠️🚨  Pirates are trying to hijack our boat! Use !fight ⚔️ You stand to loose/win " + CC_SYMBOL + "! Participation is rewarded with XP! 🏴‍☠️☠️ (" + config.min_delay_broadcast + " mins event)"}
@@ -531,6 +532,10 @@ function onCommand(target, context, commandName, self) {
   } else if (commandName === '!tm') {
 
     tmCommand(target, context, self);
+  
+  } else if (commandName === '!bless' || commandName === '!blessing' || commandName === '!bles') {
+
+    blessingCommand(target, context, self);
   
   } else if (commandName === '!gulp') {
 
@@ -1073,13 +1078,18 @@ function slotsCommand(args, target, context, self, sluts=false) {
     console.log(context.username + " won slots: cc_before=" + balance + ", amount_in=" + amount + ", cc_after=" + getUserBalance(context.username) + ", win=" + total_win);
 
   // default animation
-  let slots_out_fancy_0 = "[" + slots_out_chosen[0] + "|🔳|🔳]_📍   -" + amount + "" + CC_SYMBOL;
+  const input_display = config.enable_slot_roll_multiplicator ? ("x" + rolls ) : ("-" + amount + "" + CC_SYMBOL);
+  let slots_out_fancy_0 = "[" + slots_out_chosen[0] + "|🔳|🔳]_📍   " + input_display;
   let slots_out_fancy_1 = "[" + slots_out_chosen[0] + "|" + slots_out_chosen[1] + "|🔳]_📍";
   let slots_out_fancy_2 = "[" + slots_out_chosen[0] + "|" + slots_out_chosen[1] + "|" + slots_out_chosen[2] + "]_📍";
 
-  scheduleDelayedMessage(target, 0, slots_out_fancy_0);
-  scheduleDelayedMessage(target, slot_rolls_delay, slots_out_fancy_1);
-  scheduleDelayedMessage(target, 2 * slot_rolls_delay, slots_out_fancy_2);
+  if (config.compact_slots == 1) {
+    scheduleDelayedMessage(target, 0, slots_out_fancy_2);
+  } else {
+    scheduleDelayedMessage(target, 0, slots_out_fancy_0);
+    scheduleDelayedMessage(target, slot_rolls_delay, slots_out_fancy_1);
+    scheduleDelayedMessage(target, 2 * slot_rolls_delay, slots_out_fancy_2);
+  }
 
   let delay = 2 * slot_rolls_delay;
 
@@ -1169,11 +1179,11 @@ function getSlotOutput(username, sluts=false, goldstatus=false) {
   let rand_brause = config.rand_brause;
 
   if (isEventActive(event_blessing))
-    rand_golden -= 39;
+    rand_golden = 7;
   else if (levels[username.toLowerCase()] >= config.min_lvl_golden_chance_2)
-    rand_golden -= 15;
+    rand_golden -= 2;
   else if (levels[username.toLowerCase()] >= config.min_lvl_golden_chance_1)
-    rand_golden -= 9;
+    rand_golden -= 1;
 
   for (let i = 0; i < 3; i++) {
     if (getRandomInt(rand_golden) == 0) { // force golden
@@ -1929,6 +1939,13 @@ function juwlzCommand(args, target, context, self) {
 
   if (context.username.toLowerCase() == "juwlzdblack" || context.username == PRIV_STREAMER || context.username == PRIV_SUPPORT || context.username == PRIV_MOD_0 || context.username == PRIV_MOD_1){
     client.say(target, decodeURIComponent(config.juwlz_referal));  
+  }
+}
+
+function blessingCommand(args, target, context, self) {
+
+  if (context.username == PRIV_STREAMER || context.username == PRIV_SUPPORT){
+    triggerEventBlessing(); 
   }
 }
 
