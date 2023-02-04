@@ -77,6 +77,7 @@ const SOUND_PAUSE_ANTHEM = "kgpausa-anthem.mp3";
 const SOUND_BENIS = "benis.mp3";
 const SOUND_OUTSIDER = "outsider.mp3";
 const SOUND_ORDER = "order.mp3";
+const SOUND_SPITFIRE = "spitfire.mp3";
 
 const REWARD_ID_STRECH = "8c31a6f0-b319-4865-9c4a-e9b57b960311";
 const REWARD_ID_SOUND_SACKGESICHT = "a37d499f-1550-488b-896a-2b43e2ec9c2f";
@@ -213,6 +214,7 @@ const CC_ANTHEMS = [
   {name: "jojo-stroheim", price: 8, sound: SOUND_JOJO_STROHEIM},
   {name: "wild-west", price: 8, sound: SOUND_WILD_WEST},
   {name: "007", price: 8, sound: SOUND_007},
+  {name: "spitfire", price: 8, sound: SOUND_SPITFIRE},
   {name: "outsider", price: 8, sound: SOUND_OUTSIDER},
   {name: "strangerthings", price: 8, sound: SOUND_STRANGER_THINGS},
   {name: "skrillex", price: 10, sound: SOUND_SKRILLEX}
