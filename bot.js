@@ -160,7 +160,7 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "enable_slots_bill", type: 'n', default: 0, unit: "0=off, 1=on"},
   {name: "cantina_band_duration", type: 'n', default: 0, unit: "seconds"},
   {name: "link_timetable", type: 's', default: encodeURIComponent("")},
-
+  {name: "enable_slot_roll_multiplicator", type: 'n', default: 1, unit: "0=off, 1=on"}
 ]
 
 /*Notes on the level system: Goal is an xp earn of 1000xp as an active user per stream (daily).
@@ -225,7 +225,7 @@ const golden_emote = decodeURIComponent(config.golden_emote);
 const brause_emote = decodeURIComponent(config.brause_emote);
 
 const BROADCASTS = [
-  {randspace: 200, event: undefined, message: "💡 Gambling may cause addiction 🎰 no participation under 18, chance to win 1:67"},
+  {randspace: 200, event: undefined, message: "💡 Gambling may cause addiction 🎰 no participation under 18, chance to win 1:38"},
   {randspace: 50, event: undefined, message: "💡 You earn " + config.cc_per_chat + CC_SYMBOL + " by chatting"},
   {randspace: 80, event: undefined, message: "💡 Subscribers earn +" + (100 * (config.xp_factor_subsciber - 1)) + "% more xp"},
   {randspace: 80, event: undefined, message: "💡 Subscribers can use !anthem from level 1"},
@@ -233,7 +233,7 @@ const BROADCASTS = [
   {randspace: 50, event: undefined, message: "💡 You increase your chance of rolling a golden jackpot 50% when reaching lvl " + config.min_lvl_golden_chance_2 + " " + golden_emote},
   {randspace: 50, event: undefined, message: "💡 You can play a Text-To-Speech message with !tts (min lvl " + config.min_lvl_tts + ")"},
   {randspace: 50, event: undefined, message: "💡 By leveling you can increase your slot and TTS limit"},
-  {randspace: 50, event: undefined, message: "💡 The chance to win a single roll of slots is ~1,5% 🍑🍒🍍🍇🍉🍐🍊🥥"},
+  {randspace: 50, event: undefined, message: "💡 The chance to win a single roll of slots is ~2.8% 🍑🍒🍍🍇🍉🍐"},
   {randspace: 50, event: undefined, message: "💡 Special rewards end with level 100, but level emblems don't ;)"},
   {randspace: 50, event: undefined, message: "💡 An anthem is a theme that welcomes you personaly every stream. Unlock anthems by subscribing or by reaching level " + config.min_lvl_anthems + " (!anthem)"},
   {randspace: 50, event: undefined, message: "💡 By leveling to 100, you can reach a slots limit of 2000" + CC_SYMBOL + " 🎰"},
@@ -254,12 +254,9 @@ const BROADCASTS = [
 ]
 
 
-// bot token
-//oauth:vzlot0hklicwjsfm52tcih14fuonz1
-
-const slot_symbols = ['🍑', '🍒', '🍍', '🍇', '🍉', '🍐', '🍊', '🥥']; // propability of getting a triple is 1.56%
-const slut_symbols = ['💦', '🧡', '💅', '🍆', '😩', '👅', '💋', '🔞']; // propability of getting a triple is 1.56%
-const slot_symbols_gold = ['💎', '👑', '⛲', '🦞', '🏰', '💂', '🏆']; // propability of getting a triple is 2.04%
+const slot_symbols = ['🍑', '🍒', '🍍', '🍇', '🍉', '🍐']; // propability of getting a triple is 2.8%
+const slut_symbols = ['💦', '🍆', '😩', '👅', '💋', '🔞']; // propability of getting a triple is 2.8%
+const slot_symbols_gold = ['💎', '👑', '⛲', '🦞', '🏰', '💂']; // propability of getting a triple is 2.8%
 // average return per roll is (68/71)*250*7/(8^3) + (68/71)*1000*(1/8^3) = 5,144  ->  win +29 per 1000
 
 const SYMBOL_TM = "™";
@@ -968,186 +965,198 @@ function fightCommand(target, context) {
 
 function slotsCommand(args, target, context, self, sluts=false) {
 
-    if (sluts && levels[context.username.toLowerCase()] < config.min_lvl_slotsx) {
-      whisperBack(target, context, "You are level " + levels[context.username.toLowerCase()] + ", unlock !slotsx at level " + config.min_lvl_slotsx);
-      return;
-    }
+  if (sluts && levels[context.username.toLowerCase()] < config.min_lvl_slotsx) {
+    whisperBack(target, context, "You are level " + levels[context.username.toLowerCase()] + ", unlock !slotsx at level " + config.min_lvl_slotsx);
+    return;
+  }
 
-    if (args.length > 1 && isNaN(args[1]) && args[1] != "all") {
-      whisperBack(target, context, "invalid arguments, !slots [all|<amount>]");
-      return;
-    }
+  if (args.length > 1 && isNaN(args[1]) && args[1] != "all") {
+    whisperBack(target, context, "invalid arguments, !slots [all|<amount>]");
+    return;
+  }
 
-    let amount = 0;
-    const balance = getUserBalance(context.username);
-    const base_roll_cost = sluts ? config.cc_cost_slotsx : config.cc_cost_slots;
-    const roll_cost = isEventActive(event_happy_hr) ? Math.floor(base_roll_cost * 0.8) : (isEventActive(event_mega_happy_hr) ? Math.floor(base_roll_cost * 0.6) : base_roll_cost);
-    const compact_jackpots = config.compact_jackpots != 0;
-    const slot_rolls_delay = config.slot_rolls_delay;
-    const rolls_mid_scaling = (Math.min(config.max_lvl_slot_scaling, levels[context.username.toLowerCase()]) - 1) * config.slot_rolls_per_lvl;
-    const rolls_end_scaling = config.slot_rolls_added_last_lvls * (Math.max(0, Math.min(config.max_lvl_reward, levels[context.username.toLowerCase()] - config.max_lvl_slot_scaling)));
-    let user_slot_max = isEventActive(event_mad_slots) ? 5000 : config.cc_slots_max_in + (base_roll_cost * (rolls_mid_scaling + rolls_end_scaling));
-    if (context.username == PRIV_STREAMER) {
-      user_slot_max = 999999999;
-    }
+  let amount = 0;
+  const balance = getUserBalance(context.username);
+  const base_roll_cost = sluts ? config.cc_cost_slotsx : config.cc_cost_slots;
+  const roll_cost = isEventActive(event_happy_hr) ? Math.floor(base_roll_cost * 0.8) : (isEventActive(event_mega_happy_hr) ? Math.floor(base_roll_cost * 0.6) : base_roll_cost);
+  const compact_jackpots = config.compact_jackpots != 0;
+  const slot_rolls_delay = config.slot_rolls_delay;
+  const rolls_mid_scaling = (Math.min(config.max_lvl_slot_scaling, levels[context.username.toLowerCase()]) - 1) * config.slot_rolls_per_lvl;
+  const rolls_end_scaling = config.slot_rolls_added_last_lvls * (Math.max(0, Math.min(config.max_lvl_reward, levels[context.username.toLowerCase()] - config.max_lvl_slot_scaling)));
+  let user_slot_max = isEventActive(event_mad_slots) ? 5000 : config.cc_slots_max_in + (base_roll_cost * (rolls_mid_scaling + rolls_end_scaling));
+  if (context.username == PRIV_STREAMER) {
+    user_slot_max = 999999999;
+  }
 
-    if (args.length == 1) {
-      amount = roll_cost;
-    } else if (args[1] == "all") {
-      amount = Math.min(user_slot_max, balance);
-      amount -= amount % roll_cost;
-    } else {
-      amount = parseInt(args[1], 10);
-      amount -= amount % roll_cost;
-    }
+  if (args.length == 1) {
+    amount = roll_cost;
+  } else if (args[1] == "all") {
+    amount = Math.min(user_slot_max, balance);
+    amount -= amount % roll_cost;
+  } else {
+    amount = parseInt(args[1], 10);
+    amount -= amount % roll_cost;
+  }
 
 
-    if (amount < roll_cost) {
-      whisperBack(target, context, "To few coin inserted. Turning the slots once costs " + roll_cost + CC_SYMBOL);
-      return;
-    }
+  if (amount < roll_cost) {
+    whisperBack(target, context, "To few coin inserted. Turning the slots once costs " + roll_cost + CC_SYMBOL);
+    return;
+  }
 
-    if (amount > balance) {
-      whisperBack(target, context, "You dont have coin. (" + balance + "/" + amount + ") " + CC_SYMBOL + ", chat more");
-      return;
-    }
+  if (amount > balance) {
+    whisperBack(target, context, "You dont have coin. (" + balance + "/" + amount + ") " + CC_SYMBOL + ", chat more");
+    return;
+  }
 
-    if (amount > user_slot_max && context.username != PRIV_STREAMER) {
-      whisperBack(target, context, "Your slot limit is " + user_slot_max + CC_SYMBOL);
-      return;
-    }
+  if (amount > user_slot_max && context.username != PRIV_STREAMER) {
+    whisperBack(target, context, "Your slot limit is " + user_slot_max + CC_SYMBOL);
+    return;
+  }
 
-    let rolls = amount / roll_cost;
-    let wins = [];
-    let slots_out_chosen = [];
-    let usr_gold_status = isGoldStatusActive(context.username);
+  const rolls = amount / roll_cost; // acts as win multiplicator with a single roll in enable_slot_roll_multiplicator enables and as rolls otherwise
+  let wins = [];
+  let slots_out_chosen = [];
+  let usr_gold_status = isGoldStatusActive(context.username);
 
+  if (enable_slot_roll_multiplicator == 1) {
+  // run a single roll. Winnings will be multiplicated
+  let slots_out = getSlotOutput(context.username, sluts=sluts, goldStatus=usr_gold_status);
+  if (slots_out.rank > 0)
+    wins.push(slots_out);
+  slots_out_chosen = slots_out.symbols; // set to last output
+  } else {
+    // run multiple rolls without multiplicator for winnings
     for (let i = 0; i < rolls; i++) { // roll
       let slots_out = getSlotOutput(context.username, sluts=sluts, goldStatus=usr_gold_status);
       if (slots_out.rank > 0)
         wins.push(slots_out);
       slots_out_chosen = slots_out.symbols; // set to last output
     }
+  }
 
-    // sort
-    let win_max = wins.length > 0 ? wins[0] : undefined;
-    let total_win = 0;
+  // sort
+  let win_max = wins.length > 0 ? wins[0] : undefined;
+  let total_win = 0;
 
+  for (let win of wins) {
+
+    if (win.rank >= win_max.rank) {
+      win_max = win;
+      slots_out_chosen = win.symbols;
+    }
+    total_win += win.return;
+  }
+
+  if (enable_slot_roll_multiplicator == 1)
+    // multiplicate winnings
+    total_win *= rolls;
+  
+  let special_count = 0;
+  if (total_win == 0) {
+    // try to pick slots out with golden/brause emote if possible
     for (let win of wins) {
-
-      if (win.rank >= win_max.rank) {
-        win_max = win;
+      let count = (win.symbols[0] == " " + golden_emote + " " ? 1 : 0) + (win.symbols[1] == " " + golden_emote + " " ? 1 : 0) + (win.symbols[2] == " " + golden_emote + " " ? 1 : 0);
+      count += (win.symbols[0] == " " + brause_emote + " " ? 1 : 0) + (win.symbols[1] == " " + brause_emote + " " ? 1 : 0) + (win.symbols[2] == " " + brause_emote + " " ? 1 : 0);
+      if (count > special_count) {
+        special_count = count;
         slots_out_chosen = win.symbols;
       }
-      total_win += win.return;
     }
+  }
 
-    
-    let special_count = 0;
-    if (total_win == 0) {
-      // try to pick slots out with golden/brause emote if possible
-      for (let win of wins) {
-        let count = (win.symbols[0] == " " + golden_emote + " " ? 1 : 0) + (win.symbols[1] == " " + golden_emote + " " ? 1 : 0) + (win.symbols[2] == " " + golden_emote + " " ? 1 : 0);
-        count += (win.symbols[0] == " " + brause_emote + " " ? 1 : 0) + (win.symbols[1] == " " + brause_emote + " " ? 1 : 0) + (win.symbols[2] == " " + brause_emote + " " ? 1 : 0);
-        if (count > special_count) {
-          special_count = count;
-          slots_out_chosen = win.symbols;
-        }
-      }
-    }
+  incrementUserBalanceAndXP(context.username, total_win - amount, wins.length * config.xp_per_slot_win, cause="slots");
 
-    incrementUserBalanceAndXP(context.username, total_win - amount, wins.length * config.xp_per_slot_win, cause="slots");
+  if (total_win > 0)
+    console.log(context.username + " won slots: cc_before=" + balance + ", amount_in=" + amount + ", cc_after=" + getUserBalance(context.username) + ", win=" + total_win);
 
-    if (total_win > 0)
-      console.log(context.username + " won slots: cc_before=" + balance + ", amount_in=" + amount + ", cc_after=" + getUserBalance(context.username) + ", win=" + total_win);
+  // default animation
+  let slots_out_fancy_0 = "[" + slots_out_chosen[0] + "|🔳|🔳]_📍   -" + amount + "" + CC_SYMBOL;
+  let slots_out_fancy_1 = "[" + slots_out_chosen[0] + "|" + slots_out_chosen[1] + "|🔳]_📍";
+  let slots_out_fancy_2 = "[" + slots_out_chosen[0] + "|" + slots_out_chosen[1] + "|" + slots_out_chosen[2] + "]_📍";
 
-    // default animation
-    let slots_out_fancy_0 = "[" + slots_out_chosen[0] + "|🔳|🔳]_📍   -" + amount + "" + CC_SYMBOL;
-    let slots_out_fancy_1 = "[" + slots_out_chosen[0] + "|" + slots_out_chosen[1] + "|🔳]_📍";
-    let slots_out_fancy_2 = "[" + slots_out_chosen[0] + "|" + slots_out_chosen[1] + "|" + slots_out_chosen[2] + "]_📍";
+  scheduleDelayedMessage(target, 0, slots_out_fancy_0);
+  scheduleDelayedMessage(target, slot_rolls_delay, slots_out_fancy_1);
+  scheduleDelayedMessage(target, 2 * slot_rolls_delay, slots_out_fancy_2);
 
-    scheduleDelayedMessage(target, 0, slots_out_fancy_0);
-    scheduleDelayedMessage(target, slot_rolls_delay, slots_out_fancy_1);
-    scheduleDelayedMessage(target, 2 * slot_rolls_delay, slots_out_fancy_2);
+  let delay = 2 * slot_rolls_delay;
 
-    let delay = 2 * slot_rolls_delay;
+  if (compact_jackpots && total_win > 0) {
 
-    if (compact_jackpots && total_win > 0) {
-
-      // display only highest roll
+    // display only highest roll
+    setTimeout(function() {
+      client.say(target, win_max.message + total_win + CC_SYMBOL);
+      playSound(win_max.sound);
+    }, delay);
+    if (sluts) {
       setTimeout(function() {
-        client.say(target, win_max.message + total_win + CC_SYMBOL);
-        playSound(win_max.sound);
+        playSound(SOUND_OH_YEAH);
+      }, delay + 1900);
+    }
+
+    if (win_max.rank == 4 && context.username != PRIV_STREAMER) { // golden win present
+      setTimeout(function() {
+        goldenEvent(target, context.username);
+      }, delay);
+    }
+
+  } else {
+
+    // all wins after each other
+    for (let win of wins) {
+      if (win.rank != 1)
+        continue;
+      setTimeout(function() {
+        client.say(target, win.message + config.cc_return_slots_basic + CC_SYMBOL);
+        playSound(win.sound);
       }, delay);
       if (sluts) {
         setTimeout(function() {
           playSound(SOUND_OH_YEAH);
         }, delay + 1900);
       }
-
-      if (win_max.rank == 4 && context.username != PRIV_STREAMER) { // golden win present
-        setTimeout(function() {
-          goldenEvent(target, context.username);
-        }, delay);
-      }
-
-    } else {
-
-      // all wins after each other
-      for (let win of wins) {
-        if (win.rank != 1)
-          continue;
-        setTimeout(function() {
-          client.say(target, win.message + config.cc_return_slots_basic + CC_SYMBOL);
-          playSound(win.sound);
-        }, delay);
-        if (sluts) {
-          setTimeout(function() {
-            playSound(SOUND_OH_YEAH);
-          }, delay + 1900);
-        }
-        delay += 1000;
-      }
-  
-      for (let win of wins) {
-        if (win.rank != 2)
-          continue;
-        setTimeout(function() {
-          client.say(target, win.message + config.cc_return_slots_peach + CC_SYMBOL);
-          playSound(win.sound);
-        }, delay);
-        if (sluts) {
-          setTimeout(function() {
-            playSound(SOUND_OH_YEAH);
-          }, delay + 2200);
-        }
-        delay += 2000;
-      }
-    
-      for (let win of wins) {
-        if (win.rank != 3)
-          continue;
-        setTimeout(function() {
-          client.say(target, win.message + config.cc_return_slots_golden + CC_SYMBOL);
-          playSound(win.sound);
-        }, delay);
-        delay += 2000;
-      }
-  
-      if (total_win > 0 && win_max.rank == 3  && context.username != PRIV_STREAMER) { // golden win present
-        setTimeout(function() {
-          goldenEvent(target, context.username);
-        }, delay - 2000);
-      }
-  
+      delay += 1000;
     }
 
-    if (total_win > config.cc_return_slots_basic && config.enable_slots_bill > 0) {
-      // print bill only if atleast two basic wins or a super win
+    for (let win of wins) {
+      if (win.rank != 2)
+        continue;
       setTimeout(function() {
-        client.say(target, balance + CC_SYMBOL + " >> " + (balance - amount + total_win) + CC_SYMBOL + "", user=context.username);
-      }, delay + 10);
+        client.say(target, win.message + config.cc_return_slots_peach + CC_SYMBOL);
+        playSound(win.sound);
+      }, delay);
+      if (sluts) {
+        setTimeout(function() {
+          playSound(SOUND_OH_YEAH);
+        }, delay + 2200);
+      }
+      delay += 2000;
     }
+  
+    for (let win of wins) {
+      if (win.rank != 3)
+        continue;
+      setTimeout(function() {
+        client.say(target, win.message + config.cc_return_slots_golden + CC_SYMBOL);
+        playSound(win.sound);
+      }, delay);
+      delay += 2000;
+    }
+
+    if (total_win > 0 && win_max.rank == 3  && context.username != PRIV_STREAMER) { // golden win present
+      setTimeout(function() {
+        goldenEvent(target, context.username);
+      }, delay - 2000);
+    }
+
+  }
+
+  if (total_win > config.cc_return_slots_basic && config.enable_slots_bill > 0) {
+    // print bill only if atleast two basic wins or a super win
+    setTimeout(function() {
+      client.say(target, balance + CC_SYMBOL + " >> " + (balance - amount + total_win) + CC_SYMBOL + "", user=context.username);
+    }, delay + 10);
+  }
 }
 
 function getSlotOutput(username, sluts=false, goldstatus=false) {
