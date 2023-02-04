@@ -1019,7 +1019,7 @@ function slotsCommand(args, target, context, self, sluts=false) {
   let slots_out_chosen = [];
   let usr_gold_status = isGoldStatusActive(context.username);
 
-  if (enable_slot_roll_multiplicator == 1) {
+  if (config.enable_slot_roll_multiplicator == 1) {
   // run a single roll. Winnings will be multiplicated
   let slots_out = getSlotOutput(context.username, sluts=sluts, goldStatus=usr_gold_status);
   if (slots_out.rank > 0)
@@ -1048,7 +1048,7 @@ function slotsCommand(args, target, context, self, sluts=false) {
     total_win += win.return;
   }
 
-  if (enable_slot_roll_multiplicator == 1)
+  if (config.enable_slot_roll_multiplicator == 1)
     // multiplicate winnings
     total_win *= rolls;
   
