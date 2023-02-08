@@ -161,6 +161,7 @@ const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seco
   {name: "enable_slots_bill", type: 'n', default: 0, unit: "0=off, 1=on"},
   {name: "cantina_band_duration", type: 'n', default: 0, unit: "seconds"},
   {name: "link_timetable", type: 's', default: encodeURIComponent("")},
+  {name: "steam_code", type: 's', default: encodeURIComponent("182589643")},
   {name: "enable_slot_roll_multiplicator", type: 'n', default: 1, unit: "0=off, 1=on"},
   {name: "compact_slots", type: 'n', default: 0, unit: "0=off, 1=on"}
 ]
@@ -193,8 +194,7 @@ const CC_SOUNDS = [
   {name: "ok-lets-go", price: 4, sound: SOUND_OK_LETS_GO},
   {name: "inception", price: 6, sound: SOUND_INCEPTION},
   {name: "to-be-continued", price: 6, sound: SOUND_JOJO_TO_BE_CONTINUED},
-  {name: "x-files", price: 6, sound: SOUND_X_FILES},
-  {name: "earrape", price: 100, sound: SOUND_THOMAS}
+  {name: "x-files", price: 6, sound: SOUND_X_FILES}
 ]
 
 const CC_ANTHEMS = [
@@ -518,6 +518,11 @@ function onCommand(target, context, commandName, self) {
 
     console.log(`* discord`);
     client.say(target, decodeURIComponent(config.link_discord));
+
+  } else if (commandName === '!steam' || commandName === '!friend' || commandName === '!code' || commandName === '!steamcode') {
+
+    console.log(`* steam code`);
+    client.say(target, decodeURIComponent(config.steam_code));
 
   } else if (commandName === '!timetable' || commandName === '!tt') {
 
