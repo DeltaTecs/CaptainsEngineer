@@ -228,7 +228,7 @@ const golden_emote = decodeURIComponent(config.golden_emote);
 const brause_emote = decodeURIComponent(config.brause_emote);
 
 const BROADCASTS = [
-  {randspace: 200, event: undefined, message: "💡 Gambling may cause addiction 🎰 no participation under 18, chance to win 1:38"},
+  {randspace: 200, event: undefined, message: "💡 Gambling may cause addiction 🎰 no participation under 18, chance to win 1:25"},
   {randspace: 50, event: undefined, message: "💡 You earn " + config.cc_per_chat + CC_SYMBOL + " by chatting"},
   {randspace: 80, event: undefined, message: "💡 Subscribers earn +" + (100 * (config.xp_factor_subsciber - 1)) + "% more xp"},
   {randspace: 80, event: undefined, message: "💡 Subscribers can use !anthem from level 1"},
@@ -236,7 +236,7 @@ const BROADCASTS = [
   {randspace: 50, event: undefined, message: "💡 You increase your chance of rolling a golden jackpot 50% when reaching lvl " + config.min_lvl_golden_chance_2 + " " + golden_emote},
   {randspace: 50, event: undefined, message: "💡 You can play a Text-To-Speech message with !tts (min lvl " + config.min_lvl_tts + ")"},
   {randspace: 50, event: undefined, message: "💡 By leveling you can increase your slot and TTS limit"},
-  {randspace: 50, event: undefined, message: "💡 The chance to win a single roll of slots is ~2.8% 🍑🍒🍍🍇🍉🍐"},
+  {randspace: 50, event: undefined, message: "💡 The chance to win a single roll of slots is 4% 🍑🍒🍇🍉🍐"},
   {randspace: 50, event: undefined, message: "💡 Special rewards end with level 100, but level emblems don't ;)"},
   {randspace: 50, event: undefined, message: "💡 An anthem is a theme that welcomes you personaly every stream. Unlock anthems by subscribing or by reaching level " + config.min_lvl_anthems + " (!anthem)"},
   {randspace: 50, event: undefined, message: "💡 By leveling to 100, you can reach a slots limit of 2000" + CC_SYMBOL + " 🎰"},
@@ -257,9 +257,9 @@ const BROADCASTS = [
 ]
 
 
-const slot_symbols = ['🍑', '🍒', '🍍', '🍇', '🍉', '🍐']; // propability of getting a triple is 2.8%
-const slut_symbols = ['💦', '🍆', '😩', '👅', '💋', '🔞']; // propability of getting a triple is 2.8%
-const slot_symbols_gold = ['💎', '👑', '⛲', '🦞', '🏰', '💂']; // propability of getting a triple is 2.8%
+const slot_symbols = ['🍑', '🍒', '🍇', '🍉', '🍐']; // propability of getting a triple is 4%
+const slut_symbols = ['💦', '🍆', '👅', '💋', '🔞']; // propability of getting a triple is 4%
+const slot_symbols_gold = ['💎', '👑', '🦞', '🏰', '💂']; // propability of getting a triple is 4%
 // average return per roll is (68/71)*250*7/(8^3) + (68/71)*1000*(1/8^3) = 5,144  ->  win +29 per 1000
 
 const SYMBOL_TM = "™";
