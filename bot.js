@@ -78,6 +78,7 @@ const SOUND_BENIS = "benis.mp3";
 const SOUND_OUTSIDER = "outsider.mp3";
 const SOUND_ORDER = "order.mp3";
 const SOUND_SPITFIRE = "spitfire.mp3";
+const SOUND_MW2 = "mw2.mp3";
 
 const REWARD_ID_STRECH = "8c31a6f0-b319-4865-9c4a-e9b57b960311";
 const REWARD_ID_SOUND_SACKGESICHT = "a37d499f-1550-488b-896a-2b43e2ec9c2f";
@@ -198,6 +199,7 @@ const CC_SOUNDS = [
 ]
 
 const CC_ANTHEMS = [
+  {name: "mw2", price: 3, sound: SOUND_MW2},
   {name: "magic", price: 2, sound: SOUND_MAGIC},
   {name: "scream", price: 2, sound: SOUND_WILHELM_SCREAM},
   {name: "jojo-tbc", price: 6, sound: SOUND_JOJO_TO_BE_CONTINUED},
