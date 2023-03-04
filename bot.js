@@ -259,9 +259,9 @@ const BROADCASTS = [
 ]
 
 
-const slot_symbols = ['🍑', '🍒', '🍇', '🍉', '🍐']; // propability of getting a triple is 4%
-const slut_symbols = ['💦', '🍆', '👅', '💋', '🔞']; // propability of getting a triple is 4%
-const slot_symbols_gold = ['💎', '👑', '🦞', '🏰', '💂']; // propability of getting a triple is 4%
+const slot_symbols = ['🍑', '🍒', '🍇', '🍐']; // propability of getting a triple is
+const slut_symbols = ['💦', '🍆', '👅', '💋']; // propability of getting a triple is
+const slot_symbols_gold = ['💎', '👑', '🦞', '🏰']; // propability of getting a triple is 4%
 // average return per roll is (68/71)*250*7/(8^3) + (68/71)*1000*(1/8^3) = 5,144  ->  win +29 per 1000
 
 const SYMBOL_TM = "™";
