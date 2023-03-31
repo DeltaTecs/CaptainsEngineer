@@ -80,6 +80,8 @@ const SOUND_ORDER = "order.mp3";
 const SOUND_SPITFIRE = "spitfire.mp3";
 const SOUND_MW2 = "mw2.mp3";
 
+const ALL_SOUNDS = [SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS, SOUND_ENORM, SOUND_OH_YEAH, SOUND_THOMAS, SOUND_FAIL, SOUND_INCEPTION, SOUND_FOX_INTRO, SOUND_HES_A_PIRATE, SOUND_INTRO_CLIP, SOUND_AYE_AYE_CAPTAIN, SOUND_JACKPOT, SOUND_BRAUSE_JACKPOT, SOUND_SON_OF_A_BITCH,  SOUND_BRAWL, SOUND_JOJO_GOLDEN_WING, SOUND_NANI, SOUND_JOJO_TO_BE_CONTINUED, SOUND_JOJO_STROHEIM, SOUND_MAGIC, SOUND_SKRILLEX, SOUND_WILHELM_SCREAM, SOUND_AIRHORN, SOUND_BADUMTS, SOUND_WASTED, SOUND_CHALLENGE, SOUND_FANFARE, SOUND_SOVIET_ANTHEM, SOUND_CRAZY_FROG,  SOUND_AXEL_F, SOUND_CHIPPIN_IN, SOUND_ELDEN_RING, SOUND_SPOILER, SOUND_CANTINA_BAND, SOUND_WILD_WEST, SOUND_007, SOUND_STRANGER_THINGS, SOUND_X_FILES, SOUND_NICE, SOUND_OOF, SOUND_OK_LETS_GO, SOUND_AMONGUS, SOUND_LAUGHING, SOUND_SACKGESICHT, SOUND_BENIS, SOUND_ORDER, SOUND_MW2];
+
 const REWARD_ID_STRECH = "8c31a6f0-b319-4865-9c4a-e9b57b960311";
 const REWARD_ID_SOUND_SACKGESICHT = "a37d499f-1550-488b-896a-2b43e2ec9c2f";
 const REWARD_ID_SOUND_THOMAS = "afcbdea0-0eee-4a35-8d18-a1e71e62703f";
@@ -92,6 +94,7 @@ const REWARD_ID_CHALLENGE_HUNT = "5d798aed-c0bd-48f2-aaae-2ab3b24dea81";
 const REWARD_ID_AIRHORN = "42eb57c3-2b1f-4700-a35a-2713bd9ed519";
 const REWARD_ID_BADUMTS = "a8f76e26-aa73-494c-a75b-49ac5d6b6783";
 const REWARD_ID_TTS = "68bc9f6b-2601-4bf5-a30a-2d60eaf7daf4";
+const REWARD_ID_JUKEBOX = "9fd8e00f-7508-4ebf-97a0-f06953dd721c";
 
 const CONFIGURABLE = [{name: "tts_cooldown", type: 'n', default: 60, unit: "seconds"},
   {name: "tts_limit", type: 'n', default: 60, unit: "symbols"},
@@ -243,7 +246,6 @@ const BROADCASTS = [
   {randspace: 50, event: undefined, message: "💡 An anthem is a theme that welcomes you personaly every stream. Unlock anthems by subscribing or by reaching level " + config.min_lvl_anthems + " (!anthem)"},
   {randspace: 50, event: undefined, message: "💡 By leveling to 100, you can reach a slots limit of 2000" + CC_SYMBOL + " 🎰"},
   {randspace: 50, event: undefined, message: "💡 Rolling a golden jackpot unlocks a special anthem and grants you gold status for a month 👑"},
-  {randspace: 50, event: undefined, message: "💡 Feel free to pm deltatecs bot features you would like to see ;)"},
   {randspace: 50, event: undefined, message: "💡 Transfer Captain's Coin 💰 with !transfer"},
   {randspace: 50, event: undefined, message: "💡 Check your place in the level ranking with !ranking"},
   {randspace: 50, event: undefined, message: "💡 Besides using a reward you can play sounds with !sound"},
@@ -424,6 +426,10 @@ function onReward(msg, target, context, self) {
   } else if (context["custom-reward-id"] === REWARD_ID_BADUMTS) {
 
     playSound(SOUND_BADUMTS, 10500);
+
+  } else if (context["custom-reward-id"] === REWARD_ID_JUKEBOX) {
+
+    playSound(ALL_SOUNDS[getRandomInt(ALL_SOUNDS.length)]);
 
   } else if (context["custom-reward-id"] === REWARD_ID_TTS) {
 
