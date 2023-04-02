@@ -530,8 +530,10 @@ function onCommand(target, context, commandName, self) {
 
   } else if (commandName === '!steam' || commandName === '!friend' || commandName === '!code' || commandName === '!steamcode' || commandName === '!fc' || commandName === '!freundschaftscode') {
 
-    console.log(`* steam code`);
-    client.say(target, decodeURIComponent(config.steam_code));
+    if (context.username.toLowerCase() == "captaincasimir") {
+      console.log(`* steam code`);
+      client.say(target, decodeURIComponent(config.steam_code));
+    }
 
   } else if (commandName === '!timetable' || commandName === '!tt') {
 
