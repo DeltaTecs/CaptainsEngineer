@@ -514,9 +514,10 @@ function onCommand(target, context, commandName, self) {
 
   } else if (commandName == "!slots" || commandName == "!inserts" || commandName == "!gamble" || commandName == "!slot" || commandName == "!lot" || commandName == "!slt") {
 
-    console.log(`* slots`);
-    slotsCommand(args, target, context, self, sluts=false);
-
+    if (context.username.toLowerCase() == "captaincasimir") {
+      console.log(`* slots`);
+      slotsCommand(args, target, context, self, sluts=false);
+    }
   } else if (commandName == "!slotsx") {
 
     console.log(`* slots`);
@@ -527,7 +528,7 @@ function onCommand(target, context, commandName, self) {
     console.log(`* discord`);
     client.say(target, decodeURIComponent(config.link_discord));
 
-  } else if (commandName === '!steam' || commandName === '!friend' || commandName === '!code' || commandName === '!steamcode') {
+  } else if (commandName === '!steam' || commandName === '!friend' || commandName === '!code' || commandName === '!steamcode' || commandName === '!fc' || commandName === '!freundschaftscode') {
 
     console.log(`* steam code`);
     client.say(target, decodeURIComponent(config.steam_code));
