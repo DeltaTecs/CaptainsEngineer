@@ -87,7 +87,7 @@ const REWARD_ID_SOUND_SACKGESICHT = "a37d499f-1550-488b-896a-2b43e2ec9c2f";
 const REWARD_ID_SOUND_THOMAS = "afcbdea0-0eee-4a35-8d18-a1e71e62703f";
 const REWARD_ID_SOUND_FAIL = "3efc8ce0-3da1-40a7-83b5-a2725ab2b1f9";
 const REWARD_ID_SOUND_INCEPTION = "fe96b4b0-11f2-449d-92e1-65cde878e110";
-const REWARD_ID_MUSIC_REQUEST = "c9b4dfaa-a3fb-4f97-8195-14de8822a5b8"; 
+const REWARD_ID_MUSIC_REQUEST = "c9b4dfaa-a3fb-4f97-8195-14de8822a5b8";
 const REWARD_ID_SCREAM = "e9456e46-8d24-4e89-bec3-dc0d5132ba6c";
 const REWARD_ID_CHALLENGE_GLOBAL = "-bec3-dc0d5132ba6c";
 const REWARD_ID_CHALLENGE_HUNT = "5d798aed-c0bd-48f2-aaae-2ab3b24dea81";
@@ -251,13 +251,13 @@ const BROADCASTS = [
   {randspace: 50, event: undefined, message: "💡 Besides using a reward you can play sounds with !sound"},
   {randspace: 50, event: undefined, message: "💡 We have a slot machine 🎰 on board! Try !slots"},
   {randspace: 50, event: undefined, message: "💡 This bot and a detailed manual are available at https://github.com/DeltaTecs/CaptainsEngineer"},
-  {randspace: 100, event: triggerEventHappyHr, message: "/announce 🚨 Happy Hour! 🚨  !slots are 20% off! (for " + config.min_delay_broadcast + " mins)"},
-  {randspace: 50, event: triggerEventMegaHappyHr, message: "/announce 🚨 Mega Happy Hour! 🚨  !slots are 40% off! (for " + config.min_delay_broadcast + " mins)"},
-  {randspace: 100, event: triggerEventXpBoost, message: "/announce 🚨 XP Boost! 🚨  All XP earned is multiplied x5! (for " + config.min_delay_broadcast + " mins)"},
-  {randspace: 25, event: triggerEventBlessing, message: "/announce 🚨 " + golden_emote + " Blessed! " + golden_emote + " 🚨  1:200 golden jackpot chance " + golden_emote + " (for " + config.min_delay_broadcast + " mins)"},
-  {randspace: 50, event: triggerEventSuperSale, message: "/announce 🚨 Super Sale! 🚨  Sounds, anthems and tts are 90% off! (for " + config.min_delay_broadcast + " mins)"},
-  {randspace: 25, event: triggerEventMadSlots, message: "/announce 🚨🎰 Mad Slots! 🎰🚨  Slot limit is 5k " + CC_SYMBOL + "! (for " + config.min_delay_broadcast + " mins)"},
-  {randspace: 70, event: triggerEventPirateAttack, message: "/announce 🚨🏴‍☠️⚔️ PIRATES! ⚔️🏴‍☠️🚨  Pirates are trying to hijack our boat! Use !fight ⚔️ You stand to loose/win " + CC_SYMBOL + "! Participation is rewarded with XP! 🏴‍☠️☠️ (" + config.min_delay_broadcast + " mins event)"}
+  {randspace: 100, event: triggerEventHappyHr, message: "🚨 Happy Hour! 🚨  !slots are 20% off! (for " + config.min_delay_broadcast + " mins)"},
+  {randspace: 50, event: triggerEventMegaHappyHr, message: "🚨 Mega Happy Hour! 🚨  !slots are 40% off! (for " + config.min_delay_broadcast + " mins)"},
+  {randspace: 100, event: triggerEventXpBoost, message: "🚨 XP Boost! 🚨  All XP earned is multiplied x5! (for " + config.min_delay_broadcast + " mins)"},
+  {randspace: 25, event: triggerEventBlessing, message: "🚨 " + golden_emote + " Blessed! " + golden_emote + " 🚨  1:200 golden jackpot chance " + golden_emote + " (for " + config.min_delay_broadcast + " mins)"},
+  {randspace: 50, event: triggerEventSuperSale, message: "🚨 Super Sale! 🚨  Sounds, anthems and tts are 90% off! (for " + config.min_delay_broadcast + " mins)"},
+  {randspace: 25, event: triggerEventMadSlots, message: "🚨🎰 Mad Slots! 🎰🚨  Slot limit is 5k " + CC_SYMBOL + "! (for " + config.min_delay_broadcast + " mins)"},
+  {randspace: 70, event: triggerEventPirateAttack, message: "🚨🏴‍☠️⚔️ PIRATES! ⚔️🏴‍☠️🚨  Pirates are trying to hijack our boat! Use !fight ⚔️ You stand to loose/win " + CC_SYMBOL + "! Participation is rewarded with XP! 🏴‍☠️☠️ (" + config.min_delay_broadcast + " mins event)"}
 ]
 
 
@@ -348,6 +348,7 @@ client.connect();
 
 // Called every time a message comes in
 function onMessageHandler (target, context, msg, self) {
+  //client.say(target, "bot testing 1 2");
   if (self || context.username.toLowerCase() == 'captainsengineer') { return; } // Ignore messages from the bot
   chat_target = target;
 
@@ -514,10 +515,9 @@ function onCommand(target, context, commandName, self) {
 
   } else if (commandName == "!slots" || commandName == "!inserts" || commandName == "!gamble" || commandName == "!slot" || commandName == "!lot" || commandName == "!slt") {
 
-    if (context.username.toLowerCase() == "captaincasimir") {
-      console.log(`* slots`);
-      slotsCommand(args, target, context, self, sluts=false);
-    }
+    console.log(`* slots`);
+    slotsCommand(args, target, context, self, sluts=false);
+    
   } else if (commandName == "!slotsx") {
 
     console.log(`* slots`);
