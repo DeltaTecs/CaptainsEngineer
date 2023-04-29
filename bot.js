@@ -573,7 +573,7 @@ function onCommand(target, context, commandName, self) {
     console.log(`* tutorial cmd`);
     tutorialCommand(target, context, self);
 
-  }  else if (commandName === '!balance' || commandName == "!coin" || commandName == "!wallet" || commandName == "!money") {
+  }  else if (commandName === '!balance' || commandName == "!coin" || commandName == "!wallet" || commandName == "!money" || commandName == "!coins" || commandName == "!bank"  || commandName == "!cash") {
 
     console.log(`* balance cmd`);
     balanceCommand(target, context, self);
