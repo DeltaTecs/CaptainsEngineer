@@ -342,10 +342,6 @@ var chat_target;
 
 initUserLevels();
 
-
-playSound(ALL_SOUNDS[getRandomInt(ALL_SOUNDS.length)]);
-
-
 // Connect to Twitch:
 client.connect();
 
