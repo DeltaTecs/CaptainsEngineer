@@ -80,7 +80,7 @@ const SOUND_ORDER = "order.mp3";
 const SOUND_SPITFIRE = "spitfire.mp3";
 const SOUND_MW2 = "mw2.mp3";
 
-const ALL_SOUNDS = [SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS, SOUND_ENORM, SOUND_OH_YEAH, SOUND_THOMAS, SOUND_FAIL, SOUND_INCEPTION, SOUND_FOX_INTRO, SOUND_HES_A_PIRATE, SOUND_INTRO_CLIP, SOUND_AYE_AYE_CAPTAIN, SOUND_JACKPOT, SOUND_BRAUSE_JACKPOT, SOUND_SON_OF_A_BITCH,  SOUND_BRAWL, SOUND_JOJO_GOLDEN_WING, SOUND_NANI, SOUND_JOJO_TO_BE_CONTINUED, SOUND_JOJO_STROHEIM, SOUND_MAGIC, SOUND_SKRILLEX, SOUND_WILHELM_SCREAM, SOUND_AIRHORN, SOUND_BADUMTS, SOUND_WASTED, SOUND_CHALLENGE, SOUND_FANFARE, SOUND_SOVIET_ANTHEM, SOUND_CRAZY_FROG,  SOUND_AXEL_F, SOUND_CHIPPIN_IN, SOUND_ELDEN_RING, SOUND_SPOILER, SOUND_CANTINA_BAND, SOUND_WILD_WEST, SOUND_007, SOUND_STRANGER_THINGS, SOUND_X_FILES, SOUND_NICE, SOUND_OOF, SOUND_OK_LETS_GO, SOUND_AMONGUS, SOUND_LAUGHING, SOUND_SACKGESICHT, SOUND_BENIS, SOUND_ORDER, SOUND_MW2];
+var ALL_SOUNDS = [SOUND_CONTROLL_THE_NARATIVE_LOOSES_HIS_LIVESAVINGS, SOUND_ENORM, SOUND_OH_YEAH, SOUND_THOMAS, SOUND_FAIL, SOUND_INCEPTION, SOUND_FOX_INTRO, SOUND_HES_A_PIRATE, SOUND_INTRO_CLIP, SOUND_AYE_AYE_CAPTAIN, SOUND_JACKPOT, SOUND_BRAUSE_JACKPOT, SOUND_SON_OF_A_BITCH,  SOUND_BRAWL, SOUND_JOJO_GOLDEN_WING, SOUND_NANI, SOUND_JOJO_TO_BE_CONTINUED, SOUND_JOJO_STROHEIM, SOUND_MAGIC, SOUND_SKRILLEX, SOUND_WILHELM_SCREAM, SOUND_AIRHORN, SOUND_BADUMTS, SOUND_WASTED, SOUND_CHALLENGE, SOUND_FANFARE, SOUND_SOVIET_ANTHEM, SOUND_CRAZY_FROG,  SOUND_AXEL_F, SOUND_CHIPPIN_IN, SOUND_ELDEN_RING, SOUND_SPOILER, SOUND_CANTINA_BAND, SOUND_WILD_WEST, SOUND_007, SOUND_STRANGER_THINGS, SOUND_X_FILES, SOUND_NICE, SOUND_OOF, SOUND_OK_LETS_GO, SOUND_AMONGUS, SOUND_LAUGHING, SOUND_SACKGESICHT, SOUND_BENIS, SOUND_ORDER, SOUND_MW2];
 
 const REWARD_ID_STRECH = "8c31a6f0-b319-4865-9c4a-e9b57b960311";
 const REWARD_ID_SOUND_SACKGESICHT = "a37d499f-1550-488b-896a-2b43e2ec9c2f";
@@ -343,6 +343,9 @@ var chat_target;
 initUserLevels();
 
 
+playSound(ALL_SOUNDS[getRandomInt(ALL_SOUNDS.length)]);
+
+
 // Connect to Twitch:
 client.connect();
 
@@ -513,12 +516,12 @@ function onCommand(target, context, commandName, self) {
     client.say(target, `42069 seconds`);
     console.log(`* watchtime`);
 
-  } else if (commandName == "!slots" || commandName == "!inserts" || commandName == "!gamble" || commandName == "!slot" || commandName == "!lot" || commandName == "!slt") {
+  } else if (commandName == "!slots" || commandName == "!inserts" || commandName == "!gamble" || commandName == "!slot" || commandName == "!lot" || commandName == "!slt" || commandName == "!roll") {
 
     console.log(`* slots`);
     slotsCommand(args, target, context, self, sluts=false);
     
-  } else if (commandName == "!slotsx") {
+  } else if (commandName == "!slotsx" || commandName == "!slotx") {
 
     console.log(`* slots`);
     slotsCommand(args, target, context, self, sluts=true);
@@ -530,7 +533,7 @@ function onCommand(target, context, commandName, self) {
 
   } else if (commandName === '!steam' || commandName === '!friend' || commandName === '!code' || commandName === '!steamcode' || commandName === '!fc' || commandName === '!freundschaftscode') {
 
-    if (context.username.toLowerCase() == "captaincasimir") {
+    if (context.username.toLowerCase() == PRIV_STREAMER) {
       console.log(`* steam code`);
       client.say(target, decodeURIComponent(config.steam_code));
     }
@@ -2353,6 +2356,10 @@ function playSound(sound_path, duration=20000) {
     }
   }
 
+  if (sound_path.includes("random")) {
+    gain = gain * 0.9; // nerv random sounds
+  }
+
   exec('vlc\\vlc.exe -Irc -Idummy --gain ' + gain + ' ' + sound_path + ' vlc://quit', (err, stdout, stderr) => {});
   console.log("playing sound " + sound_path);
 }
@@ -2700,6 +2707,11 @@ function initConfig() {
   }
 
   saveConfig();
+
+  // write names of random sounds to the ALL_SOUNDS list
+  for (let i = 1; i < 64; i++) {
+    ALL_SOUNDS.push("random" + i + ".mp3");
+  }
 }
 
 function createIfUnexistent(file, defaultVal) {
