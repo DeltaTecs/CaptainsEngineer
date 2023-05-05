@@ -2675,7 +2675,7 @@ function loadConfig() {
 }
 
 function loadCredentials() {
-  createIfUnexistent('credentials.json', JSON.stringify({identity: {username: "CaptainsEngineer", password: "oauth:y4m3kppvn3ekwhmp9zrjlelstnx2n1"}, channels: ["captaincasimir"]}));
+  createIfUnexistent('credentials.json', JSON.stringify({identity: {username: "CaptainsEngineer", password: "oauth:y4m3kppvn3ekwhmp9zrjlelstnx2n1"}, channels: ["captaincasimir"]})); // token is invalid
   let rawdata = fs.readFileSync('credentials.json');
   opts = JSON.parse(rawdata);
 }
